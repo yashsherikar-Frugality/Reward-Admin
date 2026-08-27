@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RewardGenius | Card Details &amp; Offers</title>
+    <link rel="icon" href="data:," />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-credit-card"></i> RewardGenius
+            <span class="sidebar-close" onclick="toggleSidebar()"><i class="fas fa-times"></i></span>
+        </div>
+        <div class="sidebar-title">Master Data Entry</div>
+        <a href="#" class="nav-link" id="nav-dataEntry" onclick="showPage('dataEntry')"><i class="fas fa-edit"></i> Add Reward Rule</a>
+        <a href="#" class="nav-link" id="nav-import" onclick="showPage('import')"><i class="fas fa-file-import"></i> Import From Excel</a>
+        <a href="#" class="nav-link" id="nav-importOffers" onclick="showPage('importOffers')"><i class="fas fa-tags"></i> Import Offers</a>
+        <a href="#" class="nav-link" id="nav-importBenefits" onclick="showPage('importBenefits')"><i class="fas fa-gift"></i> Import Preferred Benefits</a>
+        <a href="#" class="nav-link" id="nav-importMcc" onclick="showPage('importMcc')"><i class="fas fa-list"></i> MCC Imports</a>
+    </nav>
+
+    <div class="main-content" id="mainContent">
+        <div class="topbar">
+            <div class="d-flex align-items-center gap-3">
+                <i class="fas fa-bars" style="cursor:pointer;" onclick="toggleSidebar()"></i>
+                <h5 class="m-0 fw-bold text-dark d-none d-md-block" id="pageTitle">Card Details &amp; Rewards</h5>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-weight:600;">A</div>
+                <span class="fw-semibold text-dark small d-none d-sm-block">Admin User</span>
+            </div>
+        </div>
+
+        <div id="app-views">
+            <div id="view-dataEntry" class="page-view active">
+                <div class="card-modern">
+                    <div id="wizardContainer"></div>
+                </div>
+            </div>
+            <div id="view-import" class="page-view">
+                <div class="card-modern">
+                    <div id="importContainer"></div>
+                </div>
+            </div>
+            <div id="view-importOffers" class="page-view">
+                <div class="card-modern">
+                    <div id="importOffersContainer"></div>
+                </div>
+            </div>
+            <div id="view-importBenefits" class="page-view">
+                <div class="card-modern">
+                    <div id="importBenefitsContainer"></div>
+                </div>
+            </div>
+            <div id="view-importMcc" class="page-view">
+                <div class="card-modern">
+                    <div id="importMccContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="milestoneModalOverlay" class="custom-modal-overlay" style="display:none;">
+        <div class="custom-modal-box">
+            <h6 class="fw-bold text-primary mb-3"><i class="fas fa-layer-group me-2"></i>Add Milestone Slabs</h6>
+            <label class="form-label-sm">How many additional slabs do you want to add?</label>
+            <input type="number" id="milestoneCountInput" class="form-control form-control-sm mb-3" min="1" max="20" value="1" />
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeMilestoneModal()">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="confirmAddMilestones()"><i class="fas fa-plus me-1"></i>Add</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js">
+    </script>
+    <script src="js/script1.js?v=3"></script>
+</body>
+</html>

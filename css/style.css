@@ -1,0 +1,1187 @@
+/* ===== VARIABLES ===== */
+:root {
+    --primary: #6366f1;
+    --primary-light: #818cf8;
+    --primary-dark: #4f46e5;
+    --body-bg: #f8fafc;
+    --sidebar-bg: #0f172a;
+    --sidebar-hover: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #cbd5e1;
+    --border-focus: #6366f1;
+    --border-radius: 10px;
+    --input-height: 2rem;
+}
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+
+/* ===== RESET & BASE ===== */
+* {
+     box-sizing: border-box;     
+     font-family: 'Geist', sans-serif;
+}
+/* body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--body-bg); overflow-x: hidden; color: #1e293b; } */
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    width: 230px;
+    background: var(--sidebar-bg);
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    padding: 14px 0;
+    transition: transform 0.3s ease;
+    transform: translateX(0);
+}
+.sidebar .nav-link {
+    color: #94a3b8;
+    padding: 8px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 0 6px 6px 0;
+    margin-right: 10px;
+    transition: 0.2s;
+    font-weight: 500;
+    font-size: 0.82rem;
+}
+.sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background: var(--primary); }
+.sidebar .nav-link i { width: 16px; text-align: center; }
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 18px 18px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+}
+.sidebar-header i { color: var(--primary-light); margin-right: 6px; }
+.sidebar-close {
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+.sidebar-close:hover { color: #fff; }
+.sidebar-title {
+    font-size: 9px;
+    text-transform: uppercase;
+    color: #475569;
+    padding: 14px 18px 4px;
+    letter-spacing: 1px;
+}
+
+/* ===== MAIN LAYOUT ===== */
+.main-content {
+    margin-left: 230px;
+    padding: 16px;
+    transition: margin-left 0.3s ease;
+}
+#excelTableHead{
+    
+    border: 2px solid #000;
+}
+.topbar {
+    background: #fff;
+    border-radius: 8px;
+    padding: 6px 14px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+.page-view { display: none; animation: fadeIn 0.3s ease; }
+.page-view.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.card-modern {
+    background: #fff;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    padding: 14px;
+}
+
+/* ===== SIDEBAR TOGGLE RESPONSIVE ===== */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    .main-content {
+        margin-left: 0 !important;
+    }
+}
+
+@media (min-width: 992px) {
+    .main-content.sidebar-open {
+        margin-left: 0;
+    }
+    .main-content:not(.sidebar-open) {
+        margin-left: 230px;
+    }
+}
+
+/* ===== UNIFORM INPUTS & DROPDOWNS ===== */
+.form-floating {
+    position: relative;
+    margin-bottom: 0.1rem;
+}
+.form-floating > .form-control,
+.form-floating > .form-select {
+    height: calc(var(--input-height) + 2px) !important;
+    min-height: calc(var(--input-height) + 2px) !important;
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.75rem !important;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.form-floating > .form-control:focus,
+.form-floating > .form-select:focus {
+    border-color: var(--border-focus);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.10);
+}
+.form-floating > .form-control:disabled,
+.form-floating > .form-select:disabled {
+    opacity: 0.6;
+    background: #f1f5f9;
+}
+.form-floating > label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    padding: 0.6rem 0.4rem;
+    pointer-events: none;
+    border: 1px solid transparent;
+    transform-origin: 0 0;
+    transition: transform 0.12s ease, opacity 0.12s ease, font-size 0.12s ease;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    background: transparent;
+    z-index: 1;
+    margin: 0;
+}
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select:focus ~ label,
+.form-floating.filled > label {
+    transform: scale(0.85) translateY(-0.35rem) translateX(0.1rem);
+    opacity: 0.8;
+    font-size: 0.65rem;
+    background: transparent;
+    padding: 0 0.15rem;
+    left: 0.4rem;
+    height: auto;
+    top: -0.35rem;
+}
+.form-floating > .form-control:not(:placeholder-shown),
+.form-floating > .form-control:focus,
+.form-floating > .form-select.filled,
+.form-floating > .form-select:focus {
+    padding-top: 0.85rem !important;
+    padding-bottom: 0.1rem !important;
+}
+.input-group-sm > .form-control,
+.input-group-sm > .form-select {
+    height: calc(var(--input-height) + 2px) !important;
+    min-height: calc(var(--input-height) + 2px) !important;
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.75rem !important;
+}
+.input-group-sm > .input-group-text {
+    height: calc(var(--input-height) + 2px);
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+}
+.form-floating > .form-select {
+    padding-right: 1.4rem !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%2364748b'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.35rem center;
+    background-size: 8px;
+}
+.form-floating > .form-select:focus {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%232563eb'/%3E%3C/svg%3E");
+}
+.form-floating.multi-select > label {
+    transform: scale(0.85) translateY(-0.35rem) translateX(0.1rem);
+    opacity: 0.8;
+    font-size: 0.65rem;
+    background: transparent;
+    padding: 0 0.15rem;
+    left: 0.4rem;
+    height: auto;
+    top: -0.35rem;
+}
+.form-floating.multi-select > .form-select {
+    padding-top: 0.85rem !important;
+    padding-bottom: 0.1rem !important;
+    min-height: calc(var(--input-height) + 2px) !important;
+}
+
+
+.form-floating > .form-control-plaintext ~ label::after,
+.form-floating > .form-control:focus ~ label::after,
+.form-floating > .form-control:not(:placeholder-shown) ~ label::after,
+.form-floating > .form-select ~ label::after {
+    background-color: rgba(255, 255, 255, 0.014);  
+    
+}
+/* ===== CHOICES.JS ===== */
+.choices {
+    font-size: 0.75rem;
+}
+.choices__inner {
+    min-height: calc(var(--input-height) + 2px) !important;
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.75rem !important;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: none;
+}
+.choices.is-focused .choices__inner {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.10);
+}
+.choices[data-type*="select-multiple"] .choices__inner {
+    min-height: calc(var(--input-height) + 2px) !important;
+    padding: 0.05rem 0.4rem !important;
+}
+.choices[data-type*="select-multiple"] .choices__list--multiple {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.1rem;
+}
+.choices[data-type*="select-multiple"] .choices__list--multiple .choices__item {
+    background: var(--primary-light);
+    border: none;
+    color: #fff;
+    border-radius: 3px;
+    padding: 0.05rem 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+.choices[data-type*="select-multiple"] .choices__list--multiple .choices__item.is-highlighted {
+    background: var(--primary-dark);
+}
+.choices__list--dropdown,
+.choices__list[aria-expanded] {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    background: #fff;
+    margin-top: 2px;
+    z-index: 20 !important;
+}
+.choices__list--dropdown .choices__item--selectable,
+.choices__list[aria-expanded] .choices__item--selectable {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.75rem;
+    color: #1e293b;
+}
+.choices__list--dropdown .choices__item--selectable.is-highlighted,
+.choices__list[aria-expanded] .choices__item--selectable.is-highlighted {
+    background: #eff6ff;
+}
+.choices__placeholder {
+    color: var(--text-secondary) !important;
+    opacity: 1;
+}
+.choices__input {
+    background: transparent;
+    border: none;
+    padding: 0.1rem 0;
+    font-size: 0.75rem;
+}
+.choices__button {
+    color: #fff !important;
+    opacity: 0.8;
+}
+
+/* ===== SECTIONS & TABLES ===== */
+.section-box { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); margin-bottom: 8px; }
+.section-box h6 { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.4px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px; }
+
+/* ===== BRAND & IMAGES UPLOAD ZONES ===== */
+.upload-zone {
+    border: 2px dashed #e2e8f0;
+    border-radius: 6px;
+    padding: 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #f8fafc;
+    position: relative;
+    width: 100%;
+}
+.upload-zone:hover { border-color: var(--primary); background: #eff6ff; }
+.upload-zone img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; }
+.upload-zone .remove-btn { position: absolute; top: -4px; right: -4px; background: #dc3545; border-radius: 50%; width: 14px; height: 14px; color: white; border: none; font-size: 8px; cursor: pointer; display: none; align-items: center; justify-content: center; }
+
+.offer-row { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-bottom: 8px; }
+
+.table-custom { background: #fff; border-radius: 8px; padding: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+.table-custom thead th { background: #f8fafc; color: var(--text-secondary); font-size: 8px; text-transform: uppercase; border-bottom: none; padding: 4px 6px; }
+.table-custom tbody td { padding: 4px 6px; vertical-align: middle; font-size: 0.72rem; }
+
+.benefit-disabled { opacity: 0.5; pointer-events: none; }
+.benefit-disabled .form-control, .benefit-disabled .form-select { background-color: #f1f5f9; }
+.benefit-hidden { display: none !important; }
+.is-invalid { border-color: #dc3545 !important; box-shadow: 0 0 0 2px rgba(220,53,69,0.10) !important; }
+
+/* ===== BUTTONS ===== */
+.btn {
+    border-radius: 6px;
+    font-weight: 600;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.72rem;
+    transition: all 0.2s ease;
+    border: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 3px 6px rgba(37,99,235,0.2); }
+.btn-outline-primary { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+.btn-outline-primary:hover { background: var(--primary); color: #fff; }
+.btn-success { background: #059669; color: #fff; }
+.btn-success:hover { background: #047857; }
+.btn-outline-success { border: 2px solid #059669; color: #059669; background: transparent; }
+.btn-outline-success:hover { background: #059669; color: #fff; }
+.btn-outline-secondary { border: 2px solid #cbd5e1; color: #475569; background: transparent; }
+.btn-outline-secondary:hover { background: #f1f5f9; border-color: #94a3b8; }
+.btn-sm { padding: 0.1rem 0.4rem; font-size: 0.65rem; }
+
+/* ===== MODAL ===== */
+.custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.3); z-index: 2000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+.custom-modal-box { background: #fff; border-radius: 10px; padding: 14px; width: 320px; max-width: 90vw; box-shadow: 0 6px 20px rgba(0,0,0,0.10); animation: fadeIn 0.2s ease; }
+.import-btn-wrapper { display: flex; gap: 4px; align-items: center; }
+.import-btn-wrapper .btn { font-size: 0.68rem; }
+
+/* ===== IMPORT BUTTON STYLES ===== */
+.upload-zone-button-wrapper {
+    padding: 24px;
+    background: #f5f5ff;
+    border: 2px dashed #c7d2fe;
+    border-radius: 14px;
+    text-align: center;
+}
+.btn-upload {
+    padding: 10px 28px;
+    font-size: 0.95rem;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(99,102,241,0.25);
+}
+.btn-upload i {
+    font-size: 1.1rem;
+}
+
+/* ===== COLUMN GROUP TOGGLES ===== */
+.group-toggle-btn {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #1e293b;
+    background: #e2e8f0;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: 0.2s;
+}
+.group-toggle-btn:hover {
+    background: #cbd5e1;
+}
+
+/* ===== HIDE COLUMNS ===== */
+.col-group-hidden {
+    display: none !important;
+}
+
+/* ===== NAMED GROUP TOGGLE BUTTON BAR ===== */
+.group-toggle-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+.group-toggle-bar .btn {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* ===== COMPARISON SUMMARY ===== */
+#comparisonSummary,
+#offerComparisonSummary,
+#benefitComparisonSummary,
+#mccComparisonSummary {
+    background: #f8fafc;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+/* ===== IMPORT TABLES – header column group color (fill + border), body cells plain ===== */
+#excelDataTable tbody td[class*="cardgrp-"], #offerImportTable tbody td[class*="offergrp-"] { background: transparent !important; }
+#excelDataTable thead th.cardgrp-1, #excelDataTable thead th.cardgrp-3, #excelDataTable thead th.cardgrp-5,
+#excelDataTable thead th.cardgrp-7, #excelDataTable thead th.cardgrp-9, #excelDataTable thead th.cardgrp-11,
+#offerImportTable thead th.offergrp-1, #offerImportTable thead th.offergrp-3, #offerImportTable thead th.offergrp-5 {
+    background: #2563eb !important; color: #fff !important; border-bottom: 3px solid #1d4ed8 !important;
+}
+#excelDataTable thead th.cardgrp-2, #excelDataTable thead th.cardgrp-4, #excelDataTable thead th.cardgrp-6,
+#excelDataTable thead th.cardgrp-8, #excelDataTable thead th.cardgrp-10,
+#offerImportTable thead th.offergrp-2, #offerImportTable thead th.offergrp-4 {
+    background: #f2f4f4 !important; color: #0e0d0d !important;
+}
+/* Header row gets the full outer-border block (top/bottom); the vertical group
+   dividers (left/right) run down the WHOLE table so each group stays boxed. */
+#excelDataTable thead [class*="cardgrp-"], #offerImportTable thead [class*="offergrp-"] {
+    border-top: 2px solid #000; border-bottom: 2px solid #000;
+}
+#excelDataTable .grp-start, #offerImportTable .grp-start { border-left: 2px solid #000 !important; }
+#excelDataTable .grp-end, #offerImportTable .grp-end { border-right: 2px solid #000 !important; }
+
+/* ===== GROUP TOGGLE BUTTONS – colored to match their column group ===== */
+.group-toggle-bar .group-btn {
+    border: 1.5px solid transparent;
+    color: #1e293b;
+    background-color: #fff;
+    border-radius: 999px !important;
+    font-weight: 600;
+}
+.group-toggle-bar .group-btn.is-active {
+    color: #1e293b;
+    font-weight: 700;
+}
+.group-toggle-bar .group-btn.is-inactive {
+    background-color: #fff !important;
+    color: #000000;
+    /* text-decoration: line-through; */
+}
+
+#excelDataTable th,
+#offerImportTable th {
+    border-left: 1px solid rgba(0,0,0,0.05);
+}
+#excelDataTable th:first-child,
+#offerImportTable th:first-child {
+    border-left: none;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 992px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main-content { margin-left: 0; }
+}
+/* ===== DATABASE COMPARISON DIFF (New row vs Old/DB row) — ONE consistent
+   color system used identically across Card / Offers / MCC tables, so the
+   legend always matches what's actually shown, wherever you are. ===== */
+#excelDataTable tr.diff-new-row td,
+#offerImportTable tr.diff-new-row td,
+#mccImportTable tr.diff-new-row td {
+    border-bottom: none;
+    background-color: #a7a7a994 !important; /* black — New row group */
+    color: #000000 !important;
+}
+#excelDataTable tr.diff-old-row td,
+#offerImportTable tr.diff-old-row td,
+#mccImportTable tr.diff-old-row td {
+    border-top: none;
+    border-bottom: 3px solid #0f172a;
+    background-color: #88898a !important; /* dark grey — Old row group */
+    color: #000;
+}
+/* Old row stays plain by default — text-only styling below is what stands out. */
+#excelDataTable tr.diff-old-row td:not(.diff-changed):not(.diff-added):not(.diff-removed),
+#offerImportTable tr.diff-old-row td:not(.diff-changed):not(.diff-added):not(.diff-removed),
+#mccImportTable tr.diff-old-row td:not(.diff-changed):not(.diff-added):not(.diff-removed) {
+    color: #111111;
+}
+/* Yellow: value changed */
+#excelDataTable tr.diff-old-row td.diff-changed,
+#offerImportTable tr.diff-old-row td.diff-changed,
+#mccImportTable tr.diff-old-row td.diff-changed {
+    color: #fbbf24 !important;
+    font-weight: 700;
+    font-size: calc(0.75rem + 2px);
+}
+/* Green: field newly added (old was blank) */
+#excelDataTable tr.diff-old-row td.diff-added,
+#offerImportTable tr.diff-old-row td.diff-added,
+#mccImportTable tr.diff-old-row td.diff-added {
+    color: #4ade80 !important;
+    font-weight: 700;
+    font-size: calc(0.75rem + 2px);
+}
+/* Red: field removed (now blank) */
+#excelDataTable tr.diff-old-row td.diff-removed,
+#offerImportTable tr.diff-old-row td.diff-removed,
+#mccImportTable tr.diff-old-row td.diff-removed {
+    color: #f87171 !important;
+    font-weight: 700;
+    font-size: calc(0.75rem + 2px);
+}
+
+/* ===== STICKY STATUS COLUMN (New/Old) — stays fixed while scrolling left/right ===== */
+#excelDataTable .status-cell, #offerImportTable .status-cell, #mccImportTable .status-cell,
+#excelDataTable .status-col-header, #offerImportTable .status-col-header, #mccImportTable .status-col-header {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+}
+#excelDataTable .status-col-header, #offerImportTable .status-col-header, #mccImportTable .status-col-header {
+    z-index: 6;
+    background: #fff;
+}
+#excelDataTable tr.diff-new-row td.status-cell,
+#offerImportTable tr.diff-new-row td.status-cell,
+#mccImportTable tr.diff-new-row td.status-cell {
+    background-color: #a7a7a994 !important;
+}
+#excelDataTable tr.diff-old-row td.status-cell,
+#offerImportTable tr.diff-old-row td.status-cell,
+#mccImportTable tr.diff-old-row td.status-cell {
+    background-color: #4b5563 !important;
+}
+#excelDataTable tbody tr:not(.diff-new-row):not(.diff-old-row) td.status-cell,
+#offerImportTable tbody tr:not(.diff-new-row):not(.diff-old-row) td.status-cell,
+#mccImportTable tbody tr:not(.diff-new-row):not(.diff-old-row) td.status-cell {
+    background-color: #fff;
+}
+
+/* ===== STICKY TABLE HEADER while scrolling ===== */
+/* Sticky is applied to the <th> cells themselves (not <thead>) since that's
+   the reliable way to make table headers stick across all browsers. */
+#excelDataTable thead th,
+#offerImportTable thead th,
+#mccImportTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+/* When a "Compare with Database" legend row is present above the column
+   headers, push the column-header row down so both stay stuck together. */
+#excelDataTable thead.has-legend-row th,
+#offerImportTable thead.has-legend-row th,
+#mccImportTable thead.has-legend-row th {
+    top: 34px;
+}
+.diff-legend-sticky-row td {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 6px 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+}
+.diff-legend-sticky-row .legend-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 14px;
+}
+.diff-legend-sticky-row .legend-chip .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+/* ===== DIFF COLOR LEGEND (shown on every import page) ===== */
+.import-panel > .row:first-child,
+#excelDataTableContainer,
+#offerImportTableContainer,
+#mccImportTableContainer,
+#benefitImportTableContainer {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+    margin-bottom: 20px;
+}
+.diff-color-legend {
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.legend-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 10px;
+}
+.legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: #334155;
+}
+.legend-swatch {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    border: 1px solid rgba(0,0,0,0.12);
+}
+
+.gap-3 {
+    gap: 1rem !important;
+}
+
+/* ==========================================================================
+   REFERENCE UI THEME
+   Visual-only overrides matching the supplied RewardSonic admin reference.
+   Content, generated markup, and application behavior remain unchanged.
+   ========================================================================== */
+:root {
+    --primary: #5540e8;
+    --primary-light: #7465f2;
+    --primary-dark: #3f2bc7;
+    --body-bg: #f6f7fb;
+    --sidebar-bg: #111a2e;
+    --sidebar-hover: #202b49;
+    --text-secondary: #718096;
+    --border-color: #e6e9f0;
+    --border-focus: #5540e8;
+    --border-radius: 7px;
+    --input-height: 2.15rem;
+}
+
+html { background: var(--body-bg); }
+body {
+    color: #273142;
+    background: var(--body-bg);
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 12px;
+}
+
+.sidebar {
+    width: 138px;
+    padding: 16px 0;
+    background: var(--sidebar-bg);
+}
+.sidebar-header {
+    padding: 0 15px 22px;
+    display: block;
+    font-size: 13px;
+    line-height: 1.15;
+    color: #8e84f5;
+    white-space: nowrap;
+}
+.sidebar-header i { color: #6a5df0; margin-right: 4px; }
+.sidebar-close { display: none; }
+.sidebar-title {
+    padding: 0 9px 8px;
+    color: #8993a9;
+    font-size: 6px;
+    letter-spacing: .55px;
+}
+.sidebar .nav-link {
+    margin: 0 8px 3px 8px;
+    padding: 7px 8px;
+    gap: 7px;
+    min-height: 27px;
+    border-radius: 5px;
+    color: #aab3c5;
+    font-size: 8px;
+    line-height: 1.15;
+    font-weight: 500;
+}
+.sidebar .nav-link i { width: 11px; font-size: 9px; }
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    color: #fff;
+    background: var(--primary);
+    box-shadow: 0 3px 8px rgba(85,64,232,.22);
+}
+
+.main-content {
+    margin-left: 138px;
+    padding: 0;
+    min-height: 100vh;
+}
+.topbar {
+    height: 36px;
+    margin: 0 0 20px;
+    padding: 0 22px;
+    border-radius: 0;
+    border-bottom: 1px solid #e8ebf1;
+    box-shadow: none;
+}
+.topbar .fa-bars { color: #4b5563; font-size: 11px; }
+.topbar h5 { font-size: 12px; letter-spacing: -.15px; }
+.topbar .bg-primary {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 8px;
+    background: var(--primary) !important;
+}
+.topbar .small { font-size: 8px !important; }
+
+#app-views { padding: 0 22px 28px; }
+.card-modern {
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+/* Import and comparison cards */
+.import-panel > .row:first-child,
+#excelDataTableContainer,
+#offerImportTableContainer,
+#mccImportTableContainer,
+#benefitImportTableContainer {
+    padding: 8px;
+    margin-bottom: 14px;
+    border: 1px solid #e8ebf1;
+    border-radius: 9px;
+    box-shadow: 0 2px 7px rgba(30, 42, 64, .045);
+}
+.import-panel > .row:first-child { min-height: 79px; }
+.upload-zone-button-wrapper {
+    min-height: 124px;
+    padding: 16px;
+    border: 1px dashed #7667f4;
+    border-radius: 7px;
+    background: #fbfbff;
+    justify-content: center;
+    align-items: center !important;
+}
+.upload-zone-button-wrapper > div:first-child { text-align: center; }
+.upload-zone-button-wrapper > div:first-child br { display: none; }
+.upload-zone-button-wrapper small { font-size: 7px; color: #9aa3b5 !important; }
+.btn-upload {
+    padding: 6px 13px;
+    border-radius: 4px;
+    font-size: 8px;
+    box-shadow: 0 2px 5px rgba(85,64,232,.18);
+}
+.btn-upload i { font-size: 9px; }
+.diff-color-legend {
+    width: 228px;
+    margin-left: 4px;
+    padding: 11px 12px;
+    border: 1px solid #e8ebf1;
+    border-radius: 8px;
+    background: #fbfcfe;
+    box-shadow: none;
+}
+.legend-title {
+    margin-bottom: 7px;
+    color: #273142;
+    font-size: 8px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+.legend-items { gap: 5px; }
+.legend-row { gap: 6px; font-size: 7px; }
+.legend-swatch { width: 11px; height: 8px; border-radius: 2px; border: 0; }
+
+#excelDataTableContainer { padding: 16px; }
+#excelDataTableContainer h6,
+#offerImportTableContainer h6,
+#mccImportTableContainer h6,
+#benefitImportTableContainer h6 {
+    font-size: 12px;
+    color: #273142;
+}
+#excelDataTableContainer .badge,
+#offerImportTableContainer .badge,
+#mccImportTableContainer .badge,
+#benefitImportTableContainer .badge {
+    padding: 0.32rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+#excelDataTableContainer .badge.bg-primary,
+#offerImportTableContainer .badge.bg-primary,
+#mccImportTableContainer .badge.bg-primary,
+#benefitImportTableContainer .badge.bg-primary {
+    background: var(--primary) !important;
+}
+.badge.bg-success { background: #10b981 !important; color: #fff !important; }
+.badge.bg-secondary { background: #94a3b8 !important; color: #fff !important; }
+.badge.bg-danger { background: #b91c1c !important; color: #fff !important; }
+.badge.bg-warning { background: #f59e0b !important; color: #1e293b !important; }
+
+/* Buttons, controls, and tables */
+.btn {
+    border-radius: 8px;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.05);
+}
+.btn-sm { padding: 0.32rem 0.65rem; font-size: 0.72rem; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-outline-primary { color: var(--primary); border: 1.5px solid var(--primary); background: #fff; }
+.btn-outline-secondary { border: 1.5px solid #e2e8f0; color: #475569; background: #fff; }
+.btn-outline-success { border: 1.5px solid #10b981; color: #059669; background: #fff; }
+.btn-success { background: #10b981; color: #fff; }
+.btn-success:hover { background: #059669; }
+.btn-outline-info { color: var(--primary); border: 1.5px solid var(--primary); background: #fff; }
+.form-control, .form-select { border-color: #e1e5ec; font-size: 9px; min-height:32px;}
+#excelDataTableContainer .form-control-sm {
+    min-height: 28px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+}
+.group-toggle-bar {
+    padding: 7px 9px;
+    margin-bottom: 10px !important;
+    border: 0;
+    background: transparent;
+}
+.group-toggle-bar .btn { font-size: 0.68rem; border-radius: 999px !important; }
+.table-responsive {
+    border-color: #e7eaf0 !important;
+    border-radius: 7px !important;
+}
+#excelDataTable,
+#offerImportTable,
+#mccImportTable,
+#benefitImportTable {
+    color: #273142;
+    border-color: #e7eaf0;
+}
+#excelDataTable thead th,
+#offerImportTable thead th,
+#mccImportTable thead th,
+#benefitImportTable thead th {
+    padding: 7px 6px;
+    color: #596579;
+    background: #f3f6fa !important;
+    font-size: 7px;
+    font-weight: 600;
+    text-transform: none;
+    white-space: nowrap;
+}
+#excelDataTable tbody td,
+#offerImportTable tbody td,
+#mccImportTable tbody td,
+#benefitImportTable tbody td {
+    padding: 6px;
+    font-size: 7px;
+    border-color: #edf0f4;
+}
+.table-striped > tbody > tr:nth-of-type(odd) > * { background-color: #fcfdff; }
+.table-hover > tbody > tr:hover > * { background-color: #f7f6ff; }
+.gap-3 { gap: 1rem !important; }
+
+@media (max-width: 992px) {
+    .main-content { margin-left: 0 !important; }
+    #app-views { padding: 0 12px 20px; }
+}
+
+/* Comfortable-size pass: keeps the reference style while improving readability. */
+@media (min-width: 993px) {
+    body { font-size: 13px; }
+    .sidebar { width: 168px; }
+    .sidebar-header { padding: 0 18px 25px; font-size: 15px; }
+    .sidebar-title { padding-left: 12px; font-size: 7px; }
+    .sidebar .nav-link {
+        margin-left: 10px;
+        margin-right: 10px;
+        padding: 9px 10px;
+        min-height: 32px;
+        gap: 8px;
+        font-size: 9px;
+    }
+    .sidebar .nav-link i { width: 13px; font-size: 10px; }
+    .main-content { margin-left: 168px; }
+    .topbar { height: 46px; padding: 0 28px; margin-bottom: 24px; }
+    .topbar h5 { font-size: 14px; }
+    .topbar .fa-bars { font-size: 13px; }
+    .topbar .bg-primary { width: 26px !important; height: 26px !important; font-size: 10px; }
+    .topbar .small { font-size: 9px !important; }
+    #app-views { padding: 0 28px 34px; }
+    .import-panel > .row:first-child { min-height: 87px; }
+    .upload-zone-button-wrapper { min-height: 69px; padding: 10px; }
+    .btn-upload { padding: 4px 8px; font-size: 9px; }
+    .upload-zone-button-wrapper small { font-size: 6px; }
+    .diff-color-legend { width: 260px; padding: 7px 7px; }
+    .legend-title { font-size: 8px; }
+    .legend-row { font-size: 7px; }
+    #excelDataTableContainer h6,
+    #offerImportTableContainer h6,
+    #mccImportTableContainer h6,
+    #benefitImportTableContainer h6 { font-size: 14px; }
+    .btn { padding: 6px 12px; font-size: 9px; }
+    .btn-sm { padding: 5px 9px; font-size: 8px; }
+    #excelDataTableContainer .form-control-sm { min-height: 32px; font-size: 9px; }
+    #excelDataTable thead th,
+    #offerImportTable thead th,
+    #mccImportTable thead th,
+    #benefitImportTable thead th { padding: 8px 7px; font-size: 8px; }
+    #excelDataTable tbody td,
+    #offerImportTable tbody td,
+    #mccImportTable tbody td,
+    #benefitImportTable tbody td { padding: 7px; font-size: 8px; }
+}
+
+/* Give the navigation drawer a little more breathing room. */
+@media (min-width: 993px) {
+    .sidebar { width: 190px; }
+    .main-content { margin-left: 190px; }
+}
+@media (max-width: 992px) {
+    .sidebar { width: 190px; }
+}
+
+/* Final navigation and import-panel polish. */
+@media (min-width: 993px) {
+    .sidebar { width: 220px; }
+    .sidebar.open {
+        transform: translateX(-100%);
+        box-shadow: none;
+    }
+    .sidebar-header { padding-left: 20px; padding-right: 20px; font-size: 16px; }
+    .sidebar-title { padding-left: 14px; font-size: 8px; }
+    .sidebar .nav-link {
+        padding: 10px 12px;
+        min-height: 36px;
+        gap: 9px;
+        font-size: 11px;
+        line-height: 1.2;
+    }
+    .sidebar .nav-link i { width: 15px; font-size: 11px; }
+    .main-content { margin-left: 220px; }
+    .main-content.sidebar-open { margin-left: 0 !important; }
+}
+@media (max-width: 992px) {
+    .sidebar { width: 220px; }
+}
+
+.topbar { margin-bottom: 28px; }
+#app-views { padding-left: 34px; padding-right: 34px; }
+.import-panel > .row:first-child { margin-bottom: 20px !important; }
+#excelDataTableContainer,
+#offerImportTableContainer,
+#mccImportTableContainer,
+#benefitImportTableContainer { margin-bottom: 20px; }
+.upload-zone-button-wrapper {
+    position: relative;
+    min-height: 76px;
+    gap: 24px !important;
+    padding: 9px 24px;
+}
+.upload-icon-badge {
+    width: 22px;
+    height: 22px;
+    margin: 0 auto 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #5540e8;
+    background: #f0f2ff;
+    font-size: 11px;
+}
+.upload-zone-button-wrapper .btn-upload {
+    border-radius: 5px;
+    padding: 5px 14px;
+    font-size: 9px;
+}
+.upload-zone-button-wrapper small { margin-top: 4px !important; font-size: 6px !important; }
+
+@media (max-width: 992px) {
+    #app-views { padding-left: 16px; padding-right: 16px; }
+    .upload-zone-button-wrapper { gap: 14px !important; }
+    .diff-color-legend { width: min(100%, 290px); }
+}
+
+/* Import upload split: the dashed drop area owns the left half,
+   while the comparison legend sits cleanly outside it on the right. */
+.upload-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 22px;
+    width: 100%;
+}
+.upload-layout .upload-zone-button-wrapper {
+    width: 100%;
+    margin: 0;
+}
+.upload-layout .diff-color-legend {
+    width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+@media (min-width: 993px) {
+    #searchPanel {
+        padding: 22px !important;
+    }
+    #searchPanel h5 {
+        margin-bottom: 20px !important;
+        font-size: 1.25rem;
+    }
+    #searchPanel .form-control,
+    #searchPanel .form-select {
+        height: 42px !important;
+        min-height: 42px !important;
+        font-size: 13px !important;
+    }
+    #searchPanel .form-floating > label {
+        padding-top: .72rem;
+        font-size: 12px;
+    }
+    #searchPanel .btn {
+        padding: 8px 14px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .upload-layout {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+    .upload-layout .upload-zone-button-wrapper { min-height: 145px; }
+}
+
+/* Larger, color-matched comparison legend with accessible hover states. */
+.diff-color-legend {
+    padding: 8px 9px;
+}
+.legend-title {
+    margin-bottom: 6px;
+    font-size: 10px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: #273142;
+}
+.legend-items { gap: 3px; }
+.legend-row {
+    min-height: 14px;
+    padding: 3px 5px;
+    gap: 5px;
+    border-radius: 5px;
+    font-size: 9px;
+    line-height: 1.3;
+    font-weight: 600;
+    transition: background-color .18s ease, color .18s ease;
+}
+.legend-swatch {
+    width: 15px;
+    height: 12px;
+    border-radius: 3px;
+}
+.legend-row:nth-child(1) { color: #835b00; }
+.legend-row:nth-child(1):hover { background: #fff5c7; color: #654500; }
+.legend-row:nth-child(2) { color: #087443; }
+.legend-row:nth-child(2):hover { background: #dff8eb; color: #055a33; }
+.legend-row:nth-child(3) { color: #b4232d; }
+.legend-row:nth-child(3):hover { background: #ffeaed; color: #8d1823; }
+.legend-row:nth-child(4) { color: #7f1d1d; }
+.legend-row:nth-child(4):hover { background: #fef2f2; color: #601515; }
+.legend-row:nth-child(5) { color: #b91c1c; font-weight: 700; }
+.legend-row:nth-child(5):hover { background: #fee2e2; color: #7f1d1d; }
+
+/* ===== IMPORT VALIDATION (invalid dropdown values on imported rows) ===== */
+#excelDataTable tr.row-invalid td {
+    background-color: rgba(151, 149, 149, 0.834) !important;
+}
+#excelDataTable tr.row-invalid td.cell-invalid {
+    background-color: transparent !important;
+    color: #ef4444 !important;
+    font-weight: 800;
+    font-size: calc(0.75rem + 3px);
+    animation: textBlink 1s infinite;
+}
+@keyframes textBlink {
+    0%, 100% { color: #ef4444; }
+    50% { color: #fca5a5; }
+}
+
+/* ===== Click-to-fix invalid cells ===== */
+#excelDataTable td.cell-invalid:hover {
+    outline: 2px dashed #b91c1c;
+    outline-offset: -2px;
+}
+
+/* Status header column gets the same black outer border as the grouped columns */
+.status-col-header {
+    border-top: 2px solid #000 !important;
+    border-bottom: 2px solid #000 !important;
+    border-right: 2px solid #000 !important;
+    border-left: 2px solid #000 !important;
+}
+
+/* ===== Filter icon box (matches "Filter Sheet" reference design) ===== */
+.filter-icon-group {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+.filter-icon-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    color: #1e293b;
+    font-size: 0.8rem;
+}
+.filter-icon-group .form-select {
+    border: none !important;
+    box-shadow: none !important;
+    width: auto;
+    max-width: 60px;
+    background-image: none !important;
+    padding-top: 0.32rem;
+    padding-bottom: 0.32rem;
+    font-size: 0.72rem;
+    padding-right: 0px;
+    padding-left: 0;
+    font-size: 8px;
+    font-weight: 600;
+}
