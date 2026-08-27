@@ -1216,11 +1216,12 @@ function buildFormPanel(cardData, offersData, importMode = false) {
 // 7. HELPER FUNCTIONS
 // ================================================================
 
-function createSelectField(id, label, options, value = '') {
+function createSelectField(id, label, options, value = '', onChange = '') {
     let opts = options.map(o => `<option value="${o}" ${value === o ? 'selected' : ''}>${o}</option>`).join('');
     let placeholderOpt = `<option value="" ${!value ? 'selected' : ''}></option>`;
-    return `<div class="form-floating mb-1">
-        <select id="${id}" class="form-select form-select-sm">${placeholderOpt}${opts}</select>
+    const changeAttr = onChange ? ` onchange="${onChange}"` : '';
+    return `<div class="form-floating mb-1${value ? ' filled' : ''}">
+        <select id="${id}" class="form-select form-select-sm"${changeAttr}>${placeholderOpt}${opts}</select>
         <label for="${id}">${label}</label>
     </div>`;
 }
@@ -1662,9 +1663,9 @@ function addOfferRow(data = null) {
         <div class="col-md-2">${createSelectField(`global_rp_expiry_${index}`, 'RP Expiry', ['No Expiry','12 Months','24 Months','36 Months','Custom'], data ? data.rpExpiry : '')}</div>
     </div>
     <div class="row g-2 mb-2 align-items-end">
-        <div class="col-md-4">${createSelectField(`offer_${index}_category`, 'Category', ['ALL', ...Object.keys(CATEGORY_HIERARCHY)], data ? data.category : '')}</div>
+        <div class="col-md-4">${createSelectField(`offer_${index}_category`, 'Category', ['ALL', ...Object.keys(CATEGORY_HIERARCHY)], data ? data.category : '', `onOfferCategoryChange(${index})`)}</div>
         <div class="col-md-4">${createSelectField(`offer_${index}_subCategory`, 'Sub Category', [])}</div>
-        <div class="col-md-4">${createSelectField(`offer_${index}_rewardType`, 'Reward Type', Object.keys(REWARD_TYPE_FIELDS), data ? data.rewardType : '')}</div>
+        <div class="col-md-4">${createSelectField(`offer_${index}_rewardType`, 'Reward Type', Object.keys(REWARD_TYPE_FIELDS), data ? data.rewardType : '', `onRewardTypeChange(${index})`)}</div>
     </div>
     <div id="offer_${index}_rewardFields"></div>
     <div class="row g-2 mb-2">
@@ -1719,7 +1720,7 @@ function addOfferRow(data = null) {
                 <label for="offer_${index}_couponCode">Coupon Code</label>
             </div>
         </div>
-        <div class="col-md-3">${createSelectField(`offer_${index}_platform`, 'Platform', ['Zomato Gold','Smart Buy','Other'], data ? data.platform : '')}</div>
+        <div class="col-md-3">${createSelectField(`offer_${index}_platform`, 'Platform', ['Zomato Gold','Smart Buy','Other'], data ? data.platform : '', `toggleCustomPlatform(${index})`)}</div>
     </div>
     <div class="row g-2 mb-2" id="offer_${index}_customPlatformRow" style="${data && data.platform === 'Other' ? '' : 'display:none;'}">
         <div class="col-md-3 offset-md-9">
@@ -1753,6 +1754,7 @@ function addOfferRow(data = null) {
     attachIndianNumberFormatting();
     initMerchantChoices(index);
     initScopeValueChoices(index);
+    wireFloatingLabels(row);
     if (data) {
         document.getElementById(`payment_scope_${index}`).value = data.paymentScopeType || '';
         document.getElementById(`global_rp_expiry_${index}`).value = data.rpExpiry || 'No Expiry';
@@ -1763,15 +1765,34 @@ function addOfferRow(data = null) {
         document.getElementById(`offer_${index}_subCategory`).value = data.subCategory;
         setMerchantOptions(index, data.category, data.subCategory, merchantValues);
         onRewardTypeChange(index, data.rewardType);
-        if (data.rewardFields) {
-            Object.keys(data.rewardFields).forEach(k => {
-                const el = document.getElementById(`offer_${index}_${k}`);
-                if(el) el.value = data.rewardFields[k];
-            });
-        }
+        applyRewardFieldValues(index, data.rewardType, data.rewardFields);
+        toggleCustomPlatform(index);
+        refreshFloatingLabels(row);
     } else {
         updateScopeValue(index);
     }
+}
+
+// Keeps the floating-label "filled" state in sync for dynamically injected rows.
+function wireFloatingLabels(root) {
+    if (!root) return;
+    root.querySelectorAll('.form-floating select').forEach(sel => {
+        if (sel.dataset.floatWired) return;
+        sel.dataset.floatWired = 'true';
+        sel.addEventListener('change', function() {
+            const fl = this.closest('.form-floating');
+            if (fl) fl.classList.toggle('filled', this.value !== '');
+        });
+    });
+    refreshFloatingLabels(root);
+}
+
+function refreshFloatingLabels(root) {
+    if (!root) return;
+    root.querySelectorAll('.form-floating select').forEach(sel => {
+        const fl = sel.closest('.form-floating');
+        if (fl) fl.classList.toggle('filled', sel.value !== '');
+    });
 }
 
 function toggleCustomPlatform(index) {
@@ -1943,27 +1964,97 @@ function validateMcc(input) {
     }
 }
 
+// True when a reward sub-field offers a free-text "Custom" choice.
+function rewardFieldHasCustom(field) {
+    return (field.options || []).some(o => String(o).trim().toLowerCase() === 'custom');
+}
+
+function isCustomValue(value) {
+    return String(value || '').trim().toLowerCase() === 'custom';
+}
+
+// Opens the reward-specific dropdown panel for the chosen Reward Type.
 function onRewardTypeChange(index, setValue = null) {
-    const rewardType = document.getElementById(`offer_${index}_rewardType`).value;
+    const rewardSelect = document.getElementById(`offer_${index}_rewardType`);
     const container = document.getElementById(`offer_${index}_rewardFields`);
-    container.innerHTML = '';
-    if (rewardType && REWARD_TYPE_FIELDS[rewardType]) {
-        const fields = REWARD_TYPE_FIELDS[rewardType];
-        let html = `<div class="bg-light p-2 rounded mb-2 border-start border-4 border-success">`;
-        fields.forEach(f => {
-            html += `<div class="row g-1 mb-1"><div class="col-md-6">${createSelectField(`offer_${index}_${f.id}`, f.label, f.options, '')}</div></div>`;
-        });
-        html += `</div>`;
-        container.innerHTML = html;
-        document.querySelectorAll(`#offer_${index}_rewardFields select`).forEach(sel => {
-            sel.addEventListener('change', function() {
-                this.closest('.form-floating').classList.toggle('filled', this.value !== '');
-            });
-            if (sel.value !== '') {
-                sel.closest('.form-floating').classList.add('filled');
-            }
-        });
+    if (!rewardSelect || !container) return;
+    if (setValue !== null && setValue !== undefined && setValue !== '') {
+        rewardSelect.value = setValue;
     }
+    const rewardType = rewardSelect.value;
+    container.innerHTML = '';
+    const floating = rewardSelect.closest('.form-floating');
+    if (floating) floating.classList.toggle('filled', rewardType !== '');
+    if (!rewardType || !REWARD_TYPE_FIELDS[rewardType]) return;
+
+    const fields = REWARD_TYPE_FIELDS[rewardType];
+    let html = `<div class="bg-light p-2 rounded mb-2 border-start border-4 border-success reward-fields-panel">
+        <div class="small fw-bold text-success mb-2"><i class="fas fa-sliders me-1"></i>${rewardType} Details</div>`;
+    fields.forEach(f => {
+        const supportsCustom = rewardFieldHasCustom(f);
+        html += `<div class="row g-1 mb-1 align-items-start">
+            <div class="col-md-6">${createSelectField(`offer_${index}_${f.id}`, f.label, f.options, '', `onRewardFieldChange(${index}, '${f.id}')`)}</div>`;
+        if (supportsCustom) {
+            html += `<div class="col-md-6 reward-custom-col" id="offer_${index}_${f.id}_customWrap" style="display:none;">
+                <div class="form-floating mb-1">
+                    <input type="text" id="offer_${index}_${f.id}_custom" class="form-control form-control-sm" placeholder="Enter ${f.label}">
+                    <label for="offer_${index}_${f.id}_custom">Custom ${f.label}</label>
+                </div>
+            </div>`;
+        }
+        html += `</div>`;
+    });
+    html += `</div>`;
+    container.innerHTML = html;
+    wireFloatingLabels(container);
+}
+
+// Shows/hides the free-text box that belongs to a reward sub-field when "Custom" is picked.
+function onRewardFieldChange(index, fieldId, focusInput = true) {
+    const sel = document.getElementById(`offer_${index}_${fieldId}`);
+    if (!sel) return;
+    const floating = sel.closest('.form-floating');
+    if (floating) floating.classList.toggle('filled', sel.value !== '');
+
+    const wrap = document.getElementById(`offer_${index}_${fieldId}_customWrap`);
+    const input = document.getElementById(`offer_${index}_${fieldId}_custom`);
+    if (!wrap || !input) return;
+    if (isCustomValue(sel.value)) {
+        wrap.style.display = '';
+        if (focusInput) input.focus();
+    } else {
+        wrap.style.display = 'none';
+        input.value = '';
+    }
+}
+
+// Restores saved sub-field values (including any Custom free text) into an open offer row.
+function applyRewardFieldValues(index, rewardType, rewardFields) {
+    if (!rewardFields || !REWARD_TYPE_FIELDS[rewardType]) return;
+    Object.keys(rewardFields).forEach(key => {
+        const el = document.getElementById(`offer_${index}_${key}`);
+        if (el) el.value = rewardFields[key];
+    });
+    REWARD_TYPE_FIELDS[rewardType].forEach(f => onRewardFieldChange(index, f.id, false));
+    // Re-apply custom text: the toggle above clears boxes whose select is not "Custom".
+    REWARD_TYPE_FIELDS[rewardType].forEach(f => {
+        if (!isCustomValue(rewardFields[f.id])) return;
+        const el = document.getElementById(`offer_${index}_${f.id}_custom`);
+        if (el) el.value = rewardFields[`${f.id}_custom`] || '';
+    });
+}
+
+// Human-readable reward detail string; swaps "Custom" for whatever the user typed.
+function rewardFieldsDisplay(offer) {
+    const rf = offer && offer.rewardFields;
+    if (!rf) return '';
+    const fields = REWARD_TYPE_FIELDS[offer.rewardType];
+    if (!fields) return Object.values(rf).filter(Boolean).join(' · ');
+    return fields.map(f => {
+        const v = rf[f.id];
+        if (!v) return '';
+        return isCustomValue(v) ? (rf[`${f.id}_custom`] || 'Custom') : v;
+    }).filter(Boolean).join(' · ');
 }
 
 // ================================================================
@@ -2004,10 +2095,22 @@ function saveOffer(index) {
         rewardFields: {}
     };
     if (REWARD_TYPE_FIELDS[offerData.rewardType]) {
+        let missingCustom = null;
         REWARD_TYPE_FIELDS[offerData.rewardType].forEach(f => {
             const sel = document.getElementById(`${prefix}_${f.id}`);
-            offerData.rewardFields[f.id] = sel ? sel.value : '';
+            const val = sel ? sel.value : '';
+            offerData.rewardFields[f.id] = val;
+            if (isCustomValue(val)) {
+                const customEl = document.getElementById(`${prefix}_${f.id}_custom`);
+                const customVal = customEl ? customEl.value.trim() : '';
+                offerData.rewardFields[`${f.id}_custom`] = customVal;
+                if (!customVal && !missingCustom) missingCustom = f.label;
+            }
         });
+        if (missingCustom) {
+            alert(`Please enter a value in the "Custom ${missingCustom}" box.`);
+            return;
+        }
     }
     if(!offerData.category || !offerData.rewardType) {
         alert("Please fill in Category and Reward Type.");
@@ -2027,7 +2130,7 @@ function saveOffer(index) {
 function generateOfferSummary(o) {
     const merchants = Array.isArray(o.merchant) ? o.merchant : (o.merchant ? [o.merchant] : []);
     const merchantText = merchants.length ? (merchants.includes('ALL') ? 'All Merchants' : merchants.join(', ')) : 'Not specified';
-    const rewardFieldsText = o.rewardFields ? Object.values(o.rewardFields).filter(Boolean).join(' · ') : '';
+    const rewardFieldsText = rewardFieldsDisplay(o);
     const platformText = o.platform === 'Other' ? (o.customPlatform || 'Other') : o.platform;
     return `
         <div class="p-2 small">
@@ -2051,6 +2154,9 @@ function toggleOfferReview(idx) {
 function renderOfferTable() {
     const container = document.getElementById('offerTableContainer');
     const tbody = document.getElementById('offerTableBody');
+    // The saved-offers table lives on the Add Reward Rule page. Saving from the
+    // Import Offers page reaches here with that DOM absent — nothing to draw.
+    if (!container || !tbody) return;
     if (offers.length > 0) {
         container.style.display = 'block';
         tbody.innerHTML = offers.map((o, idx) => {
@@ -2112,14 +2218,31 @@ const OFFER_GROUP_LABELS = {
     'offergrp-2': 'Reward Rule',
     'offergrp-3': 'Limits',
     'offergrp-4': 'Validity & Link',
-    'offergrp-5': 'Payment & Coupon'
+    'offergrp-5': 'Payment & Coupon',
+    'offergrp-6': 'Reward Details'
 };
 
 const OFFER_GROUP_COLORS = {
     'offergrp-1': '#2563eb', 'offergrp-2': '#2563eb', 'offergrp-3': '#2563eb',
-    'offergrp-4': '#2563eb', 'offergrp-5': '#2563eb'
+    'offergrp-4': '#2563eb', 'offergrp-5': '#2563eb', 'offergrp-6': '#16a34a'
 };
-const OFFER_GROUP_TEXTCOLORS = { 'offergrp-1': '#fff', 'offergrp-2': '#fff', 'offergrp-3': '#fff', 'offergrp-4': '#fff', 'offergrp-5': '#fff' };
+const OFFER_GROUP_TEXTCOLORS = { 'offergrp-1': '#fff', 'offergrp-2': '#fff', 'offergrp-3': '#fff', 'offergrp-4': '#fff', 'offergrp-5': '#fff', 'offergrp-6': '#fff' };
+
+// Every reward sub-field id declared in REWARD_TYPE_FIELDS, plus its "_custom" twin.
+const REWARD_SUB_FIELD_IDS = (() => {
+    const ids = new Set();
+    Object.keys(REWARD_TYPE_FIELDS).forEach(rt => {
+        REWARD_TYPE_FIELDS[rt].forEach(f => {
+            ids.add(f.id);
+            if (rewardFieldHasCustom(f)) ids.add(`${f.id}_custom`);
+        });
+    });
+    return ids;
+})();
+
+function isRewardSubFieldColumn(key) {
+    return REWARD_SUB_FIELD_IDS.has(String(key).trim());
+}
 
 function getOfferColumnGroup(key) {
     const groupMap = {
@@ -2146,7 +2269,140 @@ function getOfferColumnGroup(key) {
         'platform': 'offergrp-5',
         'customPlatform': 'offergrp-5'
     };
-    return groupMap[key] || '';
+    if (groupMap[key]) return groupMap[key];
+    if (isRewardSubFieldColumn(key)) return 'offergrp-6';
+    return '';
+}
+
+// Reward sub-field columns actually worth showing, derived from the reward types
+// present in the imported rows (in REWARD_TYPE_FIELDS declaration order).
+function getRewardSubFieldColumns(data) {
+    const rows = data || [];
+    const typesPresent = new Set();
+    rows.forEach(r => {
+        const rt = String(genericVal(r, 'rewardType') || '').trim();
+        if (REWARD_TYPE_FIELDS[rt]) typesPresent.add(rt);
+    });
+    const cols = [];
+    Object.keys(REWARD_TYPE_FIELDS).forEach(rt => {
+        if (!typesPresent.has(rt)) return;
+        REWARD_TYPE_FIELDS[rt].forEach(f => {
+            if (!cols.includes(f.id)) cols.push(f.id);
+            if (!rewardFieldHasCustom(f)) return;
+            const customKey = `${f.id}_custom`;
+            const anyCustom = rows.some(r => String(genericVal(r, customKey) || '').trim() !== '');
+            if (anyCustom && !cols.includes(customKey)) cols.push(customKey);
+        });
+    });
+    return cols;
+}
+
+function getOfferImportColumns(data) {
+    return OFFER_IMPORT_COLUMNS.concat(getRewardSubFieldColumns(data));
+}
+
+// ================================================================
+// 11a. OFFER FIELD CATALOGUE — the single source of truth used by the
+//      Excel template generator and by the column-mapping screen.
+// ================================================================
+
+const OFFER_COLUMN_LABELS = {
+    cardId: 'Card ID', offerId: 'Offer ID', category: 'Category', subCategory: 'Sub Category',
+    rewardType: 'Reward Type', frequency: 'Frequency', status: 'Status', days: 'Applicable Days',
+    instancePeriod: 'Instance Period', person: 'Applicable Person', minTx: 'Min Transaction',
+    maxTx: 'Max Transaction', maxBenefit: 'Max Benefit', startDate: 'Start Date',
+    endDate: 'End Date', weblink: 'Web Link', paymentScopeType: 'Apply Rule By',
+    paymentScopeValue: 'Apply Value', rpExpiry: 'RP Expiry', couponCode: 'Coupon Code',
+    platform: 'Platform', customPlatform: 'Custom Platform'
+};
+
+// Allowed values for the base (non reward-specific) columns, mirroring the form dropdowns.
+function getOfferBaseOptions() {
+    return {
+        category: ['ALL', ...Object.keys(CATEGORY_HIERARCHY)],
+        rewardType: Object.keys(REWARD_TYPE_FIELDS),
+        frequency: ['One Time', 'Monthly', 'Quarterly', 'Yearly'],
+        status: ['Active', 'Inactive'],
+        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Weekdays', 'Weekends', 'All Days'],
+        instancePeriod: ['Per Transaction', 'Daily', 'Weekly', 'Monthly', 'Quarterly', 'Half-Yearly', 'Yearly'],
+        person: ['Primary', 'Family', 'Cardholder', 'Spouse', 'Children', 'All Members'],
+        paymentScopeType: ['Category', 'Payment Mode', 'Location', 'Merchant'],
+        rpExpiry: ['No Expiry', '12 Months', '24 Months', '36 Months', 'Custom'],
+        platform: ['Zomato Gold', 'Smart Buy', 'Other']
+    };
+}
+
+// Every field an Excel column can be mapped onto.
+// rewardType is null for base columns, or the owning reward type for sub-fields.
+function getOfferFieldCatalogue() {
+    const baseOptions = getOfferBaseOptions();
+    const list = OFFER_IMPORT_COLUMNS.map(k => ({
+        key: k,
+        label: OFFER_COLUMN_LABELS[k] || k,
+        rewardType: null,
+        options: baseOptions[k] || []
+    }));
+    Object.keys(REWARD_TYPE_FIELDS).forEach(rt => {
+        REWARD_TYPE_FIELDS[rt].forEach(f => {
+            list.push({ key: f.id, label: f.label, rewardType: rt, options: f.options.slice() });
+            if (rewardFieldHasCustom(f)) {
+                list.push({ key: `${f.id}_custom`, label: `Custom ${f.label}`, rewardType: rt, options: [] });
+            }
+        });
+    });
+    return list;
+}
+
+function normalizeHeaderKey(text) {
+    return String(text === undefined || text === null ? '' : text).toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+// Header spellings teams commonly use, pointed at the field they mean.
+const OFFER_HEADER_ALIASES = {
+    persontype: 'person', applicableto: 'person', cardholder: 'person',
+    applicabledays: 'days', validdays: 'days',
+    validfrom: 'startDate', datefrom: 'startDate', offerstart: 'startDate',
+    validto: 'endDate', validtill: 'endDate', dateto: 'endDate', offerend: 'endDate',
+    link: 'weblink', url: 'weblink', offerlink: 'weblink', weburl: 'weblink',
+    offerstatus: 'status', activestatus: 'status',
+    mintxn: 'minTx', minspend: 'minTx', minamount: 'minTx',
+    maxtxn: 'maxTx', maxspend: 'maxTx', maxamount: 'maxTx',
+    maxcap: 'maxBenefit', cap: 'maxBenefit', benefitcap: 'maxBenefit',
+    subcat: 'subCategory', subcategoryname: 'subCategory',
+    reward: 'rewardType', rewardcategory: 'rewardType',
+    coupon: 'couponCode', promocode: 'couponCode',
+    applyruleby: 'paymentScopeType', scopetype: 'paymentScopeType',
+    applyvalue: 'paymentScopeValue', scopevalue: 'paymentScopeValue',
+    channel: 'platform'
+};
+
+// Guesses which catalogue field an Excel header refers to.
+// Order: exact field id -> known alias -> "Reward Type Label" -> bare label (only when unambiguous).
+function autoMatchOfferHeader(header, catalogue) {
+    const n = normalizeHeaderKey(header);
+    if (!n) return '';
+
+    const byKey = catalogue.find(c => normalizeHeaderKey(c.key) === n);
+    if (byKey) return byKey.key;
+
+    const aliased = OFFER_HEADER_ALIASES[n];
+    if (aliased && catalogue.some(c => c.key === aliased)) return aliased;
+
+    const byQualified = catalogue.find(c => c.rewardType && normalizeHeaderKey(`${c.rewardType} ${c.label}`) === n);
+    if (byQualified) return byQualified.key;
+
+    // A bare label is only safe when exactly one field carries it — "Conversion Ratio"
+    // belongs to both Air Miles and Hotel Points, so that one must stay unmapped.
+    const byLabel = catalogue.filter(c => normalizeHeaderKey(c.label) === n);
+    if (byLabel.length === 1) return byLabel[0].key;
+
+    const contained = catalogue.filter(c => {
+        const ln = normalizeHeaderKey(c.label);
+        return ln.length >= 5 && n.includes(ln);
+    });
+    if (contained.length === 1) return contained[0].key;
+
+    return '';
 }
 
 const OFFER_IMPORT_COLUMNS = [
@@ -2165,7 +2421,12 @@ function validateOfferRow(row) {
     if (rewardType && REWARD_TYPE_FIELDS[rewardType]) {
         REWARD_TYPE_FIELDS[rewardType].forEach(f => {
             const v = String(genericVal(row, f.id) || '').trim();
-            if (v && !f.options.includes(v)) invalid.add(f.id);
+            if (v && !f.options.includes(v)) { invalid.add(f.id); return; }
+            // "Custom" is only valid when the matching *_custom column carries a value.
+            if (isCustomValue(v)) {
+                const customVal = String(genericVal(row, `${f.id}_custom`) || '').trim();
+                if (!customVal) { invalid.add(f.id); invalid.add(`${f.id}_custom`); }
+            }
         });
     }
     return invalid;
@@ -2271,9 +2532,10 @@ function compareOffersWithDatabase(silent) {
         if (!silent) alert('Mock database populated. Click "Compare" again to see changes.');
         return;
     }
-    importedOffersData = diffCompare(importedOffersData, offerDatabaseData, getOfferMatchKey, OFFER_IMPORT_COLUMNS, genericVal);
+    const compareColumns = getOfferImportColumns(importedOffersData);
+    importedOffersData = diffCompare(importedOffersData, offerDatabaseData, getOfferMatchKey, compareColumns, genericVal);
     renderOfferImportTable(importedOffersData);
-    document.getElementById('offerComparisonSummary').innerHTML = diffSummaryHtml(importedOffersData, 'offerStatusFilter', 'offerColumnFilter', OFFER_IMPORT_COLUMNS, 'renderOfferImportTable(importedOffersData)', 'clearOfferComparison()', validateOfferRow);
+    document.getElementById('offerComparisonSummary').innerHTML = diffSummaryHtml(importedOffersData, 'offerStatusFilter', 'offerColumnFilter', compareColumns, 'renderOfferImportTable(importedOffersData)', 'clearOfferComparison()', validateOfferRow);
     document.getElementById('offerComparisonSummary').style.display = 'block';
 }
 function clearOfferComparison() {
@@ -2361,13 +2623,15 @@ function buildImportOffersPanel() {
                         </button>
                         <small class="text-muted d-block mt-1">Upload your Excel file to preview offer data</small>
                         <input type="file" id="offerExcelImportInput" accept=".xlsx,.xls" style="display:none;" onchange="handleOfferExcelImportTable(event)">
+                        <button class="btn btn-outline-primary btn-sm mt-2" onclick="downloadOfferTemplate()"><i class="fas fa-file-excel me-1"></i> Download Excel Template</button>
                     </div>
                     </div>
                     ${DIFF_COLOR_LEGEND_HTML}
                 </div>
             </div>
         </div>
-        <div id="offerImportTableContainer">
+        <div id="offerMappingPanel" style="display:none;" class="mb-4"></div>
+        <div id="offerImportTableContainer"
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="fw-bold">Imported Offers <span id="offerRecordCount" class="badge bg-primary">0 records</span></h6>
                 <div class="d-flex gap-2">
@@ -2406,8 +2670,11 @@ function buildImportOffersPanel() {
 function renderOfferGroupToggleBar() {
     const bar = document.getElementById('offerGroupToggleBar');
     if (!bar) return;
+    // "Reward Details" only makes sense once reward sub-field columns exist.
+    const hasRewardDetailCols = getRewardSubFieldColumns(importedOffersData).length > 0;
     let html = '';
     Object.keys(OFFER_GROUP_LABELS).forEach(g => {
+        if (g === 'offergrp-6' && !hasRewardDetailCols) return;
         const active = groupVisibility[g];
         const color = OFFER_GROUP_COLORS[g];
         const textcolor = OFFER_GROUP_TEXTCOLORS[g];
@@ -2431,17 +2698,19 @@ function renderOfferImportTable(data) {
     if (offerColumnFilter !== 'all') filtered = filtered.filter(r => r._status === 'new' || !r._dbMatch || String(genericVal(r, offerColumnFilter)).trim() !== String(genericVal(r._dbMatch, offerColumnFilter)).trim());
     const hasStatus = data.some(r => r._status);
 
-    const colCount = OFFER_IMPORT_COLUMNS.length + (hasStatus ? 1 : 0);
+    // Columns come from the full imported set, so searching/filtering never drops a column.
+    const columns = getOfferImportColumns(importedOffersData.length ? importedOffersData : data);
+    const colCount = columns.length + (hasStatus ? 1 : 0);
     let theadHtml = hasStatus ? diffLegendStickyRow(colCount) : '';
     theadHtml += '<tr style="border:3px solid black;">';
     if (hasStatus) theadHtml += `<th class="status-col-header" style="font-size:0.75rem; font-weight:600; color:#475569;">Status</th>`;
-    OFFER_IMPORT_COLUMNS.forEach((col, i) => {
+    columns.forEach((col, i) => {
         const groupClass = getOfferColumnGroup(col);
         const isHidden = groupClass && !groupVisibility[groupClass];
-        const prevGroup = i > 0 ? getOfferColumnGroup(OFFER_IMPORT_COLUMNS[i - 1]) : null;
-        const nextGroup = i < OFFER_IMPORT_COLUMNS.length - 1 ? getOfferColumnGroup(OFFER_IMPORT_COLUMNS[i + 1]) : null;
+        const prevGroup = i > 0 ? getOfferColumnGroup(columns[i - 1]) : null;
+        const nextGroup = i < columns.length - 1 ? getOfferColumnGroup(columns[i + 1]) : null;
         const edge = (groupClass !== prevGroup ? 'grp-start ' : '') + (groupClass !== nextGroup ? 'grp-end' : '');
-        theadHtml += `<th class="text-nowrap ${groupClass} ${edge} ${isHidden ? 'col-group-hidden' : ''}" style="font-size:0.75rem; font-weight:600; color:#475569; border-top:2px solid black;">${col}</th>`;
+        theadHtml += `<th class="text-nowrap ${groupClass} ${edge} ${isHidden ? 'col-group-hidden' : ''}" style="font-size:0.75rem; font-weight:600; color:#475569; border-top:2px solid black;" title="${offerColumnTitle(col)}">${col}</th>`;
     });
     theadHtml += '</tr>';
     thead.innerHTML = theadHtml;
@@ -2451,8 +2720,26 @@ function renderOfferImportTable(data) {
         tbody.innerHTML = `<tr><td colspan="${colCount}" class="text-center text-muted py-3">No offers to display. Please import an Excel file.</td></tr>`;
         return;
     }
-    tbody.innerHTML = diffRowsHtml(filtered, OFFER_IMPORT_COLUMNS, hasStatus, validateOfferRow, getOfferColumnGroup);
+    tbody.innerHTML = diffRowsHtml(filtered, columns, hasStatus, validateOfferRow, getOfferColumnGroup);
 }
+
+// Friendly hover text for reward sub-field headers (e.g. rp_calc -> "Reward Points › Calculation Basis").
+function offerColumnTitle(col) {
+    const base = String(col).replace(/_custom$/, '');
+    for (const rt of Object.keys(REWARD_TYPE_FIELDS)) {
+        const f = REWARD_TYPE_FIELDS[rt].find(x => x.id === base);
+        if (f) return `${rt} › ${f.label}${col.endsWith('_custom') ? ' (custom value)' : ''}`;
+    }
+    return col;
+}
+
+// ================================================================
+// 11b. COLUMN MAPPING SCREEN
+// Excel headers rarely match our field ids exactly, so the upload lands here
+// first: auto-match what we can, let the user fix the rest, then commit.
+// ================================================================
+
+let pendingOfferImport = null;   // { fileName, headers: [], rows: [], mapping: {header: fieldKey} }
 
 function handleOfferExcelImportTable(event) {
     const file = event.target.files[0];
@@ -2468,15 +2755,424 @@ function handleOfferExcelImportTable(event) {
                 alert('The Excel file is empty.');
                 return;
             }
-            importedOffersData = json;
-            renderOfferImportTable(importedOffersData);
-            document.getElementById('offerRecordCount').textContent = `${json.length} records`;
+            startOfferColumnMapping(json, file.name);
             document.getElementById('offerExcelImportInput').value = '';
         } catch (err) {
             alert('Error reading Excel file: ' + err.message);
         }
     };
     reader.readAsArrayBuffer(file);
+}
+
+function startOfferColumnMapping(rows, fileName) {
+    const catalogue = getOfferFieldCatalogue();
+    const headers = [];
+    rows.forEach(r => Object.keys(r).forEach(h => {
+        const t = String(h).trim();
+        if (t && !t.startsWith('__EMPTY') && !headers.includes(h)) headers.push(h);
+    }));
+    const mapping = {};
+    const used = new Set();
+    headers.forEach(h => {
+        const guess = autoMatchOfferHeader(h, catalogue);
+        // Never auto-assign the same target twice; the second one waits for the user.
+        mapping[h] = (guess && !used.has(guess)) ? guess : '';
+        if (mapping[h]) used.add(mapping[h]);
+    });
+    pendingOfferImport = { fileName: fileName || 'Uploaded file', headers, rows, mapping, catalogue };
+    renderOfferMappingPanel();
+}
+
+function renderOfferMappingPanel() {
+    const panel = document.getElementById('offerMappingPanel');
+    if (!panel || !pendingOfferImport) return;
+    const { headers, rows, mapping, catalogue, fileName } = pendingOfferImport;
+
+    const optionsHtml = (selectedKey) => {
+        const base = catalogue.filter(c => !c.rewardType);
+        let html = `<option value="">— Ignore this column —</option>`;
+        html += `<optgroup label="Offer Fields">` +
+            base.map(c => `<option value="${c.key}" ${selectedKey === c.key ? 'selected' : ''}>${c.label} (${c.key})</option>`).join('') +
+            `</optgroup>`;
+        Object.keys(REWARD_TYPE_FIELDS).forEach(rt => {
+            const group = catalogue.filter(c => c.rewardType === rt);
+            html += `<optgroup label="${rt}">` +
+                group.map(c => `<option value="${c.key}" ${selectedKey === c.key ? 'selected' : ''}>${c.label} (${c.key})</option>`).join('') +
+                `</optgroup>`;
+        });
+        return html;
+    };
+
+    const sampleFor = (header) => {
+        const hit = rows.find(r => String(r[header] ?? '').trim() !== '');
+        const v = hit ? String(hit[header]) : '';
+        return v.length > 28 ? v.slice(0, 28) + '…' : (v || '—');
+    };
+
+    const counts = { mapped: 0, ignored: 0 };
+    headers.forEach(h => mapping[h] ? counts.mapped++ : counts.ignored++);
+    const dupes = {};
+    headers.forEach(h => { if (mapping[h]) dupes[mapping[h]] = (dupes[mapping[h]] || 0) + 1; });
+    const hasDupes = Object.values(dupes).some(n => n > 1);
+    const hasRewardType = Object.values(mapping).includes('rewardType');
+    const hasCategory = Object.values(mapping).includes('category');
+
+    let rowsHtml = headers.map(h => {
+        const target = mapping[h];
+        const isDupe = target && dupes[target] > 1;
+        let badge = `<span class="badge bg-secondary-subtle text-secondary">Ignored</span>`;
+        if (isDupe) badge = `<span class="badge bg-danger-subtle text-danger">Duplicate</span>`;
+        else if (target) badge = `<span class="badge bg-success-subtle text-success">Mapped</span>`;
+        const entry = catalogue.find(c => c.key === target);
+        const owner = entry && entry.rewardType ? `<div class="text-muted" style="font-size:0.68rem;">applies to ${entry.rewardType}</div>` : '';
+        return `<tr class="${isDupe ? 'table-danger' : (target ? '' : 'table-warning')}">
+            <td class="fw-semibold" style="font-size:0.78rem;">${h}</td>
+            <td class="text-muted" style="font-size:0.72rem;">${sampleFor(h)}</td>
+            <td>
+                <select class="form-select form-select-sm offer-map-select" data-header="${String(h).replace(/"/g, '&quot;')}" onchange="updateOfferColumnMapping(this)" style="font-size:0.75rem;">
+                    ${optionsHtml(target)}
+                </select>
+                ${owner}
+            </td>
+            <td class="text-center">${badge}</td>
+        </tr>`;
+    }).join('');
+
+    let warning = '';
+    if (!hasRewardType || !hasCategory) {
+        const miss = [!hasCategory ? 'Category' : '', !hasRewardType ? 'Reward Type' : ''].filter(Boolean).join(' and ');
+        warning = `<div class="alert alert-warning py-2 px-3 mb-2" style="font-size:0.78rem;">
+            <i class="fas fa-triangle-exclamation me-1"></i><strong>${miss}</strong> ${miss.includes('and') ? 'are' : 'is'} not mapped. Rows without ${miss.includes('and') ? 'them' : 'it'} cannot be saved to the database.</div>`;
+    }
+    if (hasDupes) {
+        warning += `<div class="alert alert-danger py-2 px-3 mb-2" style="font-size:0.78rem;">
+            <i class="fas fa-circle-exclamation me-1"></i>Two or more columns point at the same field. Fix the duplicates before loading.</div>`;
+    }
+
+    panel.innerHTML = `
+    <div class="p-3 bg-white rounded border">
+        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+            <div>
+                <h6 class="fw-bold mb-0"><i class="fas fa-diagram-project text-primary me-2"></i>Map Excel Columns to Fields</h6>
+                <small class="text-muted">${fileName} · ${rows.length} row(s) · ${headers.length} column(s)</small>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <span class="badge bg-success-subtle text-success">${counts.mapped} mapped</span>
+                <span class="badge bg-secondary-subtle text-secondary">${counts.ignored} ignored</span>
+                <button class="btn btn-outline-secondary btn-sm" onclick="autoMatchOfferColumns()"><i class="fas fa-wand-magic-sparkles me-1"></i>Auto-match</button>
+                <button class="btn btn-outline-danger btn-sm" onclick="cancelOfferColumnMapping()"><i class="fas fa-times me-1"></i>Cancel</button>
+                <button class="btn btn-success btn-sm" ${hasDupes ? 'disabled' : ''} onclick="confirmOfferColumnMapping()"><i class="fas fa-check me-1"></i>Confirm &amp; Load</button>
+            </div>
+        </div>
+        ${warning}
+        <p class="text-muted mb-2" style="font-size:0.74rem;">
+            Each row uses only the fields belonging to its own Reward Type — a Cashback row reads the Cashback fields, an Air Miles row reads the Air Miles fields.
+            Values sitting under another reward type's column are ignored for that row.
+        </p>
+        <div class="table-responsive" style="max-height:380px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="sticky-top bg-light">
+                    <tr>
+                        <th style="font-size:0.72rem;">Excel Column</th>
+                        <th style="font-size:0.72rem;">Sample Value</th>
+                        <th style="font-size:0.72rem; width:38%;">Maps To</th>
+                        <th style="font-size:0.72rem;" class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+        </div>
+    </div>`;
+    panel.style.display = 'block';
+}
+
+function updateOfferColumnMapping(selectEl) {
+    if (!pendingOfferImport) return;
+    pendingOfferImport.mapping[selectEl.dataset.header] = selectEl.value;
+    renderOfferMappingPanel();
+}
+
+function autoMatchOfferColumns() {
+    if (!pendingOfferImport) return;
+    const { headers, catalogue, mapping } = pendingOfferImport;
+    const used = new Set();
+    headers.forEach(h => {
+        const guess = autoMatchOfferHeader(h, catalogue);
+        mapping[h] = (guess && !used.has(guess)) ? guess : '';
+        if (mapping[h]) used.add(mapping[h]);
+    });
+    renderOfferMappingPanel();
+}
+
+function cancelOfferColumnMapping() {
+    pendingOfferImport = null;
+    const panel = document.getElementById('offerMappingPanel');
+    if (panel) { panel.style.display = 'none'; panel.innerHTML = ''; }
+}
+
+// Rewrites the raw rows into canonical field keys and drops sub-field values
+// that belong to a reward type other than the row's own.
+function confirmOfferColumnMapping() {
+    if (!pendingOfferImport) return;
+    const { headers, rows, mapping } = pendingOfferImport;
+    const ownerOf = {};
+    Object.keys(REWARD_TYPE_FIELDS).forEach(rt => {
+        REWARD_TYPE_FIELDS[rt].forEach(f => {
+            ownerOf[f.id] = rt;
+            if (rewardFieldHasCustom(f)) ownerOf[`${f.id}_custom`] = rt;
+        });
+    });
+
+    let strayCells = 0;
+    const mapped = rows.map(raw => {
+        const out = {};
+        headers.forEach(h => {
+            const target = mapping[h];
+            if (!target) return;
+            const val = raw[h];
+            if (val === undefined || val === null || String(val).trim() === '') return;
+            out[target] = typeof val === 'string' ? val.trim() : val;
+        });
+        const rowType = String(out.rewardType || '').trim();
+        Object.keys(out).forEach(k => {
+            const owner = ownerOf[k];
+            if (owner && owner !== rowType) { delete out[k]; strayCells++; }
+        });
+        return out;
+    }).filter(r => Object.keys(r).length > 0);
+
+    if (mapped.length === 0) {
+        alert('Nothing to load — every row came out empty. Check the column mapping.');
+        return;
+    }
+
+    importedOffersData = mapped;
+    offerStatusFilter = 'all';
+    offerColumnFilter = 'all';
+    const summaryEl = document.getElementById('offerComparisonSummary');
+    if (summaryEl) summaryEl.style.display = 'none';
+    renderOfferImportTable(importedOffersData);
+    document.getElementById('offerRecordCount').textContent = `${mapped.length} records`;
+    cancelOfferColumnMapping();
+
+    if (strayCells > 0) {
+        const note = document.getElementById('offerImportTableContainer');
+        if (note) {
+            const el = document.createElement('div');
+            el.className = 'alert alert-info py-2 px-3 mb-3';
+            el.style.fontSize = '0.78rem';
+            el.innerHTML = `<i class="fas fa-circle-info me-1"></i>${strayCells} cell(s) were ignored because they sat under a reward type different from their row's Reward Type.`;
+            note.prepend(el);
+            setTimeout(() => el.remove(), 12000);
+        }
+    }
+}
+
+// ================================================================
+// 11c. EXCEL TEMPLATE GENERATOR
+// Three header rows (banner / label / field id) matching the convention
+// smartSheetToJson already understands, plus an Allowed Values sheet that
+// doubles as the source for the in-cell dropdowns.
+// ================================================================
+
+function buildOfferTemplateLayout() {
+    const catalogue = getOfferFieldCatalogue();
+    const columns = [];
+    OFFER_IMPORT_COLUMNS.forEach(k => {
+        const c = catalogue.find(x => x.key === k && !x.rewardType);
+        columns.push({ key: k, label: c ? c.label : k, banner: OFFER_GROUP_LABELS[getOfferColumnGroup(k)] || 'Offer Fields', options: c ? c.options : [] });
+    });
+    Object.keys(REWARD_TYPE_FIELDS).forEach(rt => {
+        REWARD_TYPE_FIELDS[rt].forEach(f => {
+            columns.push({ key: f.id, label: f.label, banner: rt, options: f.options.slice() });
+            if (rewardFieldHasCustom(f)) {
+                columns.push({ key: `${f.id}_custom`, label: `Custom ${f.label}`, banner: rt, options: [] });
+            }
+        });
+    });
+    return columns;
+}
+
+const OFFER_TEMPLATE_BANNER_COLORS = {
+    'Core Info': 'FF1E40AF', 'Reward Rule': 'FF1D4ED8', 'Limits': 'FF2563EB',
+    'Validity & Link': 'FF3B82F6', 'Payment & Coupon': 'FF60A5FA',
+    'Reward Points': 'FF15803D', 'Cashback': 'FF166534', 'Instant Discount': 'FF047857',
+    'Variable Discount': 'FF059669', 'Voucher': 'FF0D9488', 'Air Miles': 'FF0F766E',
+    'Hotel Points': 'FF115E59', 'Coins': 'FF14532D'
+};
+
+function offerTemplateExampleRows(columns) {
+    const pick = (key, value) => value;
+    const rowA = {
+        cardId: 'CARD-100001', offerId: 'OFF-1001', category: 'Dining', subCategory: 'Restaurants',
+        rewardType: 'Cashback', frequency: 'Monthly', status: 'Active', days: 'Weekends',
+        instancePeriod: 'Per Transaction', person: 'Primary', minTx: '500', maxTx: '25000',
+        maxBenefit: '1000', startDate: '2026-01-01', endDate: '2026-12-31',
+        weblink: 'https://example.com/offer', paymentScopeType: 'Category', paymentScopeValue: 'Dining',
+        rpExpiry: 'No Expiry', couponCode: 'DINE10', platform: 'Smart Buy', customPlatform: '',
+        cb_type: 'Percentage Cashback', cb_credit: 'Statement Credit', cb_limit: 'Custom',
+        cb_limit_custom: '7500 per month', cb_freq: 'Monthly'
+    };
+    const rowB = {
+        cardId: 'CARD-100001', offerId: 'OFF-1002', category: 'Travel', subCategory: 'Flights',
+        rewardType: 'Air Miles', frequency: 'One Time', status: 'Active', days: 'All Days',
+        instancePeriod: 'Per Transaction', person: 'All Members', minTx: '5000', maxTx: '200000',
+        maxBenefit: '10000', startDate: '2026-03-01', endDate: '2026-09-30',
+        weblink: 'https://example.com/miles', paymentScopeType: 'Merchant', paymentScopeValue: 'IndiGo',
+        rpExpiry: '24 Months', couponCode: '', platform: 'Other', customPlatform: 'Bank Travel Portal',
+        am_airline: 'IndiGo', am_program: 'Flying Returns', am_ratio: '2:1', am_time: 'Instant'
+    };
+    return [rowA, rowB].map(r => columns.map(c => pick(c.key, r[c.key] !== undefined ? r[c.key] : '')));
+}
+
+function downloadOfferTemplate() {
+    const columns = buildOfferTemplateLayout();
+    if (typeof ExcelJS !== 'undefined') {
+        downloadOfferTemplateRich(columns).catch(err => {
+            console.warn('Rich template failed, using basic template:', err);
+            downloadOfferTemplateBasic(columns);
+        });
+    } else {
+        downloadOfferTemplateBasic(columns);
+    }
+}
+
+function colLetter(n) {
+    let s = '';
+    while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); }
+    return s;
+}
+
+// Full-fat template: coloured banners, frozen headers and real in-cell dropdowns.
+async function downloadOfferTemplateRich(columns) {
+    const DATA_ROWS = 500;
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'RewardGenius';
+
+    const listSheet = wb.addWorksheet('Allowed Values');
+    const listRanges = {};
+    let listCol = 0;
+    columns.forEach(c => {
+        if (!c.options || c.options.length === 0) return;
+        listCol++;
+        const letter = colLetter(listCol);
+        listSheet.getCell(`${letter}1`).value = c.key;
+        listSheet.getCell(`${letter}1`).font = { bold: true, size: 10 };
+        c.options.forEach((o, i) => { listSheet.getCell(`${letter}${i + 2}`).value = String(o); });
+        listSheet.getColumn(listCol).width = Math.max(14, Math.min(34, c.key.length + 8));
+        listRanges[c.key] = `'Allowed Values'!$${letter}$2:$${letter}$${c.options.length + 1}`;
+    });
+
+    const ws = wb.addWorksheet('Offers', { views: [{ state: 'frozen', xSplit: 5, ySplit: 3 }] });
+
+    // Row 1 — banner, merged per group. Row 2 — human label. Row 3 — field id (the real header).
+    columns.forEach((c, i) => {
+        const n = i + 1;
+        ws.getCell(1, n).value = c.banner;
+        ws.getCell(1, n).font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
+        ws.getCell(1, n).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: OFFER_TEMPLATE_BANNER_COLORS[c.banner] || 'FF475569' } };
+        ws.getCell(1, n).alignment = { horizontal: 'center', vertical: 'middle' };
+
+        ws.getCell(2, n).value = c.label;
+        ws.getCell(2, n).font = { bold: true, size: 10, color: { argb: 'FF1E293B' } };
+        ws.getCell(2, n).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
+        ws.getCell(2, n).alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+
+        ws.getCell(3, n).value = c.key;
+        ws.getCell(3, n).font = { bold: true, size: 9, color: { argb: 'FF475569' } };
+        ws.getCell(3, n).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
+        ws.getCell(3, n).alignment = { horizontal: 'center' };
+        ws.getColumn(n).width = Math.max(14, Math.min(26, c.label.length + 4));
+    });
+
+    // Merge each run of identical banners into one wide heading.
+    let start = 1;
+    for (let i = 1; i <= columns.length; i++) {
+        const isLast = i === columns.length;
+        if (isLast || columns[i].banner !== columns[start - 1].banner) {
+            if (i > start) ws.mergeCells(1, start, 1, i);
+            start = i + 1;
+        }
+    }
+
+    offerTemplateExampleRows(columns).forEach((vals, r) => {
+        vals.forEach((v, i) => {
+            const cell = ws.getCell(4 + r, i + 1);
+            cell.value = v === '' ? null : v;
+            cell.font = { italic: true, color: { argb: 'FF94A3B8' }, size: 10 };
+        });
+    });
+
+    columns.forEach((c, i) => {
+        const letter = colLetter(i + 1);
+        if (!listRanges[c.key]) return;
+        for (let r = 4; r <= DATA_ROWS + 3; r++) {
+            ws.getCell(`${letter}${r}`).dataValidation = {
+                type: 'list', allowBlank: true, formulae: [listRanges[c.key]],
+                showErrorMessage: true, errorStyle: 'warning',
+                errorTitle: 'Value not in list',
+                error: `Pick one of the allowed values for "${c.label}", or type Custom where offered.`
+            };
+        }
+    });
+
+    ws.autoFilter = { from: { row: 3, column: 1 }, to: { row: 3, column: columns.length } };
+
+    const guide = wb.addWorksheet('How To Use');
+    [
+        ['RewardGenius — Offer Import Template'],
+        [''],
+        ['1.', 'Fill one row per offer, starting at row 4 of the "Offers" sheet. The two grey italic rows are examples — overwrite or delete them.'],
+        ['2.', 'Row 1 is the section banner, row 2 is the friendly label, row 3 is the field id the importer reads. Do not delete or reorder rows 1–3.'],
+        ['3.', 'Category and Reward Type are required. A row missing either is skipped when saving to the database.'],
+        ['4.', 'Each reward type owns its own block of green columns. Fill ONLY the block matching that row\'s Reward Type and leave the other blocks blank.'],
+        ['', 'Example: a Cashback row fills cb_type / cb_credit / cb_limit / cb_freq. An Air Miles row fills am_airline / am_program / am_ratio / am_time.'],
+        ['5.', 'Where a dropdown offers "Custom", pick Custom and type the real value into the matching *_custom column (e.g. cb_limit = Custom, cb_limit_custom = 7500 per month).'],
+        ['6.', 'Dates use YYYY-MM-DD. Apply Value accepts a comma separated list.'],
+        ['7.', 'The "Allowed Values" sheet lists every valid option per column — it powers the dropdowns, so leave it in place.'],
+        [''],
+        ['After uploading, the app shows a mapping screen so your own column names can be pointed at these fields. Using this template means everything auto-matches.']
+    ].forEach(r => guide.addRow(r));
+    guide.getRow(1).font = { bold: true, size: 14, color: { argb: 'FF1E40AF' } };
+    guide.getColumn(1).width = 5;
+    guide.getColumn(2).width = 130;
+    guide.getColumn(2).alignment = { wrapText: true, vertical: 'top' };
+
+    const buf = await wb.xlsx.writeBuffer();
+    saveBlobAs(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'offer_import_template.xlsx');
+}
+
+// Fallback when ExcelJS isn't available — same layout, no in-cell dropdowns.
+function downloadOfferTemplateBasic(columns) {
+    const aoa = [
+        columns.map(c => c.banner),
+        columns.map(c => c.label),
+        columns.map(c => c.key),
+        ...offerTemplateExampleRows(columns)
+    ];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = columns.map(c => ({ wch: Math.max(14, Math.min(26, c.label.length + 4)) }));
+    XLSX.utils.book_append_sheet(wb, ws, 'Offers');
+
+    const maxOpts = Math.max(...columns.map(c => (c.options || []).length), 0);
+    const listCols = columns.filter(c => (c.options || []).length);
+    const listAoa = [listCols.map(c => c.key)];
+    for (let i = 0; i < maxOpts; i++) listAoa.push(listCols.map(c => c.options[i] || ''));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(listAoa), 'Allowed Values');
+
+    XLSX.writeFile(wb, 'offer_import_template.xlsx');
+}
+
+function saveBlobAs(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function filterOfferImportTable(query) {
@@ -2605,9 +3301,14 @@ function saveOfferImportData() {
         }
 
         for (const key of Object.keys(row)) {
+            const trimmed = String(key).trim();
+            // Normalise the Excel header to the canonical sub-field id (rp_calc, cb_limit, …)
+            // so display, validation and edit all read the same keys regardless of header casing.
+            const canonical = [...REWARD_SUB_FIELD_IDS].find(id => id.toLowerCase() === trimmed.toLowerCase());
+            if (canonical) { offer.rewardFields[canonical] = row[key]; continue; }
             for (const pattern of rewardFieldPatterns) {
-                if (key.toLowerCase().startsWith(pattern)) {
-                    offer.rewardFields[key] = row[key];
+                if (trimmed.toLowerCase().startsWith(pattern)) {
+                    offer.rewardFields[trimmed] = row[key];
                     break;
                 }
             }
@@ -2624,7 +3325,8 @@ function saveOfferImportData() {
     } else {
         alert(`✅ ${addedCount} offers saved to the main offers list!`);
         renderOfferTable();
-        document.getElementById('offerTableContainer').style.display = 'block';
+        const savedTable = document.getElementById('offerTableContainer');
+        if (savedTable) savedTable.style.display = 'block';
         clearOfferImportData();
     }
 }
@@ -3389,7 +4091,7 @@ function saveMccImportData() {
 
 const groupVisibility = {};
 for (let i = 1; i <= 11; i++) { groupVisibility[`cardgrp-${i}`] = true; }
-for (let i = 1; i <= 5; i++) { groupVisibility[`offergrp-${i}`] = true; }
+for (let i = 1; i <= 6; i++) { groupVisibility[`offergrp-${i}`] = true; }
 
 let currentStatusFilter = 'all';
 let databaseData = [];
@@ -3920,7 +4622,7 @@ const EXTRA_KNOWN_KEYS = [
     'cardid', 'offerid', 'category', 'subcategory', 'rewardtype', 'mintx', 'maxtx',
     'slab_no', 'partner_no', 'lounge_program', 'golf_courses', 'milestone_amount',
     'partner_program', 'ins_provider', 'mcc', 'card', 'inclusion', 'exclusion'
-];
+].concat([...REWARD_SUB_FIELD_IDS]);
 const ALL_KNOWN_KEYS = new Set(
     Object.keys(COLUMN_ALIASES)
         .flatMap(k => COLUMN_ALIASES[k])

@@ -1185,3 +1185,33 @@ body {
     font-size: 8px;
     font-weight: 600;
 }
+
+/* ============================================================
+   Reward Type — dependent field panel & "Custom" free-text box
+   ============================================================ */
+.reward-fields-panel {
+    animation: rewardPanelIn 0.18s ease-out;
+}
+
+@keyframes rewardPanelIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.reward-custom-col {
+    animation: rewardPanelIn 0.18s ease-out;
+}
+
+.reward-custom-col .form-control {
+    border-color: #16a34a;
+    background-color: #fff;
+}
+
+.reward-custom-col .form-control:focus {
+    border-color: #16a34a;
+    box-shadow: 0 0 0 0.15rem rgba(22, 163, 74, 0.18);
+}
+
+.reward-custom-col .form-floating > label {
+    color: #16a34a;
+}
