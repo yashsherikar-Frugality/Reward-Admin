@@ -60,7 +60,7 @@ const ISSUER_PRODUCTS = {
         "YES BANK Marquee","YES BANK Reserv","YES BANK Elite+","YES BANK Wellness Plus",
         "YES BANK Wellness","YES BANK Paisabazaar PaisaSave","YES BANK Paisabazaar PaisaSave Plus",
         "YES BANK BYOC","YES BANK Prosperity Rewards Plus","YES BANK Prosperity Cashback Plus",
-        "YES BANK ACE","YES BANK FINBOOST","YES BANK RuPay Credit Card","YES BANK Business Credit Card",
+        "YES BANK ACE","YES BANK FINBOOST","YES BANK Kiwi","YES BANK RuPay Credit Card","YES BANK Business Credit Card",
         "YES BANK Corporate Credit Card"
     ],
     "RBL Bank": [
@@ -93,7 +93,7 @@ const ISSUER_PRODUCTS = {
     ],
     "AU Small Finance Bank": [
         "AU Zenith+","AU Zenith","AU Vetta","AU Altura+","AU Altura","AU LIT","AU SPONT",
-        "AU InstaPay RuPay","AU Xcite Ace","AU Xcite Ultra","AU NOMO","AU BizGrow","AU Corporate Credit Card"
+        "AU InstaPay RuPay","AU Kiwi","AU Xcite Ace","AU Xcite Ultra","AU NOMO","AU BizGrow","AU Corporate Credit Card"
     ],
     "Federal Bank": [
         "Federal Bank Celesta","Federal Bank Imperio","Federal Bank Signet","Federal Bank Scapia",
@@ -104,13 +104,13 @@ const ISSUER_PRODUCTS = {
     "Bank of Baroda": [
         "BOB Eterna","BOB Premier","BOB Select","BOB Easy","BOB Prime","BOB ICAI Exclusive",
         "BOB IRCTC Credit Card","BOB HPCL ENERGIE","BOB Snapdeal","BOB CMA One","BOB Vikram",
-        "BOB Defence","BOB RuPay Platinum","BOB UPI RuPay Credit Card","BOB Corporate Credit Card",
+        "BOB Defence","BOB RuPay Platinum","BOB UPI RuPay Credit Card","BOB OneCard","BOB Corporate Credit Card",
         "BOB Business Credit Card"
     ],
     "Punjab National Bank": [
         "PNB RuPay Platinum Credit Card","PNB RuPay Select Credit Card","PNB Visa Platinum Credit Card",
         "PNB Visa Gold Credit Card","PNB Global Platinum Credit Card","PNB Global Gold Credit Card",
-        "PNB Patanjali Credit Card","PNB Rakshak Credit Card","PNB Pride Credit Card","PNB Insta Credit Card",
+        "PNB Kiwi","PNB Patanjali Credit Card","PNB Rakshak Credit Card","PNB Pride Credit Card","PNB Insta Credit Card",
         "PNB Corporate Credit Card","PNB Business Credit Card"
     ],
     "Canara Bank": [
@@ -130,7 +130,7 @@ const ISSUER_PRODUCTS = {
         "Indian Bank Visa Platinum Credit Card","Indian Bank Visa Gold Credit Card",
         "Indian Bank Mastercard Platinum","Indian Bank Mastercard Gold",
         "Indian Bank RuPay Platinum Credit Card","Indian Bank RuPay Select Credit Card",
-        "Indian Bank Premium Credit Card","Indian Bank Signature Credit Card",
+        "Indian Bank OneCard","Indian Bank Premium Credit Card","Indian Bank Signature Credit Card",
         "Indian Bank Corporate Credit Card","Indian Bank Business Credit Card"
     ],
     "Bank of India": [
@@ -174,7 +174,7 @@ const ISSUER_PRODUCTS = {
     ],
     "CSB Bank": [
         "CSB Visa Platinum Credit Card","CSB Visa Signature Credit Card","CSB Mastercard Platinum",
-        "CSB RuPay Platinum Credit Card","CSB RuPay Select Credit Card","CSB Premium Credit Card",
+        "CSB RuPay Platinum Credit Card","CSB RuPay Select Credit Card","CSB OneCard","CSB Premium Credit Card",
         "CSB Signature Credit Card","CSB Corporate Credit Card","CSB Business Credit Card"
     ],
     "Dhanlaxmi Bank": [
@@ -200,7 +200,7 @@ const ISSUER_PRODUCTS = {
     ],
     "SBM Bank": [
         "SBM Visa Platinum Credit Card","SBM Visa Signature Credit Card","SBM Mastercard Platinum",
-        "SBM RuPay Platinum Credit Card","SBM RuPay Select Credit Card","SBM Premium Credit Card",
+        "SBM RuPay Platinum Credit Card","SBM RuPay Select Credit Card","SBM OneCard","SBM Premium Credit Card",
         "SBM Signature Credit Card","SBM Corporate Credit Card","SBM Business Credit Card"
     ]
 };
@@ -3004,7 +3004,8 @@ function buildOfferTemplateLayout() {
             }
         });
     });
-    return columns;
+    // Dropdowns in the exported template sort alphabetically, same as the website.
+    return columns.map(c => ({ ...c, options: sortOptions(c.options) }));
 }
 
 const OFFER_TEMPLATE_BANNER_COLORS = {
