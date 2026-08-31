@@ -13,7 +13,8 @@ const ISSUER_PRODUCTS = {
     ],
     "ICICI Bank": [
         "ICICI Emeralde Private Metal","ICICI Emeralde","ICICI Times Black","ICICI Sapphiro","ICICI Rubyx",
-        "ICICI Coral","ICICI HPCL Super Saver","ICICI Amazon Pay Credit Card","ICICI MakeMyTrip Signature",
+        "ICICI Coral","ICICI Rubyx American Express","ICICI HPCL Super Saver",
+        "ICICI Amazon Pay Credit Card","ICICI MakeMyTrip Signature",
         "ICICI MakeMyTrip Platinum","ICICI Manchester United Signature","ICICI Manchester United Platinum",
         "ICICI Platinum Chip","ICICI Platinum Chip RuPay","ICICI Instant Platinum","ICICI Expressions Credit Card",
         "ICICI Mine Credit Card","ICICI Adani One Signature","ICICI Adani One Platinum","ICICI Emirates Emeralde",
@@ -196,6 +197,11 @@ const ISSUER_PRODUCTS = {
         "Citi Prestige","Citi PremierMiles","Citi Rewards","Citi Cashback","Citi Simplicity",
         "Citi IndianOil","Citi Air India Platinum","Citi Air India Signature","Citi Ultima",
         "Citi Corporate Card","Citi Business Card"
+    ],
+    "SBM Bank": [
+        "SBM Visa Platinum Credit Card","SBM Visa Signature Credit Card","SBM Mastercard Platinum",
+        "SBM RuPay Platinum Credit Card","SBM RuPay Select Credit Card","SBM Premium Credit Card",
+        "SBM Signature Credit Card","SBM Corporate Credit Card","SBM Business Credit Card"
     ]
 };
 
@@ -212,7 +218,7 @@ const NETWORKS = {
     "Mastercard": ["Mastercard Standard","Mastercard Gold","Mastercard Platinum","World Mastercard","World Elite Mastercard","Titanium Mastercard","Business Mastercard","Corporate Mastercard"],
     "Maestro": ["Maestro Standard","Maestro Gold","Maestro Debit","Maestro International"],
     "RuPay": ["RuPay Classic","RuPay Platinum","RuPay Select","RuPay Platinum Plus","RuPay JCB","RuPay Business","RuPay Corporate","RuPay Credit on UPI"],
-    "AMX": ["Green Card","Gold Card","Gold Charge","Membership Rewards","Platinum Travel","Platinum Reserve","Platinum Charge","Centurion","Business Gold","Corporate Platinum"],
+    "Amex": ["Green Card","Gold Card","Gold Charge","Membership Rewards","Platinum Travel","Platinum Reserve","Platinum Charge","Centurion","Business Gold","Corporate Platinum"],
     "Diners Club": ["Diners Club Privilege","Diners Club Black","Diners Club Black Metal","Diners Club Premium"],
     "JCB": ["JCB Standard","JCB Gold","JCB Platinum","JCB World"],
     "UnionPay": ["UnionPay Classic","UnionPay Platinum","UnionPay Diamond","UnionPay Business"],
@@ -1216,8 +1222,16 @@ function buildFormPanel(cardData, offersData, importMode = false) {
 // 7. HELPER FUNCTIONS
 // ================================================================
 
+// Every dropdown option list renders alphabetically (number-aware, case-insensitive).
+// "ALL" / "All" sentinels stay pinned to the top.
+const cmpAlpha = (a, b) => String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
+function sortOptions(options) {
+    const pinned = v => (v === 'ALL' || v === 'All') ? 0 : 1;
+    return [...options].sort((a, b) => pinned(a) - pinned(b) || cmpAlpha(a, b));
+}
+
 function createSelectField(id, label, options, value = '', onChange = '') {
-    let opts = options.map(o => `<option value="${o}" ${value === o ? 'selected' : ''}>${o}</option>`).join('');
+    let opts = sortOptions(options).map(o => `<option value="${o}" ${value === o ? 'selected' : ''}>${o}</option>`).join('');
     let placeholderOpt = `<option value="" ${!value ? 'selected' : ''}></option>`;
     const changeAttr = onChange ? ` onchange="${onChange}"` : '';
     return `<div class="form-floating mb-1${value ? ' filled' : ''}">
@@ -1491,7 +1505,7 @@ function initSearchableSelect(id, placeholderText) {
 }
 
 function setSelectOptions(id, options, selectedValue = '') {
-    const choicesArr = [{ value: '', label: '', selected: !selectedValue }].concat(options.map(o => ({ value: o, label: o, selected: o === selectedValue })));
+    const choicesArr = [{ value: '', label: '', selected: !selectedValue }].concat(sortOptions(options).map(o => ({ value: o, label: o, selected: o === selectedValue })));
     const inst = singleChoicesInstances[id];
     if (inst) {
         inst.clearStore();
@@ -1603,7 +1617,7 @@ function attachBenefitListeners() {
 function populateDropdown(id, options) {
     const el = document.getElementById(id);
     if(!el) return;
-    el.innerHTML = '<option value=""></option>' + options.map(o => `<option value="${o}">${o}</option>`).join('');
+    el.innerHTML = '<option value=""></option>' + sortOptions(options).map(o => `<option value="${o}">${o}</option>`).join('');
 }
 
 function attachAllListeners() {
@@ -1853,6 +1867,7 @@ function updateScopeValue(index, selectedValues = []) {
         Object.values(CATEGORY_HIERARCHY).forEach(cat => Object.values(cat.merchants).forEach(arr => arr.forEach(mName => m.add(mName))));
         options = Array.from(m);
     }
+    options = sortOptions(options);
     const choicesArr = options.map(o => ({ value: o, label: o, selected: selectedValues.includes(o) }));
     const inst = scopeValueChoicesInstances[index];
     if (inst) {
@@ -1877,15 +1892,15 @@ function buildMerchantChoicesArray(category, subVal, selectedValues = []) {
     const hierarchy = CATEGORY_HIERARCHY[category];
     if (!hierarchy) return arr;
     if (subVal && subVal !== 'ALL' && hierarchy.merchants[subVal]) {
-        hierarchy.merchants[subVal].forEach(m => arr.push({ value: m, label: m, selected: selectedValues.includes(m) }));
+        sortOptions(hierarchy.merchants[subVal]).forEach(m => arr.push({ value: m, label: m, selected: selectedValues.includes(m) }));
     } else {
-        Object.keys(hierarchy.merchants).forEach(sub => {
+        sortOptions(Object.keys(hierarchy.merchants)).forEach(sub => {
             const merchants = hierarchy.merchants[sub] || [];
             if (!merchants.length) return;
             arr.push({
                 label: sub,
                 id: sub,
-                choices: merchants.map(m => ({ value: m, label: m, selected: selectedValues.includes(m) }))
+                choices: sortOptions(merchants).map(m => ({ value: m, label: m, selected: selectedValues.includes(m) }))
             });
         });
     }
@@ -1926,12 +1941,12 @@ function buildMerchantOptionsHtml(category, subVal) {
     const hierarchy = CATEGORY_HIERARCHY[category];
     if (!hierarchy) return html;
     if (subVal && subVal !== 'ALL' && hierarchy.merchants[subVal]) {
-        html += hierarchy.merchants[subVal].map(m => `<option value="${m}">${m}</option>`).join('');
+        html += sortOptions(hierarchy.merchants[subVal]).map(m => `<option value="${m}">${m}</option>`).join('');
     } else {
-        Object.keys(hierarchy.merchants).forEach(sub => {
+        sortOptions(Object.keys(hierarchy.merchants)).forEach(sub => {
             const merchants = hierarchy.merchants[sub] || [];
             if (!merchants.length) return;
-            html += `<optgroup label="${sub}">` + merchants.map(m => `<option value="${m}">${m}</option>`).join('') + `</optgroup>`;
+            html += `<optgroup label="${sub}">` + sortOptions(merchants).map(m => `<option value="${m}">${m}</option>`).join('') + `</optgroup>`;
         });
     }
     return html;
@@ -1942,7 +1957,7 @@ function onOfferCategoryChange(index, setValue = null, selectedMerchants = []) {
     const subSel = document.getElementById(`offer_${index}_subCategory`);
     if (category && CATEGORY_HIERARCHY[category]) {
         const subCategories = CATEGORY_HIERARCHY[category].subCategories || [];
-        subSel.innerHTML = '<option value=""></option><option value="ALL">All</option>' + subCategories.map(o => `<option value="${o}">${o}</option>`).join('');
+        subSel.innerHTML = '<option value=""></option><option value="ALL">All</option>' + sortOptions(subCategories).map(o => `<option value="${o}">${o}</option>`).join('');
         if (setValue) subSel.value = setValue;
         subSel.onchange = function() {
             setMerchantOptions(index, category, this.value);
@@ -2749,8 +2764,7 @@ function handleOfferExcelImportTable(event) {
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = smartSheetToJson(firstSheet);
+            const json = smartSheetToJson(pickSheet(workbook, 'Offers'));
             if (json.length === 0) {
                 alert('The Excel file is empty.');
                 return;
@@ -3618,8 +3632,7 @@ function handleBenefitExcelImportTable(event) {
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = smartSheetToJson(firstSheet);
+            const json = smartSheetToJson(pickSheet(workbook, 'Preferred Benefits'));
             if (json.length === 0) {
                 alert('The Excel file is empty.');
                 return;
@@ -3653,8 +3666,7 @@ function handleBenefitExcelImport(event) {
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = smartSheetToJson(firstSheet);
+            const json = smartSheetToJson(pickSheet(workbook, 'Preferred Benefits'));
             if (json.length === 0) {
                 alert('The Excel file is empty.');
                 return;
@@ -3996,8 +4008,7 @@ function handleMccExcelImportTable(event) {
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = smartSheetToJson(firstSheet);
+            const json = smartSheetToJson(pickSheet(workbook, 'MCC'));
             if (json.length === 0) {
                 alert('The Excel file is empty.');
                 return;
@@ -4152,7 +4163,7 @@ function openCellDropdown(td) {
     td.innerHTML = `<select class="form-select form-select-sm" style="font-size:0.72rem;"
         onclick="event.stopPropagation()" onchange="applyCellFix(this, ${idx}, '${key}')" onblur="renderImportTable(importedData)">
         <option value="">-- Select --</option>
-        ${options.map(o => `<option value="${o}" ${o === current ? 'selected' : ''}>${o}</option>`).join('')}
+        ${sortOptions(options).map(o => `<option value="${o}" ${o === current ? 'selected' : ''}>${o}</option>`).join('')}
     </select>`;
     td.querySelector('select').focus();
 }
@@ -4637,6 +4648,15 @@ const ALL_KNOWN_KEYS = new Set(
 // friendly label on row 2 — its real column keys (cardId, slab_no, ...) sit on row 3,
 // with data starting row 4. If row-1 headers don't match anything we recognize, retry
 // treating row 3 as the header (SheetJS 'range: 2' = 0-indexed row 3).
+// Multi-sheet template workbooks lead with a "How To Use" sheet, so SheetNames[0]
+// is prose, not data. Pick the sheet whose name matches (case-insensitive); fall
+// back to the first sheet for plain single-sheet uploads.
+function pickSheet(workbook, preferredName) {
+    const want = String(preferredName).trim().toLowerCase();
+    const hit = workbook.SheetNames.find(n => String(n).trim().toLowerCase() === want);
+    return workbook.Sheets[hit || workbook.SheetNames[0]];
+}
+
 function smartSheetToJson(worksheet) {
     const firstTry = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
     if (firstTry.length > 0) {
