@@ -226,12 +226,30 @@
         } catch (e) { fail('fetch ' + name, e); return []; }
     }
 
+    // Wipe a table and insert `rows` (chunked). Used by the full-workbook import,
+    // where the spreadsheet is the single source of truth for that table.
+    async function replaceRows(table, rows) {
+        if (!sb) { notConfigured(); return 0; }
+        try {
+            const del = await sb.from(table).delete().not('id', 'is', null);
+            if (del.error) throw del.error;
+            let done = 0;
+            for (let i = 0; i < rows.length; i += 500) {
+                const chunk = rows.slice(i, i + 500);
+                const { error } = await sb.from(table).insert(chunk);
+                if (error) throw error;
+                done += chunk.length;
+            }
+            return done;
+        } catch (e) { fail('replace ' + table, e); return -1; }
+    }
+
     window.RGDB = {
         get configured() { return !!sb; },
         fetchCards, saveCards,
         fetchOffers, saveOffers,
         fetchMcc, saveMcc,
         fetchBenefits, saveBenefits,
-        fetchTable
+        fetchTable, replaceRows
     };
 })();

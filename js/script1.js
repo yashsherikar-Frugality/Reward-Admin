@@ -2594,68 +2594,14 @@ function clearBenefitComparison() {
 
 // ---- Master button on the Cards/Import-From-Excel page: compares everything at once ----
 async function compareAllWithDatabase() {
+    // Cards only — Offers / Benefits / MCC now compare on their own pages
+    // against their wb_* tables (see compareSheetImport).
     await compareWithDatabase();
-    await compareOffersWithDatabase(true);
-    await compareBenefitsWithDatabase(true);
-    await compareMccWithDatabase(true);
 }
 
 function buildImportOffersPanel() {
-    return `
-    <div class="import-panel">
-        <div class="row g-3 mb-4">
-            <div class="col-12" style="margin-top: 0;">
-                <div class="upload-layout">
-                    <div class="upload-zone-button-wrapper">
-                    <div>
-                        <div class="upload-icon-badge"><i class="fas fa-cloud-arrow-up"></i></div>
-                        <button class="btn btn-primary btn-upload" onclick="document.getElementById('offerExcelImportInput').click()">
-                            <i class="fas fa-file-arrow-up me-2"></i> Choose Offer Excel File
-                        </button>
-                        <small class="text-muted d-block mt-1">Upload your Excel file to preview offer data</small>
-                        <input type="file" id="offerExcelImportInput" accept=".xlsx,.xls" style="display:none;" onchange="handleOfferExcelImportTable(event)">
-                        <button class="btn btn-outline-primary btn-sm mt-2" onclick="downloadOfferTemplate()"><i class="fas fa-file-excel me-1"></i> Download Excel Template</button>
-                    </div>
-                    </div>
-                    ${DIFF_COLOR_LEGEND_HTML}
-                </div>
-            </div>
-        </div>
-        <div id="offerMappingPanel" style="display:none;" class="mb-4"></div>
-        <div id="offerImportTableContainer"
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold">Imported Offers <span id="offerRecordCount" class="badge bg-primary">0 records</span></h6>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary btn-sm" onclick="compareOffersWithDatabase()"><i class="fas fa-code-compare me-1"></i>Compare with Database</button>
-                    <button class="btn btn-outline-success btn-sm" onclick="exportOfferImportData()"><i class="fas fa-download me-1"></i>Export CSV</button>
-                    <span class="filter-icon-group">
-                        <span class="filter-icon-box"><i class="fas fa-sliders"></i></span>
-                        <select class="form-select form-select-sm" style="width:auto;" onchange="if(this.value==='show')showAllGroups(); else if(this.value==='hide')hideAllGroups(); this.selectedIndex=0;">
-                            <option value="" selected disabled>Filter Sheet</option>
-                            <option value="show">Show All Columns</option>
-                            <option value="hide">Hide All Columns</option>
-                        </select>
-                    </span>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="clearOfferImportData()"><i class="fas fa-times me-1"></i>Clear</button>
-                </div>
-            </div>
-            <div id="offerComparisonSummary" style="display:none;" class="mb-3"></div>
-            <div class="mb-3">
-                <input type="text" id="offerImportSearchInput" class="form-control form-control-sm" placeholder="Search imported offers..." oninput="filterOfferImportTable(this.value)">
-            </div>
-            <div id="offerGroupToggleBar" class="group-toggle-bar mb-3"></div>
-            <div class="table-responsive" style="max-height: 500px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
-                <table class="table table-bordered table-striped table-hover mb-0" id="offerImportTable">
-                    <thead id="offerImportTableHead" class="sticky-top bg-white"></thead>
-                    <tbody id="offerImportTableBody"></tbody>
-                </table>
-            </div>
-            <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-success" onclick="saveOfferImportData()"><i class="fas fa-save me-2"></i>Save Offers to Database</button>
-            </div>
-        </div>
-    </div>
-    `;
+    return buildSheetImportPanel('importOffers', 'Import Offers',
+        'Reads the <b>offers</b> sheet from your workbook (all columns) into <code>wb_offers</code>.');
 }
 
 function renderOfferGroupToggleBar() {
@@ -2680,9 +2626,10 @@ function renderOfferGroupToggleBar() {
 }
 
 function renderOfferImportTable(data) {
-    renderOfferGroupToggleBar();
     const thead = document.getElementById('offerImportTableHead');
     const tbody = document.getElementById('offerImportTableBody');
+    if (!thead || !tbody) return;   // Offers page now uses the generic sheet importer
+    renderOfferGroupToggleBar();
     let filtered = data;
     if (offerStatusFilter === 'invalid') filtered = filtered.filter(r => validateOfferRow(r).size > 0);
     else if (offerStatusFilter !== 'all') filtered = filtered.filter(r => r._status === offerStatusFilter);
@@ -3332,42 +3279,8 @@ async function saveOfferImportData() {
 let importedBenefitsData = null;
 
 function buildImportBenefitsPanel() {
-    return `
-    <div class="import-panel">
-        <div class="row g-3 mb-4">
-            <div class="col-12" style="margin-top: 0;">
-                <div class="upload-layout">
-                    <div class="upload-zone-button-wrapper">
-                    <div>
-                        <div class="upload-icon-badge"><i class="fas fa-cloud-arrow-up"></i></div>
-                        <button class="btn btn-primary btn-upload" onclick="document.getElementById('benefitExcelImportInput').click()">
-                            <i class="fas fa-file-arrow-up me-2"></i> Choose Benefits Excel File
-                        </button>
-                        <small class="text-muted d-block mt-1">Upload your Excel file to preview benefit data</small>
-                        <input type="file" id="benefitExcelImportInput" accept=".xlsx,.xls" style="display:none;" onchange="handleBenefitExcelImportTable(event)">
-                    </div>
-                    </div>
-                    ${DIFF_COLOR_LEGEND_HTML}
-                </div>
-            </div>
-        </div>
-        <div id="benefitImportTableContainer">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold">Imported Preferred Benefits</h6>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary btn-sm" onclick="compareBenefitsWithDatabase()"><i class="fas fa-code-compare me-1"></i>Compare with Database</button>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="clearBenefitImportData()"><i class="fas fa-times me-1"></i>Clear</button>
-                </div>
-            </div>
-            <div id="benefitComparisonSummary" style="display:none;" class="mb-3"></div>
-            <div id="benefitImportTablesStandalone"></div>
-            <div class="d-flex justify-content-end mt-3 gap-2">
-                <button class="btn btn-outline-secondary" onclick="saveBenefitImportData()"><i class="fas fa-file-import me-2"></i>Load into Form</button>
-                <button class="btn btn-success" onclick="saveBenefitImportToDb()"><i class="fas fa-save me-2"></i>Save Benefits to Database</button>
-            </div>
-        </div>
-    </div>
-    `;
+    return buildSheetImportPanel('importBenefits', 'Import Preferred Benefits',
+        'Reads every benefit sheet from your workbook (Lounge, Golf, Dining, Concierge, Movie, Spa, Insurance, Fee Waiver, Fuel, Welcome, Milestone, Partner Program, Token/UPI/Contactless, Reward Structure) with all columns, into their <code>wb_*</code> tables.');
 }
 
 async function saveBenefitImportToDb() {
@@ -3389,6 +3302,7 @@ async function saveBenefitImportToDb() {
 
 function renderBenefitImportTablesStandalone(data) {
     const container = document.getElementById('benefitImportTablesStandalone');
+    if (!container) return;   // Benefits page now uses the generic sheet importer
     if (!data) {
         container.innerHTML = '<p class="text-muted">No data imported yet.</p>';
         return;
@@ -3925,55 +3839,14 @@ let importedMccData = [];
 const MCC_IMPORT_COLUMNS = ['Card', 'Offer ID', 'MCC', 'Inclusion', 'Exclusion'];
 
 function buildImportMccPanel() {
-    return `
-    <div class="import-panel">
-        <div class="row g-3 mb-4">
-            <div class="col-12" style="margin-top: 0;">
-                <div class="upload-layout">
-                    <div class="upload-zone-button-wrapper">
-                    <div>
-                        <div class="upload-icon-badge"><i class="fas fa-cloud-arrow-up"></i></div>
-                        <button class="btn btn-primary btn-upload" onclick="document.getElementById('mccExcelImportInput').click()">
-                            <i class="fas fa-file-arrow-up me-2"></i> Choose MCC Excel File
-                        </button>
-                        <small class="text-muted d-block mt-1">Upload your Excel file with MCC data</small>
-                        <input type="file" id="mccExcelImportInput" accept=".xlsx,.xls" style="display:none;" onchange="handleMccExcelImportTable(event)">
-                    </div>
-                    </div>
-                    ${DIFF_COLOR_LEGEND_HTML}
-                </div>
-            </div>
-        </div>
-        <div id="mccImportTableContainer">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold">Imported MCC Data <span id="mccRecordCount" class="badge bg-primary">0 records</span></h6>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary btn-sm" onclick="compareMccWithDatabase()"><i class="fas fa-code-compare me-1"></i>Compare with Database</button>
-                    <button class="btn btn-outline-success btn-sm" onclick="exportMccImportData()"><i class="fas fa-download me-1"></i>Export CSV</button>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="clearMccImportData()"><i class="fas fa-times me-1"></i>Clear</button>
-                </div>
-            </div>
-            <div id="mccComparisonSummary" style="display:none;" class="mb-3"></div>
-            <div class="mb-3">
-                <input type="text" id="mccImportSearchInput" class="form-control form-control-sm" placeholder="Search MCC data..." oninput="filterMccImportTable(this.value)">
-            </div>
-            <div class="table-responsive" style="max-height: 500px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
-                <table class="table table-bordered table-striped table-hover mb-0" id="mccImportTable">
-                    <thead id="mccImportTableHead" class="sticky-top bg-white"></thead>
-                    <tbody id="mccImportTableBody"></tbody>
-                </table>
-            </div>
-            <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-success" onclick="saveMccImportData()"><i class="fas fa-save me-2"></i>Save MCC Data</button>
-            </div>
-        </div>
-    </div>
-    `;
+    return buildSheetImportPanel('importMcc', 'MCC Imports',
+        'Reads the <b>mcc</b> sheet from your workbook (all columns) into <code>wb_mcc</code>.');
 }
 
 function renderMccImportTable(data) {
     const thead = document.getElementById('mccImportTableHead');
     const tbody = document.getElementById('mccImportTableBody');
+    if (!thead || !tbody) return;   // MCC page now uses the generic sheet importer
     let filtered = data;
     if (mccStatusFilter === 'invalid') filtered = filtered.filter(r => validateMccRow(r).size > 0);
     else if (mccStatusFilter !== 'all') filtered = filtered.filter(r => r._status === mccStatusFilter);
@@ -4098,37 +3971,15 @@ async function saveMccImportData() {
 // 13b. EXTRACT BENEFITS -> EXCEL
 // ================================================================
 
-// Each checkbox on the Extract Benefits page -> where its data lives in Supabase.
-//   table   : Supabase table to read
-//   prefix  : keep only card_id + columns starting with this (a benefit section)
-//   cols    : keep only card_id + these exact columns
-//   (neither): export the whole table
-const BENEFIT_EXTRACT_MAP = {
-    'Card Details':              { table: 'cards' },
-    'Lounge Details':            { table: 'card_benefits', prefix: 'lounge_' },
-    'Dining Discounts':          { table: 'card_benefits', prefix: 'dining_' },
-    'Concierge Service':         { table: 'card_benefits', prefix: 'concierge_' },
-    'Golf Benefits':             { table: 'card_benefits', prefix: 'golf_' },
-    'Movie BOGO':                { table: 'card_benefits', prefix: 'movie_' },
-    'Spa-Wellness Privileges':   { table: 'card_benefits', prefix: 'spa_' },
-    'Insurance Benefits':        { table: 'card_benefits', prefix: 'ins_' },
-    'Fees':                      { table: 'cards', prefix: 'fee_' },
-    'Fee Waiver':               { table: 'card_benefits', prefix: 'fee_waiver_' },
-    'Fuel Surcharge Waiver':     { table: 'card_benefits', prefix: 'fuel_' },
-    'Welcome Benefits-Bonus':    { table: 'card_benefits', prefix: 'welcome_' },
-    'Reward Structure':          { table: 'offers' },
-    'Milestone Details':         { table: 'benefit_milestones' },
-    'Partner Program Details':   { table: 'benefit_partner_programs' },
-    'Token Enabled':            { table: 'cards', cols: ['benefit_token_enabled'] },
-    'UPI Supported':            { table: 'cards', cols: ['benefit_upi_supported'] },
-    'contactless':              { table: 'cards', cols: ['benefit_contactless'] },
-    'offers':                    { table: 'offers' },
-    'mcc':                       { table: 'mcc_rules' }
-};
-const BENEFIT_SHEET_NAMES = Object.keys(BENEFIT_EXTRACT_MAP);
+// Extract Benefits checkboxes: one per workbook sheet, reading its wb_* table.
+// Built straight from WORKBOOK_SCHEMA so it can't drift out of sync.
+//   label (trimmed sheet name)  ->  { table }
+const BENEFIT_EXTRACT_MAP = Object.fromEntries(
+    Object.values(window.WORKBOOK_SCHEMA || {}).map(def => [def.label, { table: def.table }])
+);
 
 function getBenefitCategories() {
-    return BENEFIT_SHEET_NAMES;
+    return Object.keys(BENEFIT_EXTRACT_MAP);
 }
 
 function buildExtractBenefitsPanel() {
@@ -4163,28 +4014,21 @@ function toggleAllExtractBenefits(state) {
         .forEach(cb => { cb.checked = state; });
 }
 
-// Fetch each checked benefit from Supabase, one worksheet per benefit, download .xlsx.
+// Fetch each checked benefit table from Supabase, one worksheet per benefit, download .xlsx.
 async function extractSelectedBenefits() {
     const selected = [...document.querySelectorAll('#extractBenefitsCheckList input[type="checkbox"]:checked')]
         .map(cb => cb.value);
     if (selected.length === 0) { alert('Select at least one benefit.'); return; }
-
-    const shapeRow = (r, cfg) => {
-        if (!cfg.prefix && !cfg.cols) return r;
-        const o = {};
-        if (r.card_id !== undefined) o.card_id = r.card_id;
-        Object.keys(r).forEach(k => {
-            if (cfg.cols ? cfg.cols.includes(k) : k.startsWith(cfg.prefix)) o[k] = r[k];
-        });
-        return o;
-    };
 
     const wb = XLSX.utils.book_new();
     let total = 0;
     for (const label of selected) {
         const cfg = BENEFIT_EXTRACT_MAP[label];
         if (!cfg) continue;
-        const rows = (await RGDB.fetchTable(cfg.table)).map(r => shapeRow(r, cfg));
+        const rows = (await RGDB.fetchTable(cfg.table)).map(r => {
+            const { id, imported_at, ...rest } = r;   // drop surrogate/audit columns
+            return rest;
+        });
         total += rows.length;
         const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{ note: 'no rows' }]);
         XLSX.utils.book_append_sheet(wb, ws, label.substring(0, 31));
@@ -4274,12 +4118,12 @@ function applyCellFix(select, idx, key) {
 
 // Matches a card to the database using Card ID first; falls back to
 // Type + Issuer/Bank + Variant + Network + Sub Network when Card ID is missing.
+// A card row matches a DB row only when all of these agree:
+// Card ID + Type + Issuer/Bank + Variant + Network + Sub Network.
 function getRowMatchKey(row) {
-    const id = String(getColVal(row, 'id')).trim().toLowerCase();
-    if (id !== '') return 'id:' + id;
-    const parts = ['instrument_type', 'issuer', 'product', 'network', 'subNetwork']
-        .map(k => String(getColVal(row, k)).trim().toLowerCase());
-    return 'combo:' + parts.join('|');
+    return ['id', 'instrument_type', 'issuer', 'product', 'network', 'subNetwork']
+        .map(k => String(getColVal(row, k)).trim().toLowerCase())
+        .join('|');
 }
 
 function toggleColumnGroup(groupId) {
@@ -4564,6 +4408,21 @@ function buildImportPanel() {
                 </div>
             </div>
         </div>
+
+        <div class="alert alert-light border d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+            <div>
+                <strong><i class="fas fa-database me-1"></i> Import Full Workbook</strong>
+                <small class="text-muted d-block">Reads every sheet of the source workbook and replaces the matching table in Supabase (1 table per sheet, all columns).</small>
+            </div>
+            <div>
+                <button class="btn btn-dark btn-sm" onclick="document.getElementById('fullWorkbookInput').click()">
+                    <i class="fas fa-file-arrow-up me-1"></i> Choose Workbook &amp; Import
+                </button>
+                <input type="file" id="fullWorkbookInput" accept=".xlsx,.xls" style="display:none;" onchange="importFullWorkbook(event)">
+            </div>
+        </div>
+        <div id="workbookImportLog" class="small mb-3" style="display:none; white-space:pre-wrap; font-family:monospace; background:#0b1020; color:#c8d3f5; padding:10px; border-radius:6px; max-height:260px; overflow:auto;"></div>
+
         <div id="excelDataTableContainer">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div>
@@ -5043,6 +4902,222 @@ function handleExcelImport(event) {
     // Legacy – kept for compatibility
 }
 
+// Full-workbook import: read every sheet named in WORKBOOK_SCHEMA, map each row
+// positionally to its wb_* table, and replace that table's contents in Supabase.
+async function importFullWorkbook(event) {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    if (!window.WORKBOOK_SCHEMA) { alert('workbook_schema.js not loaded.'); return; }
+    if (!RGDB.configured) { alert('Supabase not configured — set keys in js/config.js.'); return; }
+    if (!confirm('This REPLACES every wb_* table with the contents of this workbook. Continue?')) return;
+
+    const logEl = document.getElementById('workbookImportLog');
+    logEl.style.display = 'block';
+    logEl.textContent = `Reading ${file.name} …\n`;
+    const log = (m) => { logEl.textContent += m + '\n'; logEl.scrollTop = logEl.scrollHeight; };
+
+    let wb;
+    try {
+        wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: 'array' });
+    } catch (e) { alert('Could not read the file: ' + e.message); return; }
+
+    let sheetsDone = 0, rowsTotal = 0, failed = 0;
+    for (const [sheetName, def] of Object.entries(WORKBOOK_SCHEMA)) {
+        const ws = wb.Sheets[sheetName];
+        if (!ws) { log(`skip  ${sheetName}  (not in file)`); continue; }
+
+        const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        const recs = [];
+        for (let r = 1; r < grid.length; r++) {
+            const row = grid[r];
+            if (!row || row.every(c => c === '' || c == null)) continue;
+            const rec = {};
+            def.cols.forEach((col, i) => {
+                const v = row[i];
+                rec[col] = (v === '' || v == null) ? null : String(v);
+            });
+            recs.push(rec);
+        }
+
+        const n = await RGDB.replaceRows(def.table, recs);
+        if (n < 0) { failed++; log(`FAIL  ${def.label}  ->  ${def.table}`); }
+        else { sheetsDone++; rowsTotal += n; log(`ok    ${def.label.padEnd(26)} ->  ${def.table.padEnd(28)} ${n} rows`); }
+    }
+    log(`\nDone. ${sheetsDone} sheets, ${rowsTotal} rows${failed ? `, ${failed} FAILED` : ''}.`);
+    alert(`Workbook import finished: ${sheetsDone} sheets, ${rowsTotal} rows${failed ? ` (${failed} failed — see log)` : ''}.`);
+}
+
+// ================================================================
+// 17b. GENERIC SHEET IMPORT — Offers / MCC / Preferred Benefits pages.
+// Each page owns a set of workbook sheets, reads every column, previews it,
+// compares against and saves to that sheet's wb_* table.
+// ================================================================
+
+// page id -> workbook sheet labels it owns (labels = bank-stripped sheet names).
+const PAGE_SHEET_LABELS = {
+    importOffers: ['offers'],
+    importMcc: ['mcc'],
+    importBenefits: [
+        'Lounge Details', 'Golf Benefits', 'Dining Discounts', 'Concierge Service',
+        'Movie BOGO', 'Spa-Wellness Privileges', 'Insurance Benefits', 'Fee Waiver',
+        'Fuel Surcharge Waiver', 'Welcome Benefits-Bonus', 'Milestone Details',
+        'Partner Program Details', 'Token Enabled', 'UPI Supported', 'contactless',
+        'Reward Structure'
+    ]
+};
+
+const sheetImportState = {};   // pageId -> [{ def, sheetName, rows, compared }]
+
+function schemaDefsForPage(pageId) {
+    const want = PAGE_SHEET_LABELS[pageId] || [];
+    return Object.entries(window.WORKBOOK_SCHEMA || {})
+        .filter(([, d]) => want.includes(d.label))
+        .map(([sheetName, def]) => ({ sheetName, def }));
+}
+
+function buildSheetImportPanel(pageId, title, blurb) {
+    return `
+    <div class="import-panel">
+        <div class="alert alert-light border d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div>
+                <strong><i class="fas fa-file-import me-1"></i> ${title}</strong>
+                <small class="text-muted d-block">${blurb}</small>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="document.getElementById('si_input_${pageId}').click()">
+                <i class="fas fa-file-arrow-up me-1"></i> Choose Workbook
+            </button>
+            <input type="file" id="si_input_${pageId}" accept=".xlsx,.xls" style="display:none;" onchange="onSheetImportFile('${pageId}', event)">
+        </div>
+        <div class="d-flex gap-2 mb-3" id="si_actions_${pageId}" hidden>
+            <button class="btn btn-outline-primary btn-sm" onclick="compareSheetImport('${pageId}')"><i class="fas fa-code-compare me-1"></i> Compare with Database</button>
+            <button class="btn btn-success btn-sm" onclick="saveSheetImport('${pageId}')"><i class="fas fa-save me-1"></i> Save to Database</button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="clearSheetImport('${pageId}')"><i class="fas fa-times me-1"></i> Clear</button>
+        </div>
+        <div id="si_preview_${pageId}"><p class="text-muted">No file loaded.</p></div>
+    </div>`;
+}
+
+async function onSheetImportFile(pageId, event) {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    if (!window.WORKBOOK_SCHEMA) { alert('workbook_schema.js not loaded.'); return; }
+
+    const defs = schemaDefsForPage(pageId);
+    let wb;
+    try { wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: 'array' }); }
+    catch (e) { alert('Could not read the file: ' + e.message); return; }
+
+    const state = [];
+    for (const { sheetName, def } of defs) {
+        const ws = wb.Sheets[sheetName];
+        if (!ws) continue;
+        const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        const rows = [];
+        for (let r = 1; r < grid.length; r++) {
+            const row = grid[r];
+            if (!row || row.every(c => c === '' || c == null)) continue;
+            const rec = {};
+            def.cols.forEach((c, i) => { const v = row[i]; rec[c] = (v === '' || v == null) ? '' : String(v); });
+            rows.push(rec);
+        }
+        if (rows.length) state.push({ def, sheetName, rows, compared: false });
+    }
+    if (!state.length) {
+        alert("None of this page's sheets were found in that file.\nExpected: " + (PAGE_SHEET_LABELS[pageId] || []).join(', '));
+        return;
+    }
+    sheetImportState[pageId] = state;
+    document.getElementById('si_actions_' + pageId).hidden = false;
+    renderSheetImportPreview(pageId);
+}
+
+function siStatusBadge(s) {
+    if (s === 'new') return '<span class="badge bg-success">New</span>';
+    if (s === 'updated') return '<span class="badge bg-warning text-dark">Updated</span>';
+    if (s === 'unchanged') return '<span class="badge bg-secondary">Unchanged</span>';
+    return '';
+}
+
+function renderSheetImportPreview(pageId) {
+    const el = document.getElementById('si_preview_' + pageId);
+    const state = sheetImportState[pageId] || [];
+    if (!state.length) { el.innerHTML = '<p class="text-muted">No file loaded.</p>'; return; }
+
+    el.innerHTML = state.map((s) => {
+        const cols = s.def.cols;
+        const counts = s.compared ? (() => {
+            const c = { new: 0, updated: 0, unchanged: 0 };
+            s.rows.forEach(r => { c[r._status] = (c[r._status] || 0) + 1; });
+            return ` <span class="badge bg-success">New ${c.new}</span> <span class="badge bg-warning text-dark">Updated ${c.updated}</span> <span class="badge bg-secondary">Unchanged ${c.unchanged}</span>`;
+        })() : '';
+        const head = `<th style="font-size:.68rem">#</th>${s.compared ? '<th style="font-size:.68rem">Status</th>' : ''}` +
+            cols.map(c => `<th class="text-nowrap" style="font-size:.68rem">${c}</th>`).join('');
+        const body = s.rows.map((row, ri) =>
+            `<tr><td style="font-size:.68rem">${ri + 1}</td>${s.compared ? `<td>${siStatusBadge(row._status)}</td>` : ''}` +
+            cols.map(c => `<td style="font-size:.68rem">${String(row[c] ?? '').slice(0, 80)}</td>`).join('') + '</tr>'
+        ).join('');
+        return `
+        <div class="mb-3">
+            <h6 class="fw-bold text-primary mb-1">${s.def.label}
+                <span class="badge bg-primary">${s.rows.length} rows</span>
+                <span class="text-muted small">→ ${s.def.table}</span>${counts}</h6>
+            <div class="table-responsive" style="max-height:360px; overflow:auto; border:1px solid #e2e8f0; border-radius:8px;">
+                <table class="table table-bordered table-sm table-hover mb-0">
+                    <thead class="sticky-top bg-white"><tr>${head}</tr></thead>
+                    <tbody>${body}</tbody>
+                </table>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function compareSheetImport(pageId) {
+    const state = sheetImportState[pageId] || [];
+    if (!state.length) { alert('Load a file first.'); return; }
+    for (const s of state) {
+        const db = await RGDB.fetchTable(s.def.table);
+        const idc = s.def.cardIdCol;
+        const keyOf = (row) => idc ? String(row[idc] ?? '').trim().toLowerCase()
+            : s.def.cols.map(c => String(row[c] ?? '').trim().toLowerCase()).join('|');
+        const dbByKey = {};
+        db.forEach(d => { (dbByKey[keyOf(d)] = dbByKey[keyOf(d)] || []).push(d); });
+        s.rows.forEach(row => {
+            const matches = dbByKey[keyOf(row)] || [];
+            if (!matches.length) { row._status = 'new'; return; }
+            const identical = matches.some(m => s.def.cols.every(c => String(m[c] ?? '').trim() === String(row[c] ?? '').trim()));
+            row._status = identical ? 'unchanged' : 'updated';
+        });
+        s.compared = true;
+    }
+    renderSheetImportPreview(pageId);
+}
+
+async function saveSheetImport(pageId) {
+    const state = sheetImportState[pageId] || [];
+    if (!state.length) { alert('Load a file first.'); return; }
+    if (!confirm(`This REPLACES ${state.map(s => s.def.table).join(', ')} with the loaded rows. Continue?`)) return;
+    let total = 0, failed = 0;
+    for (const s of state) {
+        const recs = s.rows.map(r => {
+            const rec = {};
+            s.def.cols.forEach(c => { rec[c] = (r[c] === '' || r[c] == null) ? null : r[c]; });
+            return rec;
+        });
+        const n = await RGDB.replaceRows(s.def.table, recs);
+        if (n < 0) failed++; else total += n;
+    }
+    alert(`Saved ${total} rows to ${state.length - failed} table(s)${failed ? `, ${failed} failed (see console)` : ''}.`);
+}
+
+function clearSheetImport(pageId) {
+    delete sheetImportState[pageId];
+    const a = document.getElementById('si_actions_' + pageId);
+    if (a) a.hidden = true;
+    renderSheetImportPreview(pageId);
+}
+
 // ================================================================
 // 18. SAVE TO DATABASE (UPDATED with new fields)
 // ================================================================
@@ -5276,19 +5351,17 @@ function showPage(pageId) {
             document.getElementById('comparisonSummary').style.display = 'block';
         }
     } else if (pageId === 'importOffers') {
-        const container = document.getElementById('importOffersContainer');
-        container.innerHTML = buildImportOffersPanel();
-        renderOfferImportTable(importedOffersData);
-        document.getElementById('offerRecordCount').textContent = `${importedOffersData.length} records`;
+        document.getElementById('importOffersContainer').innerHTML = buildImportOffersPanel();
+        renderSheetImportPreview('importOffers');
+        if (sheetImportState['importOffers']) document.getElementById('si_actions_importOffers').hidden = false;
     } else if (pageId === 'importBenefits') {
-        const container = document.getElementById('importBenefitsContainer');
-        container.innerHTML = buildImportBenefitsPanel();
-        renderBenefitImportTablesStandalone(importedBenefitsData);
+        document.getElementById('importBenefitsContainer').innerHTML = buildImportBenefitsPanel();
+        renderSheetImportPreview('importBenefits');
+        if (sheetImportState['importBenefits']) document.getElementById('si_actions_importBenefits').hidden = false;
     } else if (pageId === 'importMcc') {
-        const container = document.getElementById('importMccContainer');
-        container.innerHTML = buildImportMccPanel();
-        renderMccImportTable(importedMccData);
-        document.getElementById('mccRecordCount').textContent = `${importedMccData.length} records`;
+        document.getElementById('importMccContainer').innerHTML = buildImportMccPanel();
+        renderSheetImportPreview('importMcc');
+        if (sheetImportState['importMcc']) document.getElementById('si_actions_importMcc').hidden = false;
     } else if (pageId === 'extractBenefits') {
         document.getElementById('extractBenefitsContainer').innerHTML = buildExtractBenefitsPanel();
     }
