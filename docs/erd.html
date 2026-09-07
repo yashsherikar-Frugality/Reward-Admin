@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>RewardGenius — Database ERD</title>
+<style>
+  body { margin: 0; background: #f1f5f9; font-family: -apple-system, Segoe UI, Roboto, sans-serif; }
+  .wrap { padding: 24px; }
+  h1 { font-size: 18px; margin: 0 0 4px; color: #0f172a; }
+  p.sub { margin: 0 0 16px; color: #475569; font-size: 12px; }
+  .hint { margin: 12px 0 0; color: #64748b; font-size: 11px; }
+  svg { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; display: block; }
+  .tbl-title { font: 700 13px Segoe UI, sans-serif; fill: #fff; }
+  .tbl-hdr-cards { fill: #1d4ed8; }
+  .tbl-hdr-child { fill: #0f766e; }
+  .tbl-hdr-loose { fill: #b45309; }
+  .tbl-box { fill: #fff; stroke: #cbd5e1; stroke-width: 1; }
+  .col { font: 12px Consolas, monospace; fill: #1e293b; }
+  .col.pk { font-weight: 700; fill: #0f172a; }
+  .col.fk { fill: #b45309; }
+  .col.muted { fill: #64748b; }
+  .rel { stroke: #64748b; stroke-width: 1.5; fill: none; }
+  .rel.loose { stroke-dasharray: 5 4; stroke: #b45309; }
+  .rellbl { font: 11px Segoe UI, sans-serif; fill: #475569; }
+  .legend { font: 11px Segoe UI, sans-serif; fill: #475569; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>RewardGenius — Supabase schema</h1>
+  <p class="sub">6 tables. Solid line = FK (ON DELETE CASCADE). Dashed = logical link only (no FK; imports may land before the card row).</p>
+
+<svg width="1180" height="760" viewBox="0 0 1180 760" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- ============ cards ============ -->
+  <g transform="translate(40,60)">
+    <rect class="tbl-box" x="0" y="0" width="300" height="470" rx="6" />
+    <rect class="tbl-hdr-cards" x="0" y="0" width="300" height="28" rx="6" />
+    <rect class="tbl-hdr-cards" x="0" y="14" width="300" height="14" />
+    <text class="tbl-title" x="12" y="19">cards</text>
+    <text class="col pk"    x="12" y="48">PK  card_id            text</text>
+    <text class="col"       x="12" y="68">instrument_type / issuer / product</text>
+    <text class="col"       x="12" y="86">network / sub_network / issuer_country</text>
+    <text class="col"       x="12" y="104">card_status / card_status_date</text>
+    <text class="col"       x="12" y="122">card_web_link / card_alt_link</text>
+    <text class="col"       x="12" y="140">card_spend_per_point / card_rp_conversion</text>
+    <text class="col"       x="12" y="158">apr / card_bill_cycle_duration / card_bill_date</text>
+    <text class="col"       x="12" y="176">cobrand / reward_program</text>
+    <text class="col"       x="12" y="194">age_min / age_max / credit_score</text>
+    <text class="col"       x="12" y="212">emp_type / salary / product_type / nationality</text>
+    <text class="col"       x="12" y="230">fee_joining_type / fee_joining</text>
+    <text class="col"       x="12" y="248">fee_annual / fee_renewal</text>
+    <text class="col"       x="12" y="266">fee_waiver_spend / fee_waiver_period</text>
+    <text class="col muted" x="12" y="288">— benefit flags (boolean) —</text>
+    <text class="col"       x="12" y="306">benefit_concierge / _dining / _golf</text>
+    <text class="col"       x="12" y="324">benefit_movie / _spa / _insurance / _fees</text>
+    <text class="col"       x="12" y="342">benefit_contactless / _token_enabled</text>
+    <text class="col"       x="12" y="360">benefit_upi_supported / _welcome</text>
+    <text class="col"       x="12" y="378">benefit_fee_waiver / _fuel / _lounge</text>
+    <text class="col"       x="12" y="396">benefit_milestone / _partner_program</text>
+    <text class="col muted" x="12" y="424">created_at   timestamptz</text>
+    <text class="col muted" x="12" y="442">updated_at   timestamptz</text>
+  </g>
+
+  <!-- ============ card_benefits (1:1) ============ -->
+  <g transform="translate(470,40)">
+    <rect class="tbl-box" x="0" y="0" width="330" height="300" rx="6" />
+    <rect class="tbl-hdr-child" x="0" y="0" width="330" height="28" rx="6" />
+    <rect class="tbl-hdr-child" x="0" y="14" width="330" height="14" />
+    <text class="tbl-title" x="12" y="19">card_benefits</text>
+    <text class="col pk fk" x="12" y="48">PK/FK  card_id   → cards.card_id</text>
+    <text class="col muted" x="12" y="66">— lounge —</text>
+    <text class="col"       x="12" y="84">lounge_program, lounge_dom_* , lounge_int_*</text>
+    <text class="col muted" x="12" y="104">— golf / dining / movie / spa —</text>
+    <text class="col"       x="12" y="122">golf_courses/rounds/period/notes</text>
+    <text class="col"       x="12" y="140">dining_partner/discount_type/max_discount…</text>
+    <text class="col"       x="12" y="158">movie_partner/…/ticket_limit/days/notes</text>
+    <text class="col"       x="12" y="176">spa_partner/discount/max_discount/…</text>
+    <text class="col muted" x="12" y="196">— concierge / insurance —</text>
+    <text class="col"       x="12" y="214">concierge_notes</text>
+    <text class="col"       x="12" y="232">ins_provider/coverage/policy_link</text>
+    <text class="col"       x="12" y="250">ins_travel/purchase_protection/… (bool)</text>
+    <text class="col muted" x="12" y="270">— fee_waiver / fuel / welcome —</text>
+    <text class="col"       x="12" y="288">fee_waiver_*, fuel_*, welcome_*</text>
+  </g>
+
+  <!-- ============ benefit_milestones (N:1) ============ -->
+  <g transform="translate(470,380)">
+    <rect class="tbl-box" x="0" y="0" width="330" height="150" rx="6" />
+    <rect class="tbl-hdr-child" x="0" y="0" width="330" height="28" rx="6" />
+    <rect class="tbl-hdr-child" x="0" y="14" width="330" height="14" />
+    <text class="tbl-title" x="12" y="19">benefit_milestones</text>
+    <text class="col pk"    x="12" y="48">PK  id          uuid</text>
+    <text class="col fk"    x="12" y="66">FK  card_id     → cards.card_id</text>
+    <text class="col"       x="12" y="84">slab_no   integer</text>
+    <text class="col"       x="12" y="102">milestone_amount / _period</text>
+    <text class="col"       x="12" y="120">milestone_benefit_value / _type / _comment</text>
+  </g>
+
+  <!-- ============ benefit_partner_programs (N:1) ============ -->
+  <g transform="translate(470,560)">
+    <rect class="tbl-box" x="0" y="0" width="330" height="150" rx="6" />
+    <rect class="tbl-hdr-child" x="0" y="0" width="330" height="28" rx="6" />
+    <rect class="tbl-hdr-child" x="0" y="14" width="330" height="14" />
+    <text class="tbl-title" x="12" y="19">benefit_partner_programs</text>
+    <text class="col pk"    x="12" y="48">PK  id          uuid</text>
+    <text class="col fk"    x="12" y="66">FK  card_id     → cards.card_id</text>
+    <text class="col"       x="12" y="84">partner_no   integer</text>
+    <text class="col"       x="12" y="102">partner_program / partner_ratio</text>
+    <text class="col"       x="12" y="120">partner_min_transfer / partner_transfer_time</text>
+  </g>
+
+  <!-- ============ offers (N:1 loose) ============ -->
+  <g transform="translate(880,40)">
+    <rect class="tbl-box" x="0" y="0" width="270" height="330" rx="6" />
+    <rect class="tbl-hdr-loose" x="0" y="0" width="270" height="28" rx="6" />
+    <rect class="tbl-hdr-loose" x="0" y="14" width="270" height="14" />
+    <text class="tbl-title" x="12" y="19">offers</text>
+    <text class="col pk"    x="12" y="48">PK  id            uuid</text>
+    <text class="col fk"    x="12" y="66">idx card_id       (→ cards.card_id)</text>
+    <text class="col"      x="12" y="84">offer_id  (idx)</text>
+    <text class="col"      x="12" y="102">category / sub_category / merchant / mcc</text>
+    <text class="col"      x="12" y="120">reward_type / frequency / status / days</text>
+    <text class="col"      x="12" y="138">instance_period / person</text>
+    <text class="col"      x="12" y="156">min_tx / max_tx / max_benefit</text>
+    <text class="col"      x="12" y="174">start_date / end_date / weblink</text>
+    <text class="col"      x="12" y="192">payment_scope_type / payment_scope_value</text>
+    <text class="col"      x="12" y="210">rp_expiry / coupon_code</text>
+    <text class="col"      x="12" y="228">platform / custom_platform</text>
+    <text class="col"      x="12" y="246">reward_fields   jsonb</text>
+    <text class="col muted" x="12" y="270">created_at / updated_at</text>
+  </g>
+
+  <!-- ============ mcc_rules (N:1 loose) ============ -->
+  <g transform="translate(880,410)">
+    <rect class="tbl-box" x="0" y="0" width="270" height="180" rx="6" />
+    <rect class="tbl-hdr-loose" x="0" y="0" width="270" height="28" rx="6" />
+    <rect class="tbl-hdr-loose" x="0" y="14" width="270" height="14" />
+    <text class="tbl-title" x="12" y="19">mcc_rules</text>
+    <text class="col pk"    x="12" y="48">PK  id          uuid</text>
+    <text class="col fk"    x="12" y="66">idx card_id     (→ cards.card_id)</text>
+    <text class="col"      x="12" y="84">offer_id</text>
+    <text class="col"      x="12" y="102">mcc         text (4 digits)</text>
+    <text class="col"      x="12" y="120">inclusion</text>
+    <text class="col"      x="12" y="138">exclusion</text>
+    <text class="col muted" x="12" y="158">created_at</text>
+  </g>
+
+  <!-- ============ relationship lines ============ -->
+  <!-- cards -> card_benefits (1:1) -->
+  <path class="rel" d="M340,150 C410,150 410,120 470,120" />
+  <text class="rellbl" x="360" y="120">1 — 1</text>
+  <!-- cards -> benefit_milestones (1:N) -->
+  <path class="rel" d="M340,320 C405,320 405,440 470,440" />
+  <text class="rellbl" x="352" y="410">1 — N</text>
+  <!-- cards -> benefit_partner_programs (1:N) -->
+  <path class="rel" d="M340,360 C400,470 400,620 470,620" />
+  <text class="rellbl" x="352" y="560">1 — N</text>
+  <!-- cards -> offers (loose 1:N) -->
+  <path class="rel loose" d="M340,110 C600,-10 760,60 880,90" />
+  <text class="rellbl" x="640" y="35">1 — N (no FK)</text>
+  <!-- cards -> mcc_rules (loose 1:N) -->
+  <path class="rel loose" d="M340,430 C620,470 760,480 880,470" />
+  <text class="rellbl" x="640" y="452">1 — N (no FK)</text>
+
+  <!-- legend -->
+  <g transform="translate(40,560)">
+    <rect x="0" y="0" width="14" height="14" class="tbl-hdr-cards" />
+    <text class="legend" x="20" y="11">root table</text>
+    <rect x="0" y="22" width="14" height="14" class="tbl-hdr-child" />
+    <text class="legend" x="20" y="33">FK child (cascade delete)</text>
+    <rect x="0" y="44" width="14" height="14" class="tbl-hdr-loose" />
+    <text class="legend" x="20" y="55">linked by card_id, no FK constraint</text>
+    <text class="legend" x="0" y="82">RLS: enabled on all, open policy for anon + authenticated</text>
+  </g>
+
+</svg>
+  <p class="hint">To get a JPG: open this file in Chrome, right-click the diagram → “Save image as…”, or take a screenshot. Or File → Print → Save as PDF.</p>
+</div>
+</body>
+</html>

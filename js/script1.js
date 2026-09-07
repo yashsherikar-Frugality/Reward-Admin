@@ -60,7 +60,7 @@ const ISSUER_PRODUCTS = {
         "YES BANK Marquee","YES BANK Reserv","YES BANK Elite+","YES BANK Wellness Plus",
         "YES BANK Wellness","YES BANK Paisabazaar PaisaSave","YES BANK Paisabazaar PaisaSave Plus",
         "YES BANK BYOC","YES BANK Prosperity Rewards Plus","YES BANK Prosperity Cashback Plus",
-        "YES BANK ACE","YES BANK FINBOOST","YES BANK Kiwi","YES BANK RuPay Credit Card","YES BANK Business Credit Card",
+        "YES BANK ACE","YES BANK FINBOOST","Kiwi","YES BANK RuPay Credit Card","YES BANK Business Credit Card",
         "YES BANK Corporate Credit Card"
     ],
     "RBL Bank": [
@@ -93,24 +93,24 @@ const ISSUER_PRODUCTS = {
     ],
     "AU Small Finance Bank": [
         "AU Zenith+","AU Zenith","AU Vetta","AU Altura+","AU Altura","AU LIT","AU SPONT",
-        "AU InstaPay RuPay","AU Kiwi","AU Xcite Ace","AU Xcite Ultra","AU NOMO","AU BizGrow","AU Corporate Credit Card"
+        "AU InstaPay RuPay","Kiwi","AU Xcite Ace","AU Xcite Ultra","AU NOMO","AU BizGrow","AU Corporate Credit Card"
     ],
     "Federal Bank": [
         "Federal Bank Celesta","Federal Bank Imperio","Federal Bank Signet","Federal Bank Scapia",
-        "Federal Bank OneCard","Federal Bank Wave RuPay","Federal Bank RuPay Credit Card",
+        "OneCard","Federal Bank Wave RuPay","Federal Bank RuPay Credit Card",
         "Federal Bank Visa Platinum","Federal Bank Mastercard Platinum",
         "Federal Bank Corporate Credit Card","Federal Bank Business Credit Card"
     ],
     "Bank of Baroda": [
         "BOB Eterna","BOB Premier","BOB Select","BOB Easy","BOB Prime","BOB ICAI Exclusive",
         "BOB IRCTC Credit Card","BOB HPCL ENERGIE","BOB Snapdeal","BOB CMA One","BOB Vikram",
-        "BOB Defence","BOB RuPay Platinum","BOB UPI RuPay Credit Card","BOB OneCard","BOB Corporate Credit Card",
+        "BOB Defence","BOB RuPay Platinum","BOB UPI RuPay Credit Card","OneCard","BOB Corporate Credit Card",
         "BOB Business Credit Card"
     ],
     "Punjab National Bank": [
         "PNB RuPay Platinum Credit Card","PNB RuPay Select Credit Card","PNB Visa Platinum Credit Card",
         "PNB Visa Gold Credit Card","PNB Global Platinum Credit Card","PNB Global Gold Credit Card",
-        "PNB Kiwi","PNB Patanjali Credit Card","PNB Rakshak Credit Card","PNB Pride Credit Card","PNB Insta Credit Card",
+        "Kiwi","PNB Patanjali Credit Card","PNB Rakshak Credit Card","PNB Pride Credit Card","PNB Insta Credit Card",
         "PNB Corporate Credit Card","PNB Business Credit Card"
     ],
     "Canara Bank": [
@@ -130,7 +130,7 @@ const ISSUER_PRODUCTS = {
         "Indian Bank Visa Platinum Credit Card","Indian Bank Visa Gold Credit Card",
         "Indian Bank Mastercard Platinum","Indian Bank Mastercard Gold",
         "Indian Bank RuPay Platinum Credit Card","Indian Bank RuPay Select Credit Card",
-        "Indian Bank OneCard","Indian Bank Premium Credit Card","Indian Bank Signature Credit Card",
+        "OneCard","Indian Bank Premium Credit Card","Indian Bank Signature Credit Card",
         "Indian Bank Corporate Credit Card","Indian Bank Business Credit Card"
     ],
     "Bank of India": [
@@ -154,7 +154,7 @@ const ISSUER_PRODUCTS = {
         "UCO Corporate Credit Card","UCO Business Credit Card"
     ],
     "South Indian Bank": [
-        "South Indian Bank OneCard","South Indian Bank Visa Platinum Credit Card",
+        "OneCard","South Indian Bank Visa Platinum Credit Card",
         "South Indian Bank Visa Signature Credit Card","South Indian Bank Mastercard Platinum",
         "South Indian Bank RuPay Platinum Credit Card","South Indian Bank RuPay Select Credit Card",
         "South Indian Bank Premium Credit Card","South Indian Bank Signature Credit Card",
@@ -174,7 +174,7 @@ const ISSUER_PRODUCTS = {
     ],
     "CSB Bank": [
         "CSB Visa Platinum Credit Card","CSB Visa Signature Credit Card","CSB Mastercard Platinum",
-        "CSB RuPay Platinum Credit Card","CSB RuPay Select Credit Card","CSB OneCard","CSB Premium Credit Card",
+        "CSB RuPay Platinum Credit Card","CSB RuPay Select Credit Card","OneCard","CSB Premium Credit Card",
         "CSB Signature Credit Card","CSB Corporate Credit Card","CSB Business Credit Card"
     ],
     "Dhanlaxmi Bank": [
@@ -200,7 +200,7 @@ const ISSUER_PRODUCTS = {
     ],
     "SBM Bank": [
         "SBM Visa Platinum Credit Card","SBM Visa Signature Credit Card","SBM Mastercard Platinum",
-        "SBM RuPay Platinum Credit Card","SBM RuPay Select Credit Card","SBM OneCard","SBM Premium Credit Card",
+        "SBM RuPay Platinum Credit Card","SBM RuPay Select Credit Card","OneCard","SBM Premium Credit Card",
         "SBM Signature Credit Card","SBM Corporate Credit Card","SBM Business Credit Card"
     ]
 };
@@ -2536,17 +2536,9 @@ function getOfferMatchKey(row) {
     const oid = String(genericVal(row, 'offerId')).trim().toLowerCase();
     return oid ? 'oid:' + oid : 'combo:' + ['cardId', 'category', 'rewardType'].map(k => String(genericVal(row, k)).trim().toLowerCase()).join('|');
 }
-function compareOffersWithDatabase(silent) {
+async function compareOffersWithDatabase(silent) {
     if (importedOffersData.length === 0) { if (!silent) alert('No offers to compare. Import an Excel file first.'); return; }
-    if (offerDatabaseData.length === 0) {
-        offerDatabaseData = importedOffersData.slice(0, Math.min(2, importedOffersData.length)).map(r => ({ ...r }));
-        if (offerDatabaseData[0]) {
-            offerDatabaseData[0].maxBenefit = '';
-            const s = genericVal(offerDatabaseData[0], 'status'); if (s) offerDatabaseData[0].status = s + ' (old)';
-        }
-        if (!silent) alert('Mock database populated. Click "Compare" again to see changes.');
-        return;
-    }
+    offerDatabaseData = await RGDB.fetchOffers();
     const compareColumns = getOfferImportColumns(importedOffersData);
     importedOffersData = diffCompare(importedOffersData, offerDatabaseData, getOfferMatchKey, compareColumns, genericVal);
     renderOfferImportTable(importedOffersData);
@@ -2563,17 +2555,9 @@ function clearOfferComparison() {
 // ---- MCC ----
 let mccDatabaseData = [], mccStatusFilter = 'all', mccColumnFilter = 'all';
 function getMccMatchKey(row) { return 'combo:' + ['Card', 'Offer ID', 'MCC'].map(k => String(genericVal(row, k)).trim().toLowerCase()).join('|'); }
-function compareMccWithDatabase(silent) {
+async function compareMccWithDatabase(silent) {
     if (importedMccData.length === 0) { if (!silent) alert('No MCC data to compare. Import an Excel file first.'); return; }
-    if (mccDatabaseData.length === 0) {
-        mccDatabaseData = importedMccData.slice(0, Math.min(2, importedMccData.length)).map(r => ({ ...r }));
-        if (mccDatabaseData[0]) {
-            mccDatabaseData[0]['Exclusion'] = '';
-            const inc = genericVal(mccDatabaseData[0], 'Inclusion'); if (inc) mccDatabaseData[0]['Inclusion'] = inc + ' (old)';
-        }
-        if (!silent) alert('Mock database populated. Click "Compare" again to see changes.');
-        return;
-    }
+    mccDatabaseData = await RGDB.fetchMcc();
     importedMccData = diffCompare(importedMccData, mccDatabaseData, getMccMatchKey, MCC_IMPORT_COLUMNS, genericVal);
     renderMccImportTable(importedMccData);
     document.getElementById('mccComparisonSummary').innerHTML = diffSummaryHtml(importedMccData, 'mccStatusFilter', 'mccColumnFilter', MCC_IMPORT_COLUMNS, 'renderMccImportTable(importedMccData)', 'clearMccComparison()', validateMccRow);
@@ -2589,19 +2573,11 @@ function clearMccComparison() {
 // ---- Preferred Benefits (compares each card's main row; slabs/partners shown as-is) ----
 let benefitDatabaseData = [];
 function getBenefitMatchKey(row) { return String(genericVal(row, 'cardId') || genericVal(row, 'id')).trim().toLowerCase(); }
-function compareBenefitsWithDatabase(silent) {
+async function compareBenefitsWithDatabase(silent) {
     if (!importedBenefitsData || !importedBenefitsData.mains || importedBenefitsData.mains.length === 0) {
         if (!silent) alert('No benefits to compare. Import an Excel file first.'); return;
     }
-    if (benefitDatabaseData.length === 0) {
-        benefitDatabaseData = importedBenefitsData.mains.slice(0, Math.min(2, importedBenefitsData.mains.length)).map(r => ({ ...r }));
-        if (benefitDatabaseData[0]) {
-            benefitDatabaseData[0].golf_notes = '';
-            const lp = genericVal(benefitDatabaseData[0], 'lounge_program'); if (lp) benefitDatabaseData[0].lounge_program = lp + ' (old)';
-        }
-        if (!silent) alert('Mock database populated. Click "Compare" again to see changes.');
-        return;
-    }
+    benefitDatabaseData = await RGDB.fetchBenefits();
     const benefitCols = ['lounge_program','lounge_dom_visits','lounge_dom_period','lounge_dom_frequency','lounge_dom_criteria','lounge_int_visits','lounge_int_period','lounge_int_frequency','lounge_int_criteria','golf_courses','golf_rounds','golf_period','golf_notes','ins_provider','ins_coverage','ins_policyLink','dining_partner','dining_notes','movie_partner','movie_notes','spa_partner','spa_notes'];
     importedBenefitsData.mains = diffCompare(importedBenefitsData.mains, benefitDatabaseData, getBenefitMatchKey, benefitCols, genericVal);
     renderBenefitImportTablesStandalone(importedBenefitsData);
@@ -2617,11 +2593,11 @@ function clearBenefitComparison() {
 }
 
 // ---- Master button on the Cards/Import-From-Excel page: compares everything at once ----
-function compareAllWithDatabase() {
-    compareWithDatabase();
-    compareOffersWithDatabase(true);
-    compareBenefitsWithDatabase(true);
-    compareMccWithDatabase(true);
+async function compareAllWithDatabase() {
+    await compareWithDatabase();
+    await compareOffersWithDatabase(true);
+    await compareBenefitsWithDatabase(true);
+    await compareMccWithDatabase(true);
 }
 
 function buildImportOffersPanel() {
@@ -3243,7 +3219,7 @@ function exportOfferImportData() {
     URL.revokeObjectURL(url);
 }
 
-function saveOfferImportData() {
+async function saveOfferImportData() {
     if (importedOffersData.length === 0) {
         alert('No offers to save. Please import an Excel file first.');
         return;
@@ -3337,8 +3313,11 @@ function saveOfferImportData() {
 
     if (addedCount === 0) {
         alert('No valid offers found. Please ensure the Excel contains "category" and "rewardType" columns.');
-    } else {
-        alert(`✅ ${addedCount} offers saved to the main offers list!`);
+        return;
+    }
+    const newOffers = offers.slice(offers.length - addedCount);
+    if (await RGDB.saveOffers(newOffers)) {
+        alert(`✅ ${addedCount} offers saved to Supabase.`);
         renderOfferTable();
         const savedTable = document.getElementById('offerTableContainer');
         if (savedTable) savedTable.style.display = 'block';
@@ -3382,12 +3361,30 @@ function buildImportBenefitsPanel() {
             </div>
             <div id="benefitComparisonSummary" style="display:none;" class="mb-3"></div>
             <div id="benefitImportTablesStandalone"></div>
-            <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-success" onclick="saveBenefitImportData()"><i class="fas fa-save me-2"></i>Save Benefits to Form</button>
+            <div class="d-flex justify-content-end mt-3 gap-2">
+                <button class="btn btn-outline-secondary" onclick="saveBenefitImportData()"><i class="fas fa-file-import me-2"></i>Load into Form</button>
+                <button class="btn btn-success" onclick="saveBenefitImportToDb()"><i class="fas fa-save me-2"></i>Save Benefits to Database</button>
             </div>
         </div>
     </div>
     `;
+}
+
+async function saveBenefitImportToDb() {
+    const mains = importedBenefitsData && importedBenefitsData.mains;
+    if (!mains || mains.length === 0) { alert('No benefit data to save. Import an Excel file first.'); return; }
+    const allSlabs = (importedBenefitsData.slabs || []);
+    const allPartners = (importedBenefitsData.partners || []);
+    const cardOf = (r) => String(r.cardId || r.id || '').trim().toLowerCase();
+    let ok = 0;
+    for (const main of mains) {
+        const cid = cardOf(main);
+        const slabs = allSlabs.filter(s => !cid || cardOf(s) === cid);
+        const partners = allPartners.filter(p => !cid || cardOf(p) === cid);
+        if (await RGDB.saveBenefits(main, slabs, partners)) ok++;
+        else break;
+    }
+    if (ok > 0) alert(`✅ Benefits saved to Supabase for ${ok} card(s).`);
 }
 
 function renderBenefitImportTablesStandalone(data) {
@@ -4087,14 +4084,113 @@ function exportMccImportData() {
     URL.revokeObjectURL(url);
 }
 
-function saveMccImportData() {
+async function saveMccImportData() {
     if (importedMccData.length === 0) {
         alert('No MCC data to save. Please import an Excel file first.');
         return;
     }
-    console.log("--- SAVING MCC DATA TO DATABASE ---");
-    console.log(JSON.stringify(importedMccData, null, 2));
-    alert(`✅ ${importedMccData.length} MCC records saved to database!\nCheck console for details.`);
+    if (await RGDB.saveMcc(importedMccData)) {
+        alert(`✅ ${importedMccData.length} MCC records saved to Supabase.`);
+    }
+}
+
+// ================================================================
+// 13b. EXTRACT BENEFITS -> EXCEL
+// ================================================================
+
+// Each checkbox on the Extract Benefits page -> where its data lives in Supabase.
+//   table   : Supabase table to read
+//   prefix  : keep only card_id + columns starting with this (a benefit section)
+//   cols    : keep only card_id + these exact columns
+//   (neither): export the whole table
+const BENEFIT_EXTRACT_MAP = {
+    'Card Details':              { table: 'cards' },
+    'Lounge Details':            { table: 'card_benefits', prefix: 'lounge_' },
+    'Dining Discounts':          { table: 'card_benefits', prefix: 'dining_' },
+    'Concierge Service':         { table: 'card_benefits', prefix: 'concierge_' },
+    'Golf Benefits':             { table: 'card_benefits', prefix: 'golf_' },
+    'Movie BOGO':                { table: 'card_benefits', prefix: 'movie_' },
+    'Spa-Wellness Privileges':   { table: 'card_benefits', prefix: 'spa_' },
+    'Insurance Benefits':        { table: 'card_benefits', prefix: 'ins_' },
+    'Fees':                      { table: 'cards', prefix: 'fee_' },
+    'Fee Waiver':               { table: 'card_benefits', prefix: 'fee_waiver_' },
+    'Fuel Surcharge Waiver':     { table: 'card_benefits', prefix: 'fuel_' },
+    'Welcome Benefits-Bonus':    { table: 'card_benefits', prefix: 'welcome_' },
+    'Reward Structure':          { table: 'offers' },
+    'Milestone Details':         { table: 'benefit_milestones' },
+    'Partner Program Details':   { table: 'benefit_partner_programs' },
+    'Token Enabled':            { table: 'cards', cols: ['benefit_token_enabled'] },
+    'UPI Supported':            { table: 'cards', cols: ['benefit_upi_supported'] },
+    'contactless':              { table: 'cards', cols: ['benefit_contactless'] },
+    'offers':                    { table: 'offers' },
+    'mcc':                       { table: 'mcc_rules' }
+};
+const BENEFIT_SHEET_NAMES = Object.keys(BENEFIT_EXTRACT_MAP);
+
+function getBenefitCategories() {
+    return BENEFIT_SHEET_NAMES;
+}
+
+function buildExtractBenefitsPanel() {
+    return `
+    <div class="import-panel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold m-0"><i class="fas fa-gift me-2"></i>Select benefits to extract</h6>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-sm" onclick="toggleAllExtractBenefits(true)">Select all</button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="toggleAllExtractBenefits(false)">Deselect all</button>
+            </div>
+        </div>
+        <div class="row g-2 mb-4" id="extractBenefitsCheckList">
+            ${getBenefitCategories().map((label, i) =>
+                `<div class="col-md-3 col-sm-6">${
+                    createCheckbox(`extractBenefit_${i}`, label, false)
+                        .replace('type="checkbox"', `type="checkbox" value="${label}"`)
+                }</div>`
+            ).join('')}
+        </div>
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-success" onclick="extractSelectedBenefits()">
+                <i class="fas fa-file-excel me-2"></i>Extract to Excel
+            </button>
+        </div>
+    </div>
+    `;
+}
+
+function toggleAllExtractBenefits(state) {
+    document.querySelectorAll('#extractBenefitsCheckList input[type="checkbox"]')
+        .forEach(cb => { cb.checked = state; });
+}
+
+// Fetch each checked benefit from Supabase, one worksheet per benefit, download .xlsx.
+async function extractSelectedBenefits() {
+    const selected = [...document.querySelectorAll('#extractBenefitsCheckList input[type="checkbox"]:checked')]
+        .map(cb => cb.value);
+    if (selected.length === 0) { alert('Select at least one benefit.'); return; }
+
+    const shapeRow = (r, cfg) => {
+        if (!cfg.prefix && !cfg.cols) return r;
+        const o = {};
+        if (r.card_id !== undefined) o.card_id = r.card_id;
+        Object.keys(r).forEach(k => {
+            if (cfg.cols ? cfg.cols.includes(k) : k.startsWith(cfg.prefix)) o[k] = r[k];
+        });
+        return o;
+    };
+
+    const wb = XLSX.utils.book_new();
+    let total = 0;
+    for (const label of selected) {
+        const cfg = BENEFIT_EXTRACT_MAP[label];
+        if (!cfg) continue;
+        const rows = (await RGDB.fetchTable(cfg.table)).map(r => shapeRow(r, cfg));
+        total += rows.length;
+        const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{ note: 'no rows' }]);
+        XLSX.utils.book_append_sheet(wb, ws, label.substring(0, 31));
+    }
+    if (total === 0) { alert('No matching records in the database for the selected benefits.'); return; }
+    XLSX.writeFile(wb, 'extracted_benefits.xlsx');
 }
 
 // ================================================================
@@ -4220,31 +4316,12 @@ function hideAllGroups() {
     }
 }
 
-function compareWithDatabase() {
+async function compareWithDatabase() {
     if (importedData.length === 0) {
         alert('No data to compare. Please import an Excel file first.');
         return;
     }
-    if (databaseData.length === 0) {
-        const sampleSize = Math.min(3, importedData.length);
-        databaseData = importedData.slice(0, sampleSize).map(row => ({ ...row }));
-        // Demo tweak: alter the mock "old" DB rows a bit so Compare shows real
-        // differences (yellow/green/red) instead of everything looking identical.
-        databaseData.forEach((oldRow, i) => {
-            if (i === 0) {
-                const oldIssuer = getColVal(oldRow, 'issuer');
-                if (oldIssuer) oldRow.issuer = oldIssuer + ' (old)';   // -> yellow (changed)
-                oldRow.fee_annual = '';                                 // -> green (was blank, new adds it)
-            } else if (i === 1) {
-                oldRow.cardWebLink = '';                                // -> green (was blank, new adds it)
-                const oldApr = getColVal(oldRow, 'apr');
-                if (oldApr !== '') oldRow.apr = Number(oldApr) - 2;    // -> yellow (changed)
-            }
-            // i === 2 stays an exact clone -> genuinely unchanged, no colors, real-world case
-        });
-        alert('Mock database populated with sample data. Click "Compare" again to see changes.');
-        return;
-    }
+    databaseData = await RGDB.fetchCards();
     const fieldKeys = FIXED_COLUMNS.map(c => c.key);
     const comparedData = importedData.map(row => {
         const rowKey = getRowMatchKey(row);
@@ -4952,19 +5029,14 @@ function exportImportData() {
     URL.revokeObjectURL(url);
 }
 
-function saveImportData() {
+async function saveImportData() {
     if (importedData.length === 0) {
         alert('No data to save. Please import an Excel file first.');
         return;
     }
-    const payload = {
-        records: importedData,
-        totalRecords: importedData.length,
-        timestamp: new Date().toISOString()
-    };
-    console.log("--- SAVING IMPORTED DATA TO DATABASE ---");
-    console.log(JSON.stringify(payload, null, 2));
-    alert(`✅ ${importedData.length} records sent for approval / saved to database!\nCheck console for details.`);
+    if (await RGDB.saveCards(importedData)) {
+        alert(`✅ ${importedData.length} card records saved to Supabase.`);
+    }
 }
 
 function handleExcelImport(event) {
@@ -4975,7 +5047,7 @@ function handleExcelImport(event) {
 // 18. SAVE TO DATABASE (UPDATED with new fields)
 // ================================================================
 
-function saveAllToDatabase() {
+async function saveAllToDatabase() {
     const cardData = {
         id: document.getElementById('product_id').value,
         issuer: document.getElementById('issuer').value,
@@ -5123,9 +5195,31 @@ function saveAllToDatabase() {
         },
         offers: offers
     };
-    console.log("--- SENDING TO DATABASE ---");
-    console.log(JSON.stringify(cardData, null, 2));
-    alert("Mock Success! Check your browser's Developer Console (F12) to verify the complete JSON payload.");
+    // Flatten the wizard's nested cardData onto FIXED_COLUMNS keys for the cards table.
+    const e = cardData.eligibility || {}, f = cardData.fees || {}, b = cardData.benefits || {};
+    const flatCard = {
+        id: cardData.id, instrument_type: cardData.instrumentType, issuer: cardData.issuer,
+        product: cardData.product, network: cardData.network, subNetwork: cardData.subNetwork,
+        issuerCountry: cardData.issuerCountry, cardStatus: cardData.cardStatus, cardStatusDate: cardData.cardStatusDate,
+        cardWebLink: cardData.webLink, cardAltLink: cardData.altLink,
+        card_spend_per_point: cardData.spendPerPoint, card_rp_conversion: cardData.rpConversion, apr: cardData.apr,
+        card_bill_cycle_duration: cardData.billingCycleDuration, card_bill_date: cardData.billingDate,
+        cobrand: cardData.cobrand, rewardProgram: cardData.rewardProgram,
+        ageMin: e.ageMin, ageMax: e.ageMax, creditScore: e.creditScore, empType: e.empType,
+        salary: e.salary, productType: e.productType, nationality: e.nationality,
+        fee_joining_type: f.joiningType, fee_joining: f.joining, fee_annual: f.annual, fee_renewal: f.renewal,
+        fee_waiver_spend: b.feeWaiverDetails ? b.feeWaiverDetails.spend : '',
+        fee_waiver_period: b.feeWaiverDetails ? b.feeWaiverDetails.period : '',
+        benefit_concierge: b.concierge, benefit_dining: b.dining, benefit_golf: b.golf, benefit_movie: b.movie,
+        benefit_spa: b.spa, benefit_insurance: b.insurance, benefit_fees: b.fees, benefit_contactless: b.contactless,
+        benefit_tokenEnabled: b.tokenEnabled, benefit_upiSupported: b.upiSupported, benefit_welcome: b.welcome,
+        benefit_feeWaiver: b.feeWaiver, benefit_fuel: b.fuel, benefit_lounge: b.lounge,
+        benefit_milestone: b.milestone, benefit_partnerProgram: b.partnerProgram
+    };
+    if (!flatCard.id) { alert('Enter a Card ID before saving.'); return; }
+    const cardOk = await RGDB.saveCards([flatCard]);
+    if (cardOk && offers.length) await RGDB.saveOffers(offers);
+    if (cardOk) alert(`✅ Card ${flatCard.id} + ${offers.length} offer(s) saved to Supabase.`);
 }
 
 // ================================================================
@@ -5154,7 +5248,8 @@ function showPage(pageId) {
         import: 'Import From Excel',
         importOffers: 'Import Offers',
         importBenefits: 'Import Preferred Benefits',
-        importMcc: 'MCC Imports'
+        importMcc: 'MCC Imports',
+        extractBenefits: 'Extract Benefits'
     };
     document.getElementById('pageTitle').innerText = titles[pageId] || 'RewardGenius';
 
@@ -5164,7 +5259,8 @@ function showPage(pageId) {
         import: 'nav-import',
         importOffers: 'nav-importOffers',
         importBenefits: 'nav-importBenefits',
-        importMcc: 'nav-importMcc'
+        importMcc: 'nav-importMcc',
+        extractBenefits: 'nav-extractBenefits'
     };
     const navId = navMap[pageId];
     if (navId) document.getElementById(navId).classList.add('active');
@@ -5193,6 +5289,8 @@ function showPage(pageId) {
         container.innerHTML = buildImportMccPanel();
         renderMccImportTable(importedMccData);
         document.getElementById('mccRecordCount').textContent = `${importedMccData.length} records`;
+    } else if (pageId === 'extractBenefits') {
+        document.getElementById('extractBenefitsContainer').innerHTML = buildExtractBenefitsPanel();
     }
 }
 
