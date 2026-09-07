@@ -9,7 +9,8 @@ const ISSUER_PRODUCTS = {
         "HDFC Millennia","HDFC MoneyBack+","HDFC Freedom","HDFC Bharat Cashback","HDFC IndianOil Credit Card",
         "HDFC IRCTC Credit Card","HDFC Swiggy Credit Card","HDFC Tata Neu Infinity","HDFC Tata Neu Plus",
         "HDFC Marriott Bonvoy","HDFC Biz Black","HDFC Biz Power","HDFC Biz Grow","HDFC Pixel Play",
-        "HDFC Pixel Go","HDFC UPI RuPay Credit Card","HDFC Shoppers Stop Credit Card","HDFC Paytm Credit Card"
+        "HDFC Pixel Go","HDFC UPI RuPay Credit Card","HDFC Shoppers Stop Credit Card","HDFC Paytm Credit Card",
+        "HDFC AllMiles"
     ],
     "ICICI Bank": [
         "ICICI Emeralde Private Metal","ICICI Emeralde","ICICI Times Black","ICICI Sapphiro","ICICI Rubyx",
