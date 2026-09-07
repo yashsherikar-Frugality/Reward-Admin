@@ -4,205 +4,203 @@
 
 const ISSUER_PRODUCTS = {
     "HDFC Bank": [
-        "HDFC Infinia Metal Edition","HDFC Infinia Credit Card","HDFC Diners Club Black Metal Edition",
-        "HDFC Diners Club Black","HDFC Diners Club Privilege","HDFC Regalia Gold","HDFC Regalia",
-        "HDFC Millennia","HDFC MoneyBack+","HDFC Freedom","HDFC Bharat Cashback","HDFC IndianOil Credit Card",
-        "HDFC IRCTC Credit Card","HDFC Swiggy Credit Card","HDFC Tata Neu Infinity","HDFC Tata Neu Plus",
-        "HDFC Marriott Bonvoy","HDFC Biz Black","HDFC Biz Power","HDFC Biz Grow","HDFC Pixel Play",
-        "HDFC Pixel Go","HDFC UPI RuPay Credit Card","HDFC Shoppers Stop Credit Card","HDFC Paytm Credit Card",
-        "HDFC AllMiles"
+        "6E Rewards", "6E Rewards XL", "AllMiles", "Best Price Save Max",
+        "Best Price Save Smart", "Bharat CashBack", "BizBlack Metal Card", "BizFirst",
+        "BizGrow", "BizPower", "Business Bharat CashBack", "Business Freedom",
+        "Business MoneyBack", "Business Platinum", "Business Program", "Business Regalia",
+        "Business Regalia First", "CSC Small Business MoneyBack", "Diners Club Black", "Diners Club Black Metal Edition",
+        "Diners Club Miles", "Diners Club Premium", "Diners Club Privilege", "Diners Club Rewardz",
+        "Doctor's Regalia", "Doctors Superia", "Easy EMI", "Flipkart Wholesale",
+        "Freedom", "GIGA Business", "H.O.G Diners Club", "Harley-Davidson Diners Club",
+        "IndianOil", "Infinia", "Infinia (Metal Edition)", "InterMiles Diners Club",
+        "InterMiles Platinum", "InterMiles Signature", "IRCTC", "Marriott Bonvoy",
+        "Micro Enterprise Card", "Millennia", "MoneyBack", "MoneyBack+",
+        "Paytm", "Paytm Business", "Paytm Digital", "Paytm Select",
+        "Paytm Select Business", "Pharmeasy", "PhonePe Ultimo", "PhonePe Uno",
+        "Pine Labs", "Pine Labs Pro", "Pixel Go", "Pixel Play",
+        "Platinum Edge", "Platinum Times", "Regalia", "Regalia Activ",
+        "Regalia First", "Regalia Gold", "Retailio", "Shoppers Stop",
+        "Shoppers Stop Black", "Small Business MoneyBack", "Snapdeal", "Solitaire",
+        "Superia", "Swiggy", "Swiggy BLCK", "Tata Neu Infinity",
+        "Tata Neu Plus", "Teacher's Platinum", "Times Platinum", "Times Titanium",
+        "UPI RuPay", "UPI RuPay Biz", "UPI RuPay Mega Saver"
     ],
     "ICICI Bank": [
-        "ICICI Emeralde Private Metal","ICICI Emeralde","ICICI Times Black","ICICI Sapphiro","ICICI Rubyx",
-        "ICICI Coral","ICICI Rubyx American Express","ICICI HPCL Super Saver",
-        "ICICI Amazon Pay Credit Card","ICICI MakeMyTrip Signature",
-        "ICICI MakeMyTrip Platinum","ICICI Manchester United Signature","ICICI Manchester United Platinum",
-        "ICICI Platinum Chip","ICICI Platinum Chip RuPay","ICICI Instant Platinum","ICICI Expressions Credit Card",
-        "ICICI Mine Credit Card","ICICI Adani One Signature","ICICI Adani One Platinum","ICICI Emirates Emeralde",
-        "ICICI Emirates Sapphiro","ICICI Emirates Rubyx","ICICI Diamant Credit Card"
+        "Emeralde Private Metal", "Emeralde", "Times Black", "Sapphiro",
+        "Rubyx", "Coral", "Rubyx American Express", "HPCL Super Saver",
+        "Amazon Pay Credit Card", "MakeMyTrip Signature", "MakeMyTrip Platinum", "Manchester United Signature",
+        "Manchester United Platinum", "Platinum Chip", "Platinum Chip RuPay", "Instant Platinum",
+        "Expressions Credit Card", "Mine Credit Card", "Adani One Signature", "Adani One Platinum",
+        "Emirates Emeralde", "Emirates Sapphiro", "Emirates Rubyx", "Diamant Credit Card"
     ],
     "SBI Card": [
-        "SBI AURUM","SBI Elite","SBI Elite Advantage","SBI PRIME","SBI Pulse","SBI Cashback Card",
-        "SBI SimplyCLICK","SBI SimplySAVE","SBI SimplySAVE Advantage","SBI Card Miles","SBI Card Miles Prime",
-        "SBI Air India Signature","SBI Air India Platinum","SBI BPCL Octane","SBI BPCL","SBI IRCTC Premier",
-        "SBI IRCTC RuPay","SBI UCO Bank Platinum","SBI Shaurya","SBI Unnati","SBI Doctor's Card",
-        "SBI Lifestyle Home Centre","SBI Reliance Credit Card","SBI FBB StyleUP","SBI SimplyCLICK Advantage"
+        "AURUM", "Elite", "Elite Advantage", "PRIME",
+        "Pulse", "Cashback Card", "SimplyCLICK", "SimplySAVE",
+        "SimplySAVE Advantage", "Miles", "Miles Prime", "Air India Signature",
+        "Air India Platinum", "BPCL Octane", "BPCL", "IRCTC Premier",
+        "IRCTC RuPay", "UCO Bank Platinum", "Shaurya", "Unnati",
+        "Doctor's Card", "Lifestyle Home Centre", "Reliance Credit Card", "FBB StyleUP",
+        "SimplyCLICK Advantage"
     ],
     "Axis Bank": [
-        "Axis Magnus for Burgundy","Axis Magnus","Axis Reserve","Axis Atlas","Axis Horizon","Axis Select",
-        "Axis ACE","Axis Neo","Axis MY ZONE","Axis Rewards","Axis Privilege","Axis IndianOil Premium",
-        "Axis IndianOil","Axis Airtel","Axis Flipkart","Axis Samsung Infinite","Axis Samsung Signature",
-        "Axis Vistara Infinite","Axis Vistara Signature","Axis Vistara Platinum","Axis LIC Signature",
-        "Axis LIC Platinum","Axis Freecharge Plus","Axis Burgundy Private","Axis IOCL RuPay"
+        "Magnus for Burgundy", "Magnus", "Reserve", "Atlas",
+        "Horizon", "Select", "ACE", "Neo",
+        "MY ZONE", "Rewards", "Privilege", "IndianOil Premium",
+        "IndianOil", "Airtel", "Flipkart", "Samsung Infinite",
+        "Samsung Signature", "Vistara Infinite", "Vistara Signature", "Vistara Platinum",
+        "LIC Signature", "LIC Platinum", "Freecharge Plus", "Burgundy Private",
+        "IOCL RuPay"
     ],
     "Kotak Mahindra Bank": [
-        "Kotak White Reserve","Kotak Solitaire","Kotak Zen Signature","Kotak Royale Signature",
-        "Kotak League Platinum","Kotak PVR INOX Platinum","Kotak Myntra","Kotak IndianOil",
-        "Kotak Mojo Platinum","Kotak Essentia Platinum","Kotak Fortune Gold","Kotak Urbane Gold",
-        "Kotak Delight Platinum","Kotak 811 Dream Different","Kotak Aqua Gold","Kotak UPI RuPay",
-        "Kotak NRI Platinum","Kotak Corporate Platinum","Kotak Business Platinum","Kotak Privy League Signature"
+        "White Reserve", "Solitaire", "Zen Signature", "Royale Signature",
+        "League Platinum", "PVR INOX Platinum", "Myntra", "IndianOil",
+        "Mojo Platinum", "Essentia Platinum", "Fortune Gold", "Urbane Gold",
+        "Delight Platinum", "811 Dream Different", "Aqua Gold", "UPI RuPay",
+        "NRI Platinum", "Corporate Platinum", "Business Platinum", "Privy League Signature"
     ],
     "IndusInd Bank": [
-        "IndusInd Pioneer Heritage Metal","IndusInd Pioneer Heritage","IndusInd Pioneer Private",
-        "IndusInd Legend","IndusInd EazyDiner Platinum","IndusInd EazyDiner Signature","IndusInd Nexxt",
-        "IndusInd Platinum Aura Edge","IndusInd Platinum RuPay","IndusInd Platinum Visa","IndusInd Tiger Credit Card",
-        "IndusInd Tiger RuPay","IndusInd Club Vistara Explorer","IndusInd Club Vistara Pioneer","IndusInd Crest",
-        "IndusInd Duo Plus","IndusInd Celesta","IndusInd Avios Visa Infinite","IndusInd Avios Visa Platinum",
-        "IndusInd Samman RuPay","IndusInd Business Gold","IndusInd Corporate Credit Card"
+        "Pioneer Heritage Metal", "Pioneer Heritage", "Pioneer Private", "Legend",
+        "EazyDiner Platinum", "EazyDiner Signature", "Nexxt", "Platinum Aura Edge",
+        "Platinum RuPay", "Platinum Visa", "Tiger Credit Card", "Tiger RuPay",
+        "Club Vistara Explorer", "Club Vistara Pioneer", "Crest", "Duo Plus",
+        "Celesta", "Avios Visa Infinite", "Avios Visa Platinum", "Samman RuPay",
+        "Business Gold", "Corporate Credit Card"
     ],
     "IDFC FIRST Bank": [
-        "IDFC FIRST Ashva","IDFC FIRST Mayura","IDFC FIRST FIRST Private","IDFC FIRST Wealth",
-        "IDFC FIRST Select","IDFC FIRST Millennia","IDFC FIRST Classic","IDFC FIRST WOW",
-        "IDFC FIRST Power+","IDFC FIRST SWYP","IDFC FIRST Earn","IDFC FIRST Digital RuPay",
-        "IDFC FIRST Club Vistara","IDFC FIRST LIC Classic","IDFC FIRST LIC Select",
-        "IDFC FIRST Business Credit Card","IDFC FIRST Corporate Credit Card"
+        "Ashva", "Mayura", "FIRST Private", "Wealth",
+        "Select", "Millennia", "Classic", "WOW",
+        "Power+", "SWYP", "Earn", "Digital RuPay",
+        "Club Vistara", "LIC Classic", "LIC Select", "Business Credit Card",
+        "Corporate Credit Card"
     ],
     "YES BANK": [
-        "YES BANK Marquee","YES BANK Reserv","YES BANK Elite+","YES BANK Wellness Plus",
-        "YES BANK Wellness","YES BANK Paisabazaar PaisaSave","YES BANK Paisabazaar PaisaSave Plus",
-        "YES BANK BYOC","YES BANK Prosperity Rewards Plus","YES BANK Prosperity Cashback Plus",
-        "YES BANK ACE","YES BANK FINBOOST","Kiwi","YES BANK RuPay Credit Card","YES BANK Business Credit Card",
-        "YES BANK Corporate Credit Card"
+        "Marquee", "Reserv", "Elite+", "Wellness Plus",
+        "Wellness", "Paisabazaar PaisaSave", "Paisabazaar PaisaSave Plus", "BYOC",
+        "Prosperity Rewards Plus", "Prosperity Cashback Plus", "ACE", "FINBOOST",
+        "Kiwi", "RuPay Credit Card", "Business Credit Card", "Corporate Credit Card"
     ],
     "RBL Bank": [
-        "RBL World Safari","RBL Insignia Preferred Banking","RBL Icon","RBL Platinum Maxima Plus",
-        "RBL ShopRite","RBL Popcorn","RBL BookMyShow Play","RBL Bajaj Finserv SuperCard",
-        "RBL Bajaj Finserv World Prime SuperCard","RBL Bajaj Finserv World Plus SuperCard",
-        "RBL Bajaj Finserv Platinum Plus SuperCard","RBL IndianOil XTRA","RBL Duet Plus",
-        "RBL Bank Credit Card","RBL RuPay Credit Card","RBL Corporate Credit Card"
+        "World Safari", "Insignia Preferred Banking", "Icon", "Platinum Maxima Plus",
+        "ShopRite", "Popcorn", "BookMyShow Play", "Bajaj Finserv SuperCard",
+        "Bajaj Finserv World Prime SuperCard", "Bajaj Finserv World Plus SuperCard", "Bajaj Finserv Platinum Plus SuperCard", "IndianOil XTRA",
+        "Duet Plus", "Credit Card", "RuPay Credit Card", "Corporate Credit Card"
     ],
     "HSBC India": [
-        "HSBC Premier Metal","HSBC Premier","HSBC TravelOne","HSBC Live+","HSBC Platinum",
-        "HSBC Visa Platinum","HSBC Cashback","HSBC Smart Value","HSBC Gold","HSBC Rewards",
-        "HSBC Corporate Credit Card","HSBC Business Credit Card"
+        "Premier Metal", "Premier", "TravelOne", "Live+",
+        "Platinum", "Visa Platinum", "Cashback", "Smart Value",
+        "Gold", "Rewards", "Corporate Credit Card", "Business Credit Card"
     ],
     "Standard Chartered Bank": [
-        "Standard Chartered Ultimate","Standard Chartered Ultimate 2.0","Standard Chartered Smart",
-        "Standard Chartered DigiSmart","Standard Chartered EaseMyTrip","Standard Chartered Emirates World",
-        "Standard Chartered Emirates Platinum","Standard Chartered Platinum Rewards",
-        "Standard Chartered Super Value Titanium","Standard Chartered Titanium",
-        "Standard Chartered Manhattan Platinum","Standard Chartered Rewards",
-        "Standard Chartered Priority Visa Infinite","Standard Chartered Visa Infinite",
-        "Standard Chartered Platinum","Standard Chartered Corporate Card","Standard Chartered Business Card"
+        "Ultimate", "Ultimate 2.0", "Smart", "DigiSmart",
+        "EaseMyTrip", "Emirates World", "Emirates Platinum", "Platinum Rewards",
+        "Super Value Titanium", "Titanium", "Manhattan Platinum", "Rewards",
+        "Priority Visa Infinite", "Visa Infinite", "Platinum", "Corporate Card",
+        "Business Card"
     ],
     "American Express": [
-        "American Express Platinum Charge Card","American Express Platinum Reserve",
-        "American Express Platinum Travel","American Express Gold Charge Card","American Express SmartEarn",
-        "American Express Membership Rewards","American Express MRCC","American Express Green Card",
-        "American Express Corporate Card","American Express Business Card","American Express Centurion",
-        "American Express Gold Corporate","American Express Business Gold","American Express Corporate Platinum"
+        "Platinum Charge Card", "Platinum Reserve", "Platinum Travel", "Gold Charge Card",
+        "SmartEarn", "Membership Rewards", "MRCC", "Green Card",
+        "Corporate Card", "Business Card", "Centurion", "Gold Corporate",
+        "Business Gold", "Corporate Platinum"
     ],
     "AU Small Finance Bank": [
-        "AU Zenith+","AU Zenith","AU Vetta","AU Altura+","AU Altura","AU LIT","AU SPONT",
-        "AU InstaPay RuPay","Kiwi","AU Xcite Ace","AU Xcite Ultra","AU NOMO","AU BizGrow","AU Corporate Credit Card"
+        "Zenith+", "Zenith", "Vetta", "Altura+",
+        "Altura", "LIT", "SPONT", "InstaPay RuPay",
+        "Kiwi", "Xcite Ace", "Xcite Ultra", "NOMO",
+        "BizGrow", "Corporate Credit Card"
     ],
     "Federal Bank": [
-        "Federal Bank Celesta","Federal Bank Imperio","Federal Bank Signet","Federal Bank Scapia",
-        "OneCard","Federal Bank Wave RuPay","Federal Bank RuPay Credit Card",
-        "Federal Bank Visa Platinum","Federal Bank Mastercard Platinum",
-        "Federal Bank Corporate Credit Card","Federal Bank Business Credit Card"
+        "Celesta", "Imperio", "Signet", "Scapia",
+        "OneCard", "Wave RuPay", "RuPay Credit Card", "Visa Platinum",
+        "Mastercard Platinum", "Corporate Credit Card", "Business Credit Card"
     ],
     "Bank of Baroda": [
-        "BOB Eterna","BOB Premier","BOB Select","BOB Easy","BOB Prime","BOB ICAI Exclusive",
-        "BOB IRCTC Credit Card","BOB HPCL ENERGIE","BOB Snapdeal","BOB CMA One","BOB Vikram",
-        "BOB Defence","BOB RuPay Platinum","BOB UPI RuPay Credit Card","OneCard","BOB Corporate Credit Card",
-        "BOB Business Credit Card"
+        "Eterna", "Premier", "Select", "Easy",
+        "Prime", "ICAI Exclusive", "IRCTC Credit Card", "HPCL ENERGIE",
+        "Snapdeal", "CMA One", "Vikram", "Defence",
+        "RuPay Platinum", "UPI RuPay Credit Card", "OneCard", "Corporate Credit Card",
+        "Business Credit Card"
     ],
     "Punjab National Bank": [
-        "PNB RuPay Platinum Credit Card","PNB RuPay Select Credit Card","PNB Visa Platinum Credit Card",
-        "PNB Visa Gold Credit Card","PNB Global Platinum Credit Card","PNB Global Gold Credit Card",
-        "Kiwi","PNB Patanjali Credit Card","PNB Rakshak Credit Card","PNB Pride Credit Card","PNB Insta Credit Card",
-        "PNB Corporate Credit Card","PNB Business Credit Card"
+        "RuPay Platinum Credit Card", "RuPay Select Credit Card", "Visa Platinum Credit Card", "Visa Gold Credit Card",
+        "Global Platinum Credit Card", "Global Gold Credit Card", "Kiwi", "Patanjali Credit Card",
+        "Rakshak Credit Card", "Pride Credit Card", "Insta Credit Card", "Corporate Credit Card",
+        "Business Credit Card"
     ],
     "Canara Bank": [
-        "Canara Visa Platinum Credit Card","Canara Visa Gold Credit Card","Canara Mastercard Platinum",
-        "Canara Mastercard Gold","Canara RuPay Platinum Credit Card","Canara RuPay Select Credit Card",
-        "Canara World Credit Card","Canara Signature Credit Card","Canara Premium Credit Card",
-        "Canara Corporate Credit Card","Canara Business Credit Card"
+        "Visa Platinum Credit Card", "Visa Gold Credit Card", "Mastercard Platinum", "Mastercard Gold",
+        "RuPay Platinum Credit Card", "RuPay Select Credit Card", "World Credit Card", "Signature Credit Card",
+        "Premium Credit Card", "Corporate Credit Card", "Business Credit Card"
     ],
     "Union Bank of India": [
-        "Union Bank RuPay Platinum Credit Card","Union Bank RuPay Select Credit Card",
-        "Union Bank Visa Platinum Credit Card","Union Bank Visa Signature Credit Card",
-        "Union Bank Visa Gold Credit Card","Union Bank Mastercard Platinum",
-        "Union Bank Signature Credit Card","Union Bank Premium Credit Card",
-        "Union Bank Corporate Credit Card","Union Bank Business Credit Card"
+        "RuPay Platinum Credit Card", "RuPay Select Credit Card", "Visa Platinum Credit Card", "Visa Signature Credit Card",
+        "Visa Gold Credit Card", "Mastercard Platinum", "Signature Credit Card", "Premium Credit Card",
+        "Corporate Credit Card", "Business Credit Card"
     ],
     "Indian Bank": [
-        "Indian Bank Visa Platinum Credit Card","Indian Bank Visa Gold Credit Card",
-        "Indian Bank Mastercard Platinum","Indian Bank Mastercard Gold",
-        "Indian Bank RuPay Platinum Credit Card","Indian Bank RuPay Select Credit Card",
-        "OneCard","Indian Bank Premium Credit Card","Indian Bank Signature Credit Card",
-        "Indian Bank Corporate Credit Card","Indian Bank Business Credit Card"
+        "Visa Platinum Credit Card", "Visa Gold Credit Card", "Mastercard Platinum", "Mastercard Gold",
+        "RuPay Platinum Credit Card", "RuPay Select Credit Card", "OneCard", "Premium Credit Card",
+        "Signature Credit Card", "Corporate Credit Card", "Business Credit Card"
     ],
     "Bank of India": [
-        "BOI Visa Platinum Credit Card","BOI Visa Gold Credit Card","BOI Mastercard Platinum",
-        "BOI Mastercard Gold","BOI RuPay Platinum Credit Card","BOI RuPay Select Credit Card",
-        "BOI Premium Credit Card","BOI Signature Credit Card","BOI Corporate Credit Card",
-        "BOI Business Credit Card","BOI Global Credit Card"
+        "Visa Platinum Credit Card", "Visa Gold Credit Card", "Mastercard Platinum", "Mastercard Gold",
+        "RuPay Platinum Credit Card", "RuPay Select Credit Card", "Premium Credit Card", "Signature Credit Card",
+        "Corporate Credit Card", "Business Credit Card", "Global Credit Card"
     ],
     "Central Bank of India": [
-        "Central Bank Visa Platinum Credit Card","Central Bank Visa Gold Credit Card",
-        "Central Bank Mastercard Platinum","Central Bank Mastercard Gold",
-        "Central Bank RuPay Platinum Credit Card","Central Bank RuPay Select Credit Card",
-        "Central Bank World Credit Card","Central Bank Signature Credit Card",
-        "Central Bank Premium Credit Card","Central Bank Corporate Credit Card",
-        "Central Bank Business Credit Card"
+        "Visa Platinum Credit Card", "Visa Gold Credit Card", "Mastercard Platinum", "Mastercard Gold",
+        "RuPay Platinum Credit Card", "RuPay Select Credit Card", "World Credit Card", "Signature Credit Card",
+        "Premium Credit Card", "Corporate Credit Card", "Business Credit Card"
     ],
     "UCO Bank": [
-        "UCO Visa Platinum Credit Card","UCO Visa Gold Credit Card","UCO Mastercard Platinum",
-        "UCO Mastercard Gold","UCO RuPay Platinum Credit Card","UCO RuPay Select Credit Card",
-        "UCO IRCTC RuPay Credit Card","UCO Premium Credit Card","UCO Signature Credit Card",
-        "UCO Corporate Credit Card","UCO Business Credit Card"
+        "Visa Platinum Credit Card", "Visa Gold Credit Card", "Mastercard Platinum", "Mastercard Gold",
+        "RuPay Platinum Credit Card", "RuPay Select Credit Card", "IRCTC RuPay Credit Card", "Premium Credit Card",
+        "Signature Credit Card", "Corporate Credit Card", "Business Credit Card"
     ],
     "South Indian Bank": [
-        "OneCard","South Indian Bank Visa Platinum Credit Card",
-        "South Indian Bank Visa Signature Credit Card","South Indian Bank Mastercard Platinum",
-        "South Indian Bank RuPay Platinum Credit Card","South Indian Bank RuPay Select Credit Card",
-        "South Indian Bank Premium Credit Card","South Indian Bank Signature Credit Card",
-        "South Indian Bank Corporate Credit Card","South Indian Bank Business Credit Card"
+        "OneCard", "Visa Platinum Credit Card", "Visa Signature Credit Card", "Mastercard Platinum",
+        "RuPay Platinum Credit Card", "RuPay Select Credit Card", "Premium Credit Card", "Signature Credit Card",
+        "Corporate Credit Card", "Business Credit Card"
     ],
     "Karnataka Bank": [
-        "Karnataka Bank Visa Platinum Credit Card","Karnataka Bank Visa Signature Credit Card",
-        "Karnataka Bank Mastercard Platinum","Karnataka Bank RuPay Platinum Credit Card",
-        "Karnataka Bank RuPay Select Credit Card","Karnataka Bank Signature Credit Card",
-        "Karnataka Bank Premium Credit Card","Karnataka Bank Corporate Credit Card",
-        "Karnataka Bank Business Credit Card"
+        "Visa Platinum Credit Card", "Visa Signature Credit Card", "Mastercard Platinum", "RuPay Platinum Credit Card",
+        "RuPay Select Credit Card", "Signature Credit Card", "Premium Credit Card", "Corporate Credit Card",
+        "Business Credit Card"
     ],
     "Karur Vysya Bank": [
-        "KVB Visa Platinum Credit Card","KVB Visa Signature Credit Card","KVB Mastercard Platinum",
-        "KVB RuPay Platinum Credit Card","KVB RuPay Select Credit Card","KVB Signature Credit Card",
-        "KVB Premium Credit Card","KVB Corporate Credit Card","KVB Business Credit Card"
+        "Visa Platinum Credit Card", "Visa Signature Credit Card", "Mastercard Platinum", "RuPay Platinum Credit Card",
+        "RuPay Select Credit Card", "Signature Credit Card", "Premium Credit Card", "Corporate Credit Card",
+        "Business Credit Card"
     ],
     "CSB Bank": [
-        "CSB Visa Platinum Credit Card","CSB Visa Signature Credit Card","CSB Mastercard Platinum",
-        "CSB RuPay Platinum Credit Card","CSB RuPay Select Credit Card","OneCard","CSB Premium Credit Card",
-        "CSB Signature Credit Card","CSB Corporate Credit Card","CSB Business Credit Card"
+        "Visa Platinum Credit Card", "Visa Signature Credit Card", "Mastercard Platinum", "RuPay Platinum Credit Card",
+        "RuPay Select Credit Card", "OneCard", "Premium Credit Card", "Signature Credit Card",
+        "Corporate Credit Card", "Business Credit Card"
     ],
     "Dhanlaxmi Bank": [
-        "Dhanlaxmi Visa Platinum Credit Card","Dhanlaxmi Visa Signature Credit Card",
-        "Dhanlaxmi Mastercard Platinum","Dhanlaxmi RuPay Platinum Credit Card",
-        "Dhanlaxmi RuPay Select Credit Card","Dhanlaxmi Premium Credit Card","Dhanlaxmi Signature Credit Card",
-        "Dhanlaxmi Corporate Credit Card","Dhanlaxmi Business Credit Card"
+        "Visa Platinum Credit Card", "Visa Signature Credit Card", "Mastercard Platinum", "RuPay Platinum Credit Card",
+        "RuPay Select Credit Card", "Premium Credit Card", "Signature Credit Card", "Corporate Credit Card",
+        "Business Credit Card"
     ],
     "Jammu & Kashmir Bank": [
-        "J&K Bank Visa Platinum Credit Card","J&K Bank Visa Gold Credit Card","J&K Bank RuPay Platinum Credit Card",
-        "J&K Bank RuPay Select Credit Card","J&K Bank Mastercard Platinum","J&K Bank Signature Credit Card",
-        "J&K Bank Premium Credit Card","J&K Bank Corporate Credit Card","J&K Bank Business Credit Card"
+        "Visa Platinum Credit Card", "Visa Gold Credit Card", "RuPay Platinum Credit Card", "RuPay Select Credit Card",
+        "Mastercard Platinum", "Signature Credit Card", "Premium Credit Card", "Corporate Credit Card",
+        "Business Credit Card"
     ],
     "DBS Bank India": [
-        "DBS Vantage Credit Card","DBS Spark Credit Card","DBS Altitude Visa Signature",
-        "DBS Black Visa Card","DBS Treasures Black Elite","DBS Insignia Card","DBS Live Fresh Card",
-        "DBS Business Card","DBS Corporate Card"
+        "Vantage Credit Card", "Spark Credit Card", "Altitude Visa Signature", "Black Visa Card",
+        "Treasures Black Elite", "Insignia Card", "Live Fresh Card", "Business Card",
+        "Corporate Card"
     ],
     "Citi India": [
-        "Citi Prestige","Citi PremierMiles","Citi Rewards","Citi Cashback","Citi Simplicity",
-        "Citi IndianOil","Citi Air India Platinum","Citi Air India Signature","Citi Ultima",
-        "Citi Corporate Card","Citi Business Card"
+        "Prestige", "PremierMiles", "Rewards", "Cashback",
+        "Simplicity", "IndianOil", "Air India Platinum", "Air India Signature",
+        "Ultima", "Corporate Card", "Business Card"
     ],
     "SBM Bank": [
-        "SBM Visa Platinum Credit Card","SBM Visa Signature Credit Card","SBM Mastercard Platinum",
-        "SBM RuPay Platinum Credit Card","SBM RuPay Select Credit Card","OneCard","SBM Premium Credit Card",
-        "SBM Signature Credit Card","SBM Corporate Credit Card","SBM Business Credit Card"
+        "Visa Platinum Credit Card", "Visa Signature Credit Card", "Mastercard Platinum", "RuPay Platinum Credit Card",
+        "RuPay Select Credit Card", "OneCard", "Premium Credit Card", "Signature Credit Card",
+        "Corporate Credit Card", "Business Credit Card"
     ]
 };
 
