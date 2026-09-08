@@ -23,9 +23,17 @@
         alert('Database error (' + where + '): ' + (err && err.message ? err.message : err));
     }
 
+    // Missing values are stored as a placeholder instead of empty/NULL.
+    // Set MISSING_TEXT = '' (and MISSING_NUM = null) to go back to real NULLs.
+    const MISSING_TEXT = 'N/A';
+    const MISSING_NUM = '0.0';
+    const isEmpty = (v) => v == null || (typeof v === 'string' && v.trim() === '') || (Array.isArray(v) && v.length === 0);
+    const looksNumericField = (k) => /(_rate|_percent|_amount|_value|_fee|_cap|_count|_visits|_rounds|_sessions|_tickets|_limit|_spend|_bill|_points|_score|_min|_max|_transaction|_markup|_ratio|_duration|_days|per_rupee)$/i.test(k || '') || /^(min|max)_/i.test(k || '');
+    const fill = (v, key) => isEmpty(v) ? (looksNumericField(key) ? MISSING_NUM : MISSING_TEXT) : v;
+
     const toBool = (v) => v === true || ['true', 'yes', '1', 'y'].includes(String(v == null ? '' : v).trim().toLowerCase());
     const toArrText = (v) => Array.isArray(v) ? v.join(',') : (v == null ? '' : String(v));
-    const blank = (v) => (v == null ? '' : v);
+    const blank = (v) => fill(v);
     const colVal = (row, k) => (typeof getColVal === 'function' ? getColVal(row, k) : (row[k] ?? ''));
     const genVal = (row, k) => (typeof genericVal === 'function' ? genericVal(row, k) : (row[k] ?? ''));
     const fixedCols = () => (typeof FIXED_COLUMNS !== 'undefined' ? FIXED_COLUMNS : []);
@@ -190,8 +198,8 @@
             const cardId = String((main && (main.cardId || main.id)) || '').trim();
             if (!cardId) { alert('Benefits row has no Card ID.'); return false; }
             const rec = { card_id: cardId, updated_at: new Date().toISOString() };
-            BENEFIT_TEXT_COLS.forEach(c => { const v = benefitPick(main, c); if (v !== undefined) rec[c] = v; });
-            BENEFIT_BOOL_COLS.forEach(c => { const v = benefitPick(main, c); if (v !== undefined) rec[c] = toBool(v); });
+            BENEFIT_TEXT_COLS.forEach(c => { rec[c] = fill(benefitPick(main, c), c); });
+            BENEFIT_BOOL_COLS.forEach(c => { const v = benefitPick(main, c); rec[c] = v === undefined ? false : toBool(v); });
 
             let r = await sb.from('card_benefits').upsert(rec, { onConflict: 'card_id' });
             if (r.error) throw r.error;
@@ -199,17 +207,17 @@
             await sb.from('benefit_milestones').delete().eq('card_id', cardId);
             const ms = (slabs || []).map((s, i) => ({
                 card_id: cardId, slab_no: parseInt(s.slab_no, 10) || i + 1,
-                milestone_amount: s.milestone_amount, milestone_period: s.milestone_period,
-                milestone_benefit_value: s.milestone_benefit_value, milestone_benefit_type: s.milestone_benefit_type,
-                milestone_benefit_comment: s.milestone_benefit_comment
+                milestone_amount: fill(s.milestone_amount, 'milestone_amount'), milestone_period: fill(s.milestone_period),
+                milestone_benefit_value: fill(s.milestone_benefit_value, 'benefit_value'), milestone_benefit_type: fill(s.milestone_benefit_type),
+                milestone_benefit_comment: fill(s.milestone_benefit_comment)
             }));
             if (ms.length) { r = await sb.from('benefit_milestones').insert(ms); if (r.error) throw r.error; }
 
             await sb.from('benefit_partner_programs').delete().eq('card_id', cardId);
             const pp = (partners || []).map((p, i) => ({
                 card_id: cardId, partner_no: parseInt(p.partner_no, 10) || i + 1,
-                partner_program: p.partner_program, partner_ratio: p.partner_ratio,
-                partner_min_transfer: p.partner_minTransfer, partner_transfer_time: p.partner_transferTime
+                partner_program: fill(p.partner_program), partner_ratio: fill(p.partner_ratio, 'ratio'),
+                partner_min_transfer: fill(p.partner_minTransfer, 'min_transfer'), partner_transfer_time: fill(p.partner_transferTime)
             }));
             if (pp.length) { r = await sb.from('benefit_partner_programs').insert(pp); if (r.error) throw r.error; }
             return true;
@@ -226,6 +234,17 @@
         } catch (e) { fail('fetch ' + name, e); return []; }
     }
 
+    // Rows of `table` where `col` equals `val` (case-insensitive). Used by All Data Check.
+    async function fetchWhere(table, col, val) {
+        if (!sb) { notConfigured(); return []; }
+        if (!col) return [];
+        try {
+            const { data, error } = await sb.from(table).select('*').ilike(col, String(val).trim());
+            if (error) throw error;
+            return data || [];
+        } catch (e) { fail('fetch ' + table + ' where ' + col, e); return []; }
+    }
+
     // Wipe a table and insert `rows` (chunked). Used by the full-workbook import,
     // where the spreadsheet is the single source of truth for that table.
     async function replaceRows(table, rows) {
@@ -233,9 +252,15 @@
         try {
             const del = await sb.from(table).delete().not('id', 'is', null);
             if (del.error) throw del.error;
+            // Replace empty cells with the missing-value placeholder.
+            const filled = rows.map(r => {
+                const o = {};
+                for (const k of Object.keys(r)) o[k] = fill(r[k], k);
+                return o;
+            });
             let done = 0;
-            for (let i = 0; i < rows.length; i += 500) {
-                const chunk = rows.slice(i, i + 500);
+            for (let i = 0; i < filled.length; i += 500) {
+                const chunk = filled.slice(i, i + 500);
                 const { error } = await sb.from(table).insert(chunk);
                 if (error) throw error;
                 done += chunk.length;
@@ -250,6 +275,6 @@
         fetchOffers, saveOffers,
         fetchMcc, saveMcc,
         fetchBenefits, saveBenefits,
-        fetchTable, replaceRows
+        fetchTable, fetchWhere, replaceRows
     };
 })();

@@ -619,13 +619,18 @@ function buildFormPanel(cardData, offersData, importMode = false) {
     // TOP ACTION BAR
     html += `
     <div class="row g-2 mb-3 border-bottom pb-2 bg-light p-2 rounded">
-        <div class="col-md-3">
-            <div class="form-floating">
-                <input type="text" id="product_id" class="form-control form-control-sm" readonly value="${data.id || 'CARD-' + Date.now().toString().slice(-6)}">
-                <label for="product_id">Card ID</label>
+        <div class="col-md-4">
+            <div class="input-group input-group-sm">
+                <div class="form-floating">
+                    <input type="text" id="product_id" class="form-control form-control-sm" readonly
+                           data-auto="${data.id ? '0' : '1'}" value="${data.id || ''}">
+                    <label for="product_id">Card ID (auto)</label>
+                </div>
+                <button class="btn btn-outline-secondary" type="button" title="Regenerate Card ID" onclick="regenerateCardId()"><i class="fas fa-rotate"></i></button>
             </div>
+            <span id="cardStatusBadge" class="badge bg-light text-dark border mt-1" style="font-size:.62rem;">No status</span>
         </div>
-        <div class="col-md-9 d-flex align-items-end justify-content-end gap-2">
+        <div class="col-md-8 d-flex align-items-end justify-content-end gap-2">
             ${importMode ? `
                 <div class="import-btn-wrapper">
                     <span class="badge bg-info text-dark">Import Mode</span>
@@ -755,7 +760,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                 <div class="row g-2 mb-2">
                     <div class="col-md-4">${createSelectField('empType', 'Employment Type', ['Salaried','Business','Self Employed','All'], elig.empType)}</div>
                     <div class="col-md-4">${createSelectField('salary', 'Salary', ['NA','1.8L+','2.4L+','3L+','3.6L+','6L+','10L+','12L+','18L+','24L+','30L+'], elig.salary)}</div>
-                    <div class="col-md-4">${createSelectField('productType', 'Product Type', ['General','Business','Corporate','FD backed','Invite Only','Others'], elig.productType)}</div>
+                    <div class="col-md-4">${createSelectField('productType', 'Product Type', ['General','Retail','Consumer','Business','Commercial','Corporate','FD backed','Invite Only','Others'], elig.productType)}</div>
                 </div>
                 <div class="row g-2">
                     <div class="col-md-4">${createSelectField('nationality', 'Nationality', ['Resident Indian','NRI','Foreign National','OCI / PIO','Any'], elig.nationality)}</div>
@@ -869,34 +874,10 @@ function buildFormPanel(cardData, offersData, importMode = false) {
             <div class="section-box">
                 <div class="d-flex justify-content-between align-items-center">
                     <h6><i class="fas fa-gift me-2"></i> Preferred Benefits</h6>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('benefitExcelInput').click()">
-                        <i class="fas fa-file-import me-1"></i> Import Preferred Benefits
-                    </button>
-                    <input type="file" id="benefitExcelInput" accept=".xlsx,.xls" style="display:none;" onchange="handleBenefitExcelImport(event)">
                 </div>
-                <div class="row g-2">
-                    <div class="col-6">
-                        ${createCheckbox('benefit_concierge', 'Concierge Service', data.benefits && data.benefits.concierge)}
-                        ${createCheckbox('benefit_dining', 'Dining Discounts', data.benefits && data.benefits.dining)}
-                        ${createCheckbox('benefit_golf', 'Golf Benefits', data.benefits && data.benefits.golf)}
-                        ${createCheckbox('benefit_movie', 'Movie BOGO', data.benefits && data.benefits.movie)}
-                        ${createCheckbox('benefit_spa', 'Spa/Wellness Privileges', data.benefits && data.benefits.spa)}
-                        ${createCheckbox('benefit_insurance', 'Insurance Benefits', data.benefits && data.benefits.insurance)}
-                        ${createCheckbox('benefit_fees', 'Fees', data.benefits && data.benefits.fees)}
-                        ${createCheckbox('benefit_contactless', 'Contactless', data.benefits && data.benefits.contactless)}
-                    </div>
-                    <div class="col-6">
-                        ${createCheckbox('benefit_welcome', 'Welcome Benefits/Bonus', data.benefits && data.benefits.welcome)}
-                        ${createCheckbox('benefit_feeWaiver', 'Fee Waiver', data.benefits && data.benefits.feeWaiver)}
-                        ${createCheckbox('benefit_fuel', 'Fuel Surcharge Waiver', data.benefits && data.benefits.fuel)}
-                        ${createCheckbox('benefit_lounge', 'Lounge Access', data.benefits && data.benefits.lounge)}
-                        ${createCheckbox('benefit_milestone', 'Milestone Bonus', data.benefits && data.benefits.milestone)}
-                        ${createCheckbox('benefit_partnerProgram', 'Partner Program (Transfer Partners)', data.benefits && data.benefits.partnerProgram)}
-                        ${createCheckbox('benefit_tokenEnabled', 'Token Enabled', data.benefits && data.benefits.tokenEnabled)}
-                        ${createCheckbox('benefit_upiSupported', 'UPI Supported', data.benefits && data.benefits.upiSupported)}
-                    </div>
-                </div>
+                ${renderBenefitChecklist(data)}
                 <div id="benefitImportTables" style="margin-top: 10px;"></div>
+                <div id="benefitSpecHost" class="mt-2"></div>
             </div>
 
             <div class="section-box">
@@ -1195,8 +1176,6 @@ function buildFormPanel(cardData, offersData, importMode = false) {
             <h5 class="fw-bold text-primary m-0"><i class="fas fa-tags me-2"></i> Manage Offers</h5>
             <div>
                 <button type="button" class="btn btn-primary" onclick="addOfferRow()"><i class="fas fa-plus me-2"></i> Add Offer</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="importOffers()"><i class="fas fa-file-import me-2"></i> Import Offers</button>
-                <input type="file" id="offerExcelInput" accept=".xlsx,.xls" style="display:none;" onchange="handleOfferExcelImport(event)">
             </div>
         </div>
         <div id="offersContainer"></div>
@@ -1224,9 +1203,15 @@ function buildFormPanel(cardData, offersData, importMode = false) {
 // Every dropdown option list renders alphabetically (number-aware, case-insensitive).
 // "ALL" / "All" sentinels stay pinned to the top.
 const cmpAlpha = (a, b) => String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
+// A–Z for every dropdown. "All"/"Any" stay pinned at the top (select-all
+// sentinels); "Other", "Others", "Custom", "None", "N/A", "Unknown", "etc."
+// sink to the bottom. Everything else is plain alphabetical.
 function sortOptions(options) {
-    const pinned = v => (v === 'ALL' || v === 'All') ? 0 : 1;
-    return [...options].sort((a, b) => pinned(a) - pinned(b) || cmpAlpha(a, b));
+    const s = v => String(v).trim();
+    const isHead = v => /^(all|any)$/i.test(s(v));
+    const isTail = v => /^(other|others|etc\.?|custom|none|n\/?a|unknown|not applicable|others? \(specify\))$/i.test(s(v));
+    const bucket = v => isHead(v) ? 0 : isTail(v) ? 2 : 1;
+    return [...options].sort((a, b) => bucket(a) - bucket(b) || cmpAlpha(a, b));
 }
 
 function createSelectField(id, label, options, value = '', onChange = '') {
@@ -1533,13 +1518,101 @@ function attachCardListeners() {
     document.getElementById('issuer').addEventListener('change', function() {
         const products = ISSUER_PRODUCTS[this.value] || [];
         setSelectOptions('product', products);
+        autoFillCardId();
     });
     document.getElementById('network').addEventListener('change', function() {
         const subNets = NETWORKS[this.value] || [];
         setSelectOptions('subNetwork', subNets);
+        autoFillCardId();
+    });
+    ['product', 'subNetwork', 'instrument_type'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', autoFillCardId);
     });
     document.getElementById('instrument_type').addEventListener('change', toggleCardFields);
-    document.getElementById('cardStatus').addEventListener('change', toggleCardStatusDate);
+    document.getElementById('cardStatus').addEventListener('change', () => { toggleCardStatusDate(); updateCardStatusBadge(); });
+    autoFillCardId();
+    updateCardStatusBadge();
+}
+
+// ---- Auto Card ID  (style: ISSUER-VAR-NET-NNNN, all caps) --------
+// Explicit issuer short codes; anything else falls back to an acronym of the
+// name's words (Bank of India -> BOI), or the first 4 letters.
+const ISSUER_CODE = {
+    'HDFC Bank': 'HDFC', 'ICICI Bank': 'ICICI', 'SBI Card': 'SBI', 'Axis Bank': 'AXIS',
+    'Kotak Mahindra Bank': 'KOTAK', 'IndusInd Bank': 'INDUS', 'IDFC FIRST Bank': 'IDFC',
+    'YES BANK': 'YES', 'RBL Bank': 'RBL', 'HSBC India': 'HSBC', 'Standard Chartered Bank': 'SCB',
+    'American Express': 'AMEX', 'AU Small Finance Bank': 'AU', 'Federal Bank': 'FED',
+    'Bank of Baroda': 'BOB', 'Punjab National Bank': 'PNB', 'Canara Bank': 'CANARA',
+    'Union Bank of India': 'UBI', 'Indian Bank': 'INDBK', 'Bank of India': 'BOI',
+    'Central Bank of India': 'CBI', 'UCO Bank': 'UCO', 'South Indian Bank': 'SIB',
+    'Karnataka Bank': 'KBL', 'Karur Vysya Bank': 'KVB', 'CSB Bank': 'CSB',
+    'Dhanlaxmi Bank': 'DHAN', 'Jammu & Kashmir Bank': 'JKB', 'DBS Bank India': 'DBS',
+    'Citi India': 'CITI', 'SBM Bank': 'SBM'
+};
+const NETWORK_CODE = {
+    'Visa': 'VIS', 'Mastercard': 'MC', 'RuPay': 'RUP', 'Diners Club': 'DIN',
+    'American Express': 'AMX', 'Amex': 'AMX', 'Diners': 'DIN'
+};
+const issuerCode = (v) => {
+    if (!v) return '';
+    if (ISSUER_CODE[v]) return ISSUER_CODE[v];
+    const ac = v.replace(/&/g, ' ').split(/\s+/).filter(Boolean).map(w => w[0]).join('').toUpperCase();
+    return ac.length >= 2 ? ac : v.replace(/[^A-Za-z0-9]/g, '').slice(0, 4).toUpperCase();
+};
+const shortCode = (v, n = 3) => String(v || '').replace(/[^A-Za-z0-9]/g, '').slice(0, n).toUpperCase();
+const networkCode = (v) => NETWORK_CODE[v] || shortCode(v, 3);
+
+// ISSUER-VAR-NET, minus the running number.
+function cardIdPrefix() {
+    const g = id => (document.getElementById(id) || {}).value || '';
+    const parts = [issuerCode(g('issuer')), shortCode(g('product'), 3), networkCode(g('network'))].filter(Boolean);
+    return parts.length ? parts.join('-') : 'CARD';
+}
+
+// Highest NNNN already used for this prefix, in cards + wb_card_details.
+async function nextCardSeq(prefix) {
+    let max = 0;
+    try {
+        if (window.RGDB && RGDB.configured) {
+            const rowsA = await RGDB.fetchWhere('cards', 'card_id', prefix + '-%');
+            const rowsB = await RGDB.fetchWhere('wb_card_details', 'cardid', prefix + '-%');
+            [...rowsA, ...rowsB].forEach(r => {
+                const m = String(r.card_id || r.cardid || '').match(/-(\d+)$/);
+                if (m) max = Math.max(max, parseInt(m[1], 10));
+            });
+        }
+    } catch { /* offline -> start at 1 */ }
+    return max + 1;
+}
+
+// Fill #product_id. Skips if the user retrieved an existing card (data-auto="0"); `force` overrides.
+async function autoFillCardId(force) {
+    const el = document.getElementById('product_id');
+    if (!el) return;
+    if (!force && el.dataset.auto !== '1') return;
+    el.value = 'generating…';
+    const prefix = cardIdPrefix();
+    const seq = String(await nextCardSeq(prefix)).padStart(4, '0');
+    el.value = `${prefix}-${seq}`;
+    el.dataset.auto = '1';
+}
+function regenerateCardId() { autoFillCardId(true); }
+
+function updateCardStatusBadge() {
+    const b = document.getElementById('cardStatusBadge');
+    if (!b) return;
+    const s = (document.getElementById('cardStatus') || {}).value || '';
+    const map = {
+        Active:           ['bg-success', 'ACTIVE'],
+        Upcoming:         ['bg-primary', 'UPCOMING'],
+        ToBeDiscontinued: ['bg-warning text-dark', 'TO BE DISCONTINUED'],
+        Discontinued:     ['bg-secondary', 'DISCONTINUED'],
+    };
+    const [cls, txt] = map[s] || ['bg-light text-dark border', 'No status'];
+    b.className = 'badge mt-1 ' + cls;
+    b.style.fontSize = '.62rem';
+    b.textContent = txt;
 }
 
 function toggleCardStatusDate() {
@@ -1611,6 +1684,170 @@ function attachBenefitListeners() {
         toggleFeesBlock();
         feesCheckbox.addEventListener('change', toggleFeesBlock);
     }
+    mountWizardBenefitSpecPanels();
+}
+
+// Every benefit checkbox in the wizard -> a spec-driven detail panel (spec §8).
+// Checkboxes that already had a hand-coded panel get the spec fields as an extra
+// "Full detail (spec §8)" block; the ones that opened nothing now open this.
+const WIZARD_BENEFIT_SPEC_MAP = {
+    benefit_concierge: 'Concierge',
+    benefit_dining: 'Dining',
+    benefit_golf: 'Golf',
+    benefit_movie: 'Movie',
+    benefit_spa: 'SPA / Wellness',
+    benefit_insurance: 'Insurance / Protection',
+    benefit_welcome: 'Welcome',
+    benefit_feeWaiver: 'Fee Waiver',
+    benefit_fuel: 'Fuel',
+    benefit_lounge: 'Lounge',
+    benefit_milestone: 'Milestone',
+    benefit_partnerProgram: 'Partner & Transfer',
+    // §8 benefit types that had no wizard checkbox — added to #extraBenefitChecks.
+    benefit_rewardPoints: 'Reward Points',
+    benefit_renewalBenefit: 'Renewal Benefit',
+    benefit_travelInsurance: 'Travel Insurance',
+    benefit_travel: 'Travel',
+    benefit_hotel: 'Hotel',
+    benefit_airline: 'Airline',
+    benefit_forex: 'Forex / International',
+    benefit_airportTransfer: 'Airport Transfer',
+    benefit_shopping: 'Shopping',
+    benefit_ott: 'OTT / Subscription',
+    benefit_purchaseProtection: 'Purchase Protection',
+    benefit_personalAccident: 'Personal Accident',
+    benefit_roadsideAssistance: 'Roadside Assistance',
+    benefit_statusBenefits: 'Status Benefits'
+};
+
+// Full wizard benefit checklist, grouped. Every §8 benefit + the card-feature
+// flags. Checkbox ids are unchanged so the hand-coded detail panels and the
+// save mapping keep working.
+const WIZARD_BENEFIT_GROUPS = [
+    { title: 'Travel & Lounge', items: [
+        ['benefit_lounge', 'Lounge Access'],
+        ['benefit_airportTransfer', 'Airport Transfer'],
+        ['benefit_travel', 'Travel Benefits'],
+        ['benefit_hotel', 'Hotel Benefits'],
+        ['benefit_airline', 'Airline Benefits'],
+        ['benefit_forex', 'Forex / International'],
+    ]},
+    { title: 'Rewards & Spend', items: [
+        ['benefit_rewardPoints', 'Reward Points'],
+        ['benefit_milestone', 'Milestone Bonus'],
+        ['benefit_welcome', 'Welcome Benefits / Bonus'],
+        ['benefit_renewalBenefit', 'Renewal Benefit'],
+        ['benefit_feeWaiver', 'Fee Waiver'],
+        ['benefit_partnerProgram', 'Partner Program (Transfer)'],
+        ['benefit_fuel', 'Fuel Surcharge Waiver'],
+    ]},
+    { title: 'Lifestyle', items: [
+        ['benefit_dining', 'Dining Discounts'],
+        ['benefit_golf', 'Golf Benefits'],
+        ['benefit_movie', 'Movie BOGO'],
+        ['benefit_spa', 'Spa / Wellness'],
+        ['benefit_concierge', 'Concierge Service'],
+        ['benefit_shopping', 'Shopping / Merchant Offers'],
+        ['benefit_ott', 'OTT / Subscription'],
+    ]},
+    { title: 'Protection & Insurance', items: [
+        ['benefit_insurance', 'Insurance Benefits'],
+        ['benefit_travelInsurance', 'Travel Insurance'],
+        ['benefit_purchaseProtection', 'Purchase Protection'],
+        ['benefit_personalAccident', 'Personal Accident'],
+        ['benefit_roadsideAssistance', 'Roadside Assistance'],
+    ]},
+    { title: 'Card Features', items: [
+        ['benefit_statusBenefits', 'Status Benefits'],
+        ['benefit_upiSupported', 'UPI Supported'],
+        ['benefit_contactless', 'Contactless'],
+        ['benefit_tokenEnabled', 'Token Enabled'],
+        ['benefit_fees', 'Fees'],
+    ]},
+];
+
+const allWizardBenefitIds = () => WIZARD_BENEFIT_GROUPS.flatMap(g => g.items.map(i => i[0]));
+
+function renderBenefitChecklist(data) {
+    const b = (data && data.benefits) || {};
+    const camel = (id) => id.replace('benefit_', '');
+    return `<div class="row g-3">` + WIZARD_BENEFIT_GROUPS.map(g => `
+        <div class="col-md-4 col-sm-6">
+            <div class="fw-bold text-secondary text-uppercase mb-1" style="font-size:0.62rem; letter-spacing:0.5px;">${g.title}</div>
+            ${g.items.map(([id, label]) => createCheckbox(id, label, b[camel(id)])).join('')}
+        </div>`).join('') + `</div>`;
+}
+
+// §8 has no detail table for these — small controlled panel so the checkbox still
+// opens usable inputs.
+const WIZARD_BENEFIT_MINI_SPEC = {
+    benefit_fees: { label: 'Fees', fields: [['fee_type', 'select', 'fee_type'], 'fee_amount', 'fee_frequency', 'exclusions', 'source_id'] },
+    benefit_contactless: { label: 'Contactless', fields: [['available', 'bool'], ['network', 'select', 'network'], 'per_txn_limit', 'notes', 'source_id'] },
+    benefit_tokenEnabled: { label: 'Token Enabled', fields: [['available', 'bool'], ['supported_networks', 'multi', 'network'], 'token_provider', 'notes', 'source_id'] },
+    benefit_partnerProgram: { label: 'Partner & Transfer', fields: ['partner_id', ['partner_type', 'select', 'partner_type'], 'partner_name', 'transfer_ratio', 'minimum_transfer', 'transfer_increment', 'transfer_fee', 'transfer_time', 'source_id'] },
+    benefit_upiSupported: { label: 'UPI', fields: ['notes'] }
+};
+
+// One detail box per benefit. If the benefit already has a hand-coded panel
+// (benefit_<x>_details), the spec §8 fields are appended INSIDE it — so a click
+// opens a single box. Benefits with no hand-coded panel get one standalone box
+// in #benefitSpecHost, toggled by the checkbox.
+function mountWizardBenefitSpecPanels() {
+    const host = document.getElementById('benefitSpecHost');
+    if (!host || !window.BENEFIT_DETAIL_SPEC) return;
+    host.innerHTML = '';
+
+    const keys = [...new Set([...Object.keys(WIZARD_BENEFIT_SPEC_MAP), ...Object.keys(WIZARD_BENEFIT_MINI_SPEC)])];
+
+    // Benefits whose existing box isn't named <id>_details.
+    const PANEL_ALIAS = { benefit_fees: 'feeBlockContainer' };
+
+    keys.forEach(cbId => {
+        const cb = document.getElementById(cbId);
+        if (!cb) return;
+        const def = (WIZARD_BENEFIT_SPEC_MAP[cbId] && window.BENEFIT_DETAIL_SPEC[WIZARD_BENEFIT_SPEC_MAP[cbId]])
+            || WIZARD_BENEFIT_MINI_SPEC[cbId];
+        if (!def) return;
+
+        const fieldsHtml = def.fields.map(f => benefitFieldControl(f)
+            .replace('data-bfield=', `data-wspec="${cbId}" data-bfield=`)).join('');
+
+        const existing = document.getElementById(cbId + '_details')
+            || (PANEL_ALIAS[cbId] && document.getElementById(PANEL_ALIAS[cbId]));
+        if (existing) {
+            // merge into the existing box — no second box, no extra listener
+            if (!existing.querySelector('.wspec-extra')) {
+                existing.insertAdjacentHTML('beforeend', `
+                    <div class="wspec-extra mt-2 pt-2 border-top">
+                        <div class="fw-bold text-primary mb-1" style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.4px;">Additional details</div>
+                        <div class="row g-1">${fieldsHtml}</div>
+                    </div>`);
+            }
+        } else {
+            const panelId = 'wspec_' + cbId;
+            host.insertAdjacentHTML('beforeend', `
+                <div id="${panelId}" class="p-2 bg-light rounded border mb-2" style="display:none;">
+                    <div class="fw-bold text-primary mb-1" style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.4px;">${def.label} details</div>
+                    <div class="row g-1">${fieldsHtml}</div>
+                </div>`);
+            const panel = document.getElementById(panelId);
+            const sync = () => { panel.style.display = cb.checked ? '' : 'none'; };
+            sync();
+            cb.addEventListener('change', sync);
+        }
+    });
+}
+
+// Values from every wizard spec field, grouped by benefit checkbox id.
+function collectWizardBenefitSpec() {
+    const out = {};
+    document.querySelectorAll('[data-wspec][data-bfield]').forEach(el => {
+        const g = el.dataset.wspec;
+        let v = el.multiple ? [...el.selectedOptions].map(o => o.value) : el.value;
+        if (v === '' || (Array.isArray(v) && !v.length)) return;
+        (out[g] = out[g] || {})[el.dataset.bfield] = v;
+    });
+    return out;
 }
 
 function populateDropdown(id, options) {
@@ -4037,6 +4274,132 @@ async function extractSelectedBenefits() {
 }
 
 // ================================================================
+// 13d. ALL DATA CHECK — one search box: enter a Card ID, see every table's
+// rows for that card (card details, each benefit, offers, mcc) — one table each.
+// ================================================================
+
+function buildAllDataPanel() {
+    return `
+    <div class="import-panel">
+        <h6 class="fw-bold m-0 mb-1"><i class="fas fa-magnifying-glass me-2"></i>All Data Check</h6>
+        <small class="text-muted d-block mb-3">Enter a Card ID to pull every stored row for that card.</small>
+        <div class="input-group mb-3" style="max-width:520px;">
+            <input type="text" id="allDataSearch" class="form-control" placeholder="Card ID (e.g. HDFC-INFINIA)"
+                   onkeydown="if(event.key==='Enter') runAllDataSearch()">
+            <button class="btn btn-primary" onclick="runAllDataSearch()"><i class="fas fa-search me-1"></i> Search</button>
+        </div>
+        <div id="allDataResults"><p class="text-muted">No search yet.</p></div>
+    </div>`;
+}
+
+// Every source table + the column that holds the card id.
+function allDataSources() {
+    const list = [];
+    const S = window.WORKBOOK_SCHEMA || {};
+    // card master first, then the rest in a sensible order
+    const order = ['Card Details', 'Lounge Details', 'Golf Benefits', 'Dining Discounts', 'Movie BOGO',
+        'Spa-Wellness Privileges', 'Concierge Service', 'Insurance Benefits', 'Fee Waiver',
+        'Fuel Surcharge Waiver', 'Welcome Benefits-Bonus', 'Milestone Details', 'Partner Program Details',
+        'Reward Structure', 'Token Enabled', 'UPI Supported', 'contactless', 'offers', 'mcc'];
+    const byLabel = {};
+    Object.values(S).forEach(d => { byLabel[d.label] = d; });
+    order.forEach(lbl => { if (byLabel[lbl]) list.push(byLabel[lbl]); });
+    Object.values(S).forEach(d => { if (!list.includes(d)) list.push(d); });
+    return list;
+}
+
+function allDataTableHtml(def, rows) {
+    const cols = def.cols.filter(c => c !== 'id' && c !== 'imported_at');
+    const head = cols.map(c => `<th class="text-nowrap" style="font-size:.68rem;">${c}</th>`).join('');
+    const body = rows.map(r =>
+        `<tr>${cols.map(c => `<td style="font-size:.68rem;">${String(r[c] ?? '')}</td>`).join('')}</tr>`
+    ).join('');
+    return `
+    <div class="mb-4">
+        <h6 class="fw-bold text-primary mb-1">${def.label}
+            <span class="badge bg-primary">${rows.length}</span>
+            <span class="text-muted small">${def.table}</span></h6>
+        <div class="table-responsive" style="max-height:340px; overflow:auto; border:1px solid #e2e8f0; border-radius:8px;">
+            <table class="table table-bordered table-sm table-striped mb-0">
+                <thead class="sticky-top bg-white"><tr>${head}</tr></thead>
+                <tbody>${body}</tbody>
+            </table>
+        </div>
+    </div>`;
+}
+
+async function runAllDataSearch() {
+    const id = (document.getElementById('allDataSearch').value || '').trim();
+    const out = document.getElementById('allDataResults');
+    if (!id) { out.innerHTML = '<p class="text-danger">Enter a Card ID.</p>'; return; }
+    if (!window.WORKBOOK_SCHEMA) { out.innerHTML = '<p class="text-danger">workbook_schema.js not loaded.</p>'; return; }
+
+    out.innerHTML = '<p class="text-muted">Searching…</p>';
+    const sources = allDataSources();
+    const results = await Promise.all(sources.map(def =>
+        RGDB.fetchWhere(def.table, def.cardIdCol, id).then(rows => ({ def, rows }))
+    ));
+
+    const withData = results.filter(r => r.rows.length);
+    if (!withData.length) {
+        out.innerHTML = `<p class="text-muted">No rows found for <strong>${id}</strong> in any table.</p>`;
+        return;
+    }
+    const totalRows = withData.reduce((n, r) => n + r.rows.length, 0);
+    out.innerHTML = `<p class="small text-muted">Card <strong>${id}</strong> — ${totalRows} rows across ${withData.length} table(s).</p>`
+        + withData.map(r => allDataTableHtml(r.def, r.rows)).join('');
+}
+
+// ================================================================
+// 13c. BENEFIT DETAIL ARCHITECTURE  (Credit_Card_Data_Capture_Specification V3, §8 + §4)
+// Spec config lives in js/benefit_spec.js. This renders it as forms with the
+// controlled-vocabulary dropdowns.
+// ================================================================
+
+// Infer an input type from a spec field name when it isn't an explicit dropdown tuple.
+function benefitFieldType(id) {
+    if (/_url$/.test(id)) return 'url';
+    if (/(^|_)(date|from|to|deadline)$/.test(id) || /_date$/.test(id)) return 'date';
+    if (/mcc/i.test(id)) return 'text';
+    if (/(_rate|_percent|_amount|_value|_fee|_cap|_count|_rounds|_sessions|_tickets|_visits|_score|_days|_limit|_threshold|_transaction|_spend|_bill|_points|_multiplier|_timeline|_duration|_period_days|_min|_max|per_rupee|per_period)$/.test(id)) return 'number';
+    if (/^(min|max)_/.test(id)) return 'number';
+    if (/(_required|_included|_allowed|_eligible|_excluded|_only|_enabled|_supported|_available|_match|_reversal|_waiver|_upgrade|_linkage)$/.test(id)) return 'bool';
+    if (['boarding_pass_required', 'dcc_supported', 'p2p_eligible', 'room_upgrade', 'status_benefit',
+        'upgrade_benefit', 'breakfast', 'caddie_included', 'guest_allowed', 'reservation_required',
+        'booking_required', 'dine_in_only', 'tip_excluded', 'tax_excluded', 'international_support',
+        'travel_requirement', 'automatic_waiver', 'partial_waiver_allowed', 'lesson_available',
+        'merchant_transaction_eligible', 'international_reward_eligible', 'upi_enabled',
+        'meet_and_greet'].includes(id)) return 'bool';
+    return 'text';
+}
+
+function benefitFieldControl(spec) {
+    const [id, kind, vocabKey] = Array.isArray(spec) ? spec : [spec];
+    const label = id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const type = kind || benefitFieldType(id);
+    let control;
+    if (type === 'select' || type === 'multi') {
+        const opts = sortOptions(window.BENEFIT_VOCAB[vocabKey] || []).map(o => `<option value="${o}">${o}</option>`).join('');
+        control = `<select class="form-select form-select-sm" data-bfield="${id}" ${type === 'multi' ? 'multiple' : ''}>
+            ${type === 'multi' ? '' : '<option value=""></option>'}${opts}</select>`;
+    } else if (type === 'bool') {
+        control = `<select class="form-select form-select-sm" data-bfield="${id}"><option value=""></option><option>Yes</option><option>No</option><option>Conditional</option></select>`;
+    } else if (type === 'date') {
+        control = `<input type="date" class="form-control form-control-sm" data-bfield="${id}">`;
+    } else if (type === 'number') {
+        control = `<input type="number" step="any" class="form-control form-control-sm" data-bfield="${id}">`;
+    } else if (type === 'url') {
+        control = `<input type="url" class="form-control form-control-sm" placeholder="https://..." data-bfield="${id}">`;
+    } else {
+        control = `<input type="text" class="form-control form-control-sm" data-bfield="${id}">`;
+    }
+    return `<div class="col-md-4 col-sm-6 mb-2">
+        <label class="form-label-sm mb-1">${label}${(type === 'select' || type === 'multi') ? ' <span class="text-primary">▾</span>' : ''}</label>
+        ${control}
+    </div>`;
+}
+
+// ================================================================
 // 14. COLUMN GROUP TOGGLES & DATA COMPARISON
 // ================================================================
 
@@ -4408,20 +4771,6 @@ function buildImportPanel() {
             </div>
         </div>
 
-        <div class="alert alert-light border d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
-            <div>
-                <strong><i class="fas fa-database me-1"></i> Import Full Workbook</strong>
-                <small class="text-muted d-block">Reads every sheet of the source workbook and replaces the matching table in Supabase (1 table per sheet, all columns).</small>
-            </div>
-            <div>
-                <button class="btn btn-dark btn-sm" onclick="document.getElementById('fullWorkbookInput').click()">
-                    <i class="fas fa-file-arrow-up me-1"></i> Choose Workbook &amp; Import
-                </button>
-                <input type="file" id="fullWorkbookInput" accept=".xlsx,.xls" style="display:none;" onchange="importFullWorkbook(event)">
-            </div>
-        </div>
-        <div id="workbookImportLog" class="small mb-3" style="display:none; white-space:pre-wrap; font-family:monospace; background:#0b1020; color:#c8d3f5; padding:10px; border-radius:6px; max-height:260px; overflow:auto;"></div>
-
         <div id="excelDataTableContainer">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div>
@@ -4689,7 +5038,7 @@ const IMPORT_VALID_OPTIONS = {
     ageMax: ['All','<40','<50','<60','<70','<75','<80'],
     empType: ['Salaried','Business','Self Employed','All'],
     salary: ['NA','1.8L+','2.4L+','3L+','3.6L+','6L+','10L+','12L+','18L+','24L+','30L+'],
-    productType: ['General','Business','Corporate','FD backed','Invite Only','Others'],
+    productType: ['General','Retail','Consumer','Business','Commercial','Corporate','FD backed','Invite Only','Others'],
     nationality: ['Resident Indian','NRI','Foreign National','OCI / PIO','Any'],
     fee_joining_type: ['Custom','LTF'],
     fee_waiver_period: ['Monthly','Quarterly','Half-Yearly','Yearly','Birthday','Anniversary','Festival'],
@@ -4892,59 +5241,28 @@ async function saveImportData() {
         alert('No data to save. Please import an Excel file first.');
         return;
     }
+    await assignAutoCardIds(importedData);   // ignore any Card ID in the sheet
     if (await RGDB.saveCards(importedData)) {
-        alert(`✅ ${importedData.length} card records saved to Supabase.`);
+        alert(`✅ ${importedData.length} card records saved to Supabase (Card IDs auto-generated).`);
+    }
+}
+
+// Overwrite every row's Card ID with a fresh ISSUER-VAR-NET-NNNN, whatever the
+// sheet had. Sequence continues from the highest already in the DB per prefix.
+async function assignAutoCardIds(rows) {
+    const g = (row, key) => String(getColVal(row, key) || '').trim();
+    const nextByPrefix = {};
+    for (const row of rows) {
+        const parts = [issuerCode(g(row, 'issuer')), shortCode(g(row, 'product'), 3), networkCode(g(row, 'network'))].filter(Boolean);
+        const prefix = parts.length ? parts.join('-') : 'CARD';
+        if (nextByPrefix[prefix] === undefined) nextByPrefix[prefix] = await nextCardSeq(prefix);
+        const id = `${prefix}-${String(nextByPrefix[prefix]++).padStart(4, '0')}`;
+        setColVal(row, 'id', id);
     }
 }
 
 function handleExcelImport(event) {
     // Legacy – kept for compatibility
-}
-
-// Full-workbook import: read every sheet named in WORKBOOK_SCHEMA, map each row
-// positionally to its wb_* table, and replace that table's contents in Supabase.
-async function importFullWorkbook(event) {
-    const file = event.target.files[0];
-    event.target.value = '';
-    if (!file) return;
-    if (!window.WORKBOOK_SCHEMA) { alert('workbook_schema.js not loaded.'); return; }
-    if (!RGDB.configured) { alert('Supabase not configured — set keys in js/config.js.'); return; }
-    if (!confirm('This REPLACES every wb_* table with the contents of this workbook. Continue?')) return;
-
-    const logEl = document.getElementById('workbookImportLog');
-    logEl.style.display = 'block';
-    logEl.textContent = `Reading ${file.name} …\n`;
-    const log = (m) => { logEl.textContent += m + '\n'; logEl.scrollTop = logEl.scrollHeight; };
-
-    let wb;
-    try {
-        wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: 'array' });
-    } catch (e) { alert('Could not read the file: ' + e.message); return; }
-
-    let sheetsDone = 0, rowsTotal = 0, failed = 0;
-    for (const [sheetName, def] of Object.entries(WORKBOOK_SCHEMA)) {
-        const ws = wb.Sheets[sheetName];
-        if (!ws) { log(`skip  ${sheetName}  (not in file)`); continue; }
-
-        const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-        const recs = [];
-        for (let r = 1; r < grid.length; r++) {
-            const row = grid[r];
-            if (!row || row.every(c => c === '' || c == null)) continue;
-            const rec = {};
-            def.cols.forEach((col, i) => {
-                const v = row[i];
-                rec[col] = (v === '' || v == null) ? null : String(v);
-            });
-            recs.push(rec);
-        }
-
-        const n = await RGDB.replaceRows(def.table, recs);
-        if (n < 0) { failed++; log(`FAIL  ${def.label}  ->  ${def.table}`); }
-        else { sheetsDone++; rowsTotal += n; log(`ok    ${def.label.padEnd(26)} ->  ${def.table.padEnd(28)} ${n} rows`); }
-    }
-    log(`\nDone. ${sheetsDone} sheets, ${rowsTotal} rows${failed ? `, ${failed} FAILED` : ''}.`);
-    alert(`Workbook import finished: ${sheetsDone} sheets, ${rowsTotal} rows${failed ? ` (${failed} failed — see log)` : ''}.`);
 }
 
 // ================================================================
@@ -5265,8 +5583,14 @@ async function saveAllToDatabase() {
             fees: document.getElementById('benefit_fees').checked,
             contactless: document.getElementById('benefit_contactless').checked,
             tokenEnabled: document.getElementById('benefit_tokenEnabled').checked,
-            upiSupported: document.getElementById('benefit_upiSupported').checked
+            upiSupported: document.getElementById('benefit_upiSupported').checked,
+            // every benefit in the grouped checklist (flag only)
+            ...Object.fromEntries(allWizardBenefitIds().map(id => {
+                const el = document.getElementById(id);
+                return [id.replace('benefit_', ''), !!(el && el.checked)];
+            }))
         },
+        benefitSpec: collectWizardBenefitSpec(),   // spec §8 detail fields per benefit
         offers: offers
     };
     // Flatten the wizard's nested cardData onto FIXED_COLUMNS keys for the cards table.
@@ -5323,7 +5647,8 @@ function showPage(pageId) {
         importOffers: 'Import Offers',
         importBenefits: 'Import Preferred Benefits',
         importMcc: 'MCC Imports',
-        extractBenefits: 'Extract Benefits'
+        extractBenefits: 'Extract Benefits',
+        allData: 'All Data Check'
     };
     document.getElementById('pageTitle').innerText = titles[pageId] || 'RewardGenius';
 
@@ -5334,7 +5659,8 @@ function showPage(pageId) {
         importOffers: 'nav-importOffers',
         importBenefits: 'nav-importBenefits',
         importMcc: 'nav-importMcc',
-        extractBenefits: 'nav-extractBenefits'
+        extractBenefits: 'nav-extractBenefits',
+        allData: 'nav-allData'
     };
     const navId = navMap[pageId];
     if (navId) document.getElementById(navId).classList.add('active');
@@ -5363,6 +5689,8 @@ function showPage(pageId) {
         if (sheetImportState['importMcc']) document.getElementById('si_actions_importMcc').hidden = false;
     } else if (pageId === 'extractBenefits') {
         document.getElementById('extractBenefitsContainer').innerHTML = buildExtractBenefitsPanel();
+    } else if (pageId === 'allData') {
+        document.getElementById('allDataContainer').innerHTML = buildAllDataPanel();
     }
 }
 

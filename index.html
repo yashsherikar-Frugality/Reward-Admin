@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css?v=8" />
 </head>
 <body>
 
@@ -26,6 +26,7 @@
         <a href="#" class="nav-link" id="nav-importBenefits" onclick="showPage('importBenefits')"><i class="fas fa-gift"></i> Import Preferred Benefits</a>
         <a href="#" class="nav-link" id="nav-importMcc" onclick="showPage('importMcc')"><i class="fas fa-list"></i> MCC Imports</a>
         <a href="#" class="nav-link" id="nav-extractBenefits" onclick="showPage('extractBenefits')"><i class="fas fa-file-export"></i> Extract Benefits</a>
+        <a href="#" class="nav-link" id="nav-allData" onclick="showPage('allData')"><i class="fas fa-magnifying-glass"></i> All Data Check</a>
     </nav>
 
     <div class="main-content" id="mainContent">
@@ -71,6 +72,11 @@
                     <div id="extractBenefitsContainer"></div>
                 </div>
             </div>
+            <div id="view-allData" class="page-view">
+                <div class="card-modern">
+                    <div id="allDataContainer"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -89,9 +95,10 @@
     <script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js">
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-    <script src="js/config.js"></script>
-    <script src="js/workbook_schema.js"></script>
-    <script src="js/db.js"></script>
-    <script src="js/script1.js?v=3"></script>
+    <script src="js/config.js?v=8"></script>
+    <script src="js/workbook_schema.js?v=8"></script>
+    <script src="js/benefit_spec.js?v=8"></script>
+    <script src="js/db.js?v=8"></script>
+    <script src="js/script1.js?v=8"></script>
 </body>
 </html>
