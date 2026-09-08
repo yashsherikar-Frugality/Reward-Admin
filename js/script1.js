@@ -4751,63 +4751,8 @@ function diffLegendStickyRow(colspan) {
 }
 
 function buildImportPanel() {
-    return `
-    <div class="import-panel">
-        <div class="row g-3 mb-4">
-            <div class="col-12" style="margin-top: 0;">
-                <div class="upload-layout">
-                    <div class="upload-zone-button-wrapper">
-                    <div>
-                       <div class="upload-icon-badge"><i class="fas fa-cloud-arrow-up"></i></div>
-                       <button class="btn btn-primary btn-upload" onclick="document.getElementById('excelFileInputImport').click()">
-                            <i class="fas fa-file-arrow-up me-2"></i> Choose Excel File
-                        </button>
-                        <small class="text-muted d-block mt-1">Supports multiple sheets: Card Details, Offers, Preferred Benefits, MCC</small>
-                        <input type="file" id="excelFileInputImport" accept=".xlsx,.xls" style="display:none;" onchange="handleMultiSheetExcelImport(event)">
-                    </div>
-                    </div>
-                    ${DIFF_COLOR_LEGEND_HTML}
-                </div>
-            </div>
-        </div>
-
-        <div id="excelDataTableContainer">
-            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <div>
-                    <h6 class="fw-bold d-inline me-2">Imported Data</h6>
-                    <span id="recordCount" class="badge bg-primary">0 records</span>
-                </div>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary btn-sm" onclick="compareAllWithDatabase()" title="Compares Cards + Offers + Benefits + MCC together"><i class="fas fa-code-compare me-1"></i>Compare with Database</button>
-                    <button class="btn btn-outline-success btn-sm" onclick="exportImportData()"><i class="fas fa-download me-1"></i>Export CSV</button>
-                    <span class="filter-icon-group">
-                        <span class="filter-icon-box"><i class="fas fa-sliders"></i></span>
-                        <select class="form-select form-select-sm" style="width:auto;" onchange="if(this.value==='show')showAllGroups(); else if(this.value==='hide')hideAllGroups(); this.selectedIndex=0;">
-                            <option value="" selected disabled>Filter Sheet</option>
-                            <option value="show">Show All Columns</option>
-                            <option value="hide">Hide All Columns</option>
-                        </select>
-                    </span>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="clearImportData()"><i class="fas fa-times me-1"></i>Clear</button>
-                </div>
-            </div>
-            <div id="comparisonSummary" style="display:none;" class="mb-3"></div>
-            <div class="mb-3">
-                <input type="text" id="importSearchInput" class="form-control form-control-sm" placeholder="Search imported data..." oninput="filterImportTable(this.value)">
-            </div>
-            <div id="cardGroupToggleBar" class="group-toggle-bar mb-3"></div>
-            <div class="table-responsive" style="max-height: 600px; overflow-y: auto; border: 1px solid #0b0b0b; border-radius: 8px;">
-                <table class="table table-bordered table-striped table-hover mb-0" id="excelDataTable">
-                    <thead id="excelTableHead" class="sticky-top bg-white"></thead>
-                    <tbody id="excelTableBody"></tbody>
-                </table>
-            </div>
-            <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-success" onclick="saveImportData()"><i class="fas fa-save me-2"></i>Save in Database</button>
-            </div>
-        </div>
-    </div>
-    `;
+    return buildSheetImportPanel('import', 'Import From Excel',
+        'Upload one workbook with any of the project sheets (Card Details, Lounge, Golf, Dining, … Offers, MCC). Every column is mapped to its field and every sheet is saved to its table. Card IDs on the Card Details sheet are auto-generated — leave that column blank.');
 }
 
 // FIXED_COLUMNS – removed fuel detail columns, kept benefit_fuel
@@ -5287,10 +5232,10 @@ const PAGE_SHEET_LABELS = {
 const sheetImportState = {};   // pageId -> [{ def, sheetName, rows, compared }]
 
 function schemaDefsForPage(pageId) {
+    const all = Object.entries(window.WORKBOOK_SCHEMA || {}).map(([sheetName, def]) => ({ sheetName, def }));
+    if (pageId === 'import') return all;   // Import From Excel = every sheet
     const want = PAGE_SHEET_LABELS[pageId] || [];
-    return Object.entries(window.WORKBOOK_SCHEMA || {})
-        .filter(([, d]) => want.includes(d.label))
-        .map(([sheetName, def]) => ({ sheetName, def }));
+    return all.filter(({ def }) => want.includes(def.label));
 }
 
 function buildSheetImportPanel(pageId, title, blurb) {
@@ -5415,8 +5360,17 @@ async function saveSheetImport(pageId) {
     const state = sheetImportState[pageId] || [];
     if (!state.length) { alert('Load a file first.'); return; }
     if (!confirm(`This REPLACES ${state.map(s => s.def.table).join(', ')} with the loaded rows. Continue?`)) return;
+
+    // Card Details sheet: auto-generate every Card ID (ignore the sheet's value).
+    let idMap = null;
+    const cardSheet = state.find(s => s.def.table === 'wb_card_details');
+    if (cardSheet) idMap = await regenCardSheetIds(cardSheet);
+
     let total = 0, failed = 0;
     for (const s of state) {
+        // Re-point child sheets to the regenerated Card IDs where we can match them.
+        if (idMap && s !== cardSheet && s.def.cardIdCol) remapChildCardIds(s, idMap);
+
         const recs = s.rows.map(r => {
             const rec = {};
             s.def.cols.forEach(c => { rec[c] = (r[c] === '' || r[c] == null) ? null : r[c]; });
@@ -5425,7 +5379,46 @@ async function saveSheetImport(pageId) {
         const n = await RGDB.replaceRows(s.def.table, recs);
         if (n < 0) failed++; else total += n;
     }
-    alert(`Saved ${total} rows to ${state.length - failed} table(s)${failed ? `, ${failed} failed (see console)` : ''}.`);
+    alert(`Saved ${total} rows to ${state.length - failed} table(s)${failed ? `, ${failed} failed (see console)` : ''}.`
+        + (idMap ? `\nCard IDs auto-generated.` : ''));
+}
+
+// Overwrite each card row's id with a fresh ISSUER-VAR-NET-NNNN. Returns a map
+// { oldId|matchKey -> newId } so child sheets can be re-linked.
+async function regenCardSheetIds(s) {
+    const idc = s.def.cardIdCol || 'cardid';
+    const col = (row, name) => {
+        const k = s.def.cols.find(c => c === name) || name;
+        return String(row[k] || '').trim();
+    };
+    const matchKey = (issuer, name, network) => [issuer, name, network].map(x => x.toLowerCase()).join('|');
+    const nextByPrefix = {};
+    const map = {};
+    for (const row of s.rows) {
+        const issuer = col(row, 'issuer'), name = col(row, 'product') || col(row, 'card_name') || col(row, 'cardname');
+        const network = col(row, 'network');
+        const prefix = [issuerCode(issuer), shortCode(name, 3), networkCode(network)].filter(Boolean).join('-') || 'CARD';
+        if (nextByPrefix[prefix] === undefined) nextByPrefix[prefix] = await nextCardSeq(prefix);
+        const newId = `${prefix}-${String(nextByPrefix[prefix]++).padStart(4, '0')}`;
+        const old = String(row[idc] || '').trim();
+        if (old) map[old.toLowerCase()] = newId;
+        map[matchKey(issuer, name, network)] = newId;
+        row[idc] = newId;
+    }
+    return map;
+}
+
+function remapChildCardIds(s, idMap) {
+    const idc = s.def.cardIdCol;
+    const col = (row, name) => String(row[(s.def.cols.find(c => c === name) || name)] || '').trim();
+    s.rows.forEach(row => {
+        const cur = String(row[idc] || '').trim().toLowerCase();
+        const byOld = idMap[cur];
+        const byMatch = idMap[[col(row, 'issuer'), col(row, 'card_name') || col(row, 'cardname'), col(row, 'network')]
+            .map(x => x.toLowerCase()).join('|')];
+        const to = byOld || byMatch;
+        if (to) row[idc] = to;
+    });
 }
 
 function clearSheetImport(pageId) {
@@ -5668,13 +5661,9 @@ function showPage(pageId) {
     if (pageId === 'dataEntry') {
         showInitialPage();
     } else if (pageId === 'import') {
-        const container = document.getElementById('importContainer');
-        container.innerHTML = buildImportPanel();
-        renderImportTable(importedData);
-        if (importedData.some(r => r._status)) {
-            updateComparisonSummary();
-            document.getElementById('comparisonSummary').style.display = 'block';
-        }
+        document.getElementById('importContainer').innerHTML = buildImportPanel();
+        renderSheetImportPreview('import');
+        if (sheetImportState['import']) document.getElementById('si_actions_import').hidden = false;
     } else if (pageId === 'importOffers') {
         document.getElementById('importOffersContainer').innerHTML = buildImportOffersPanel();
         renderSheetImportPreview('importOffers');
