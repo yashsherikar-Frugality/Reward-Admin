@@ -34,6 +34,16 @@
         redemption_type: ['Voucher', 'Cash', 'Travel', 'Transfer', 'Product', 'Statement credit', 'Reward balance'], // §10
         valuation_basis: ['Published', 'Market', 'Conservative', 'Realistic'],             // §10
         partner_type: ['Airline', 'Hotel', 'Voucher', 'Retail', 'Cashback'],              // §11
+        partner_redemption_mode: [
+            'Cashback (1 : 0.25 RP)',
+            'Voucher (1 : 0.5 RP)',
+            'Travel / Hotel — Partner (1 : 1 RP)',
+            'Travel / Hotel — Others (1 : 0.5 RP)',
+            'Miles — KrisFlyer (1 : 1)',
+            'Miles — Accor (1 : 1.2)',
+            'Miles — Others (1 : 0.75)',
+            'Other',
+        ],
         cap_period: ['Monthly', 'Quarterly', 'Half-Yearly', 'Yearly', 'Statement cycle'], // §9/§11
 
         currency: ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD'],
@@ -91,6 +101,7 @@
         // Travel / hotel / airline
         booking_channel: ['Issuer travel portal', 'Partner website', 'Concierge', 'Any channel', 'Co-brand app'],
         hotel_program: ['Marriott Bonvoy', 'Hilton Honors', 'IHG One Rewards', 'Accor ALL', 'World of Hyatt', 'Taj InnerCircle', 'Club ITC', 'Radisson Rewards'],
+        hotel_sub_benefits: ['Room Upgrade', 'Complimentary Night', 'Breakfast', 'Early Check-in', 'Late Check-out', 'Airport Transfer', 'Travel Credit', 'Dining Credit', 'Spa Credit', 'Loyalty Points', 'Status Match', 'Lounge Access', 'Travel Concierge', 'Other'],
         airline_program: ['Air India Flying Returns', 'Club Vistara', 'IndiGo 6E Rewards', 'KrisFlyer', 'Executive Club', 'Skywards', 'Privilege Club', 'Flying Blue', 'Miles & More'],
 
         // UPI
@@ -298,6 +309,7 @@
         Hotel: {
             label: 'Hotel',
             fields: [
+                ['hotel_sub_benefits', 'multi', 'hotel_sub_benefits'],
                 'hotel_partner',
                 ['hotel_program', 'select', 'hotel_program'],
                 'discount_percent', 'room_upgrade', 'complimentary_night',

@@ -1202,19 +1202,7 @@ body {
     animation: rewardPanelIn 0.18s ease-out;
 }
 
-.reward-custom-col .form-control {
-    border-color: #16a34a;
-    background-color: #fff;
-}
-
-.reward-custom-col .form-control:focus {
-    border-color: #16a34a;
-    box-shadow: 0 0 0 0.15rem rgba(22, 163, 74, 0.18);
-}
-
-.reward-custom-col .form-floating > label {
-    color: #16a34a;
-}
+.reward-custom-col .form-control { background-color: #fff; }
 
 /* ============================================================
    UI POLISH PASS — appended last so it wins the cascade.
@@ -1295,3 +1283,118 @@ body {
 }
 
 .badge { border-radius: 6px; font-weight: 600; letter-spacing: 0.2px; }
+
+/* ===== Sheet-import preview: per-cell diff + validation ===== */
+td.diff-added   { background: #dcfce7 !important; }
+td.diff-changed { background: #fef9c3 !important; }
+td.diff-removed { background: #fee2e2 !important; }
+td.cell-invalid { /* no red border / fill — dark-red text only, see below */ }
+.diff-swatch { display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:middle; margin-right:4px; border:1px solid rgba(0,0,0,.15); }
+.diff-swatch.diff-added   { background:#dcfce7; }
+.diff-swatch.diff-changed { background:#fef9c3; }
+.diff-swatch.diff-removed { background:#fee2e2; }
+.diff-swatch.cell-invalid { background:#fee2e2; border-color:#ef4444; }
+
+/* ===== Invalid import cell: dark-red text, click to fix ===== */
+td.cell-invalid { color: #8b0000 !important; font-weight: 600; background: transparent !important; outline: none !important; }
+td.cell-invalid.clickable-fix { cursor: pointer; text-decoration: underline dotted #8b0000; }
+td.cell-invalid.clickable-fix:hover { background: #f1f5f9 !important; }
+
+/* ============================================================
+   UNIFIED INPUT STYLE — matches the All Data Check search box.
+   Applied to every text input / select in the project.
+   ============================================================ */
+:root { --input-height: 2.3rem; }
+
+.form-control,
+.form-select,
+.form-floating > .form-control,
+.form-floating > .form-select,
+.input-group > .form-control,
+.input-group > .form-select,
+.input-group-sm > .form-control,
+.input-group-sm > .form-select,
+.form-control-sm,
+.form-select-sm {
+    min-height: 2.3rem !important;
+    height: 2.3rem !important;
+    padding: 0.35rem 0.6rem !important;
+    font-size: 0.8rem !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    background: #fff;
+    color: #1e293b;
+    box-shadow: none;
+}
+.form-control:focus,
+.form-select:focus,
+.form-floating > .form-control:focus,
+.form-floating > .form-select:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    outline: none;
+}
+.form-control::placeholder { color: #94a3b8; opacity: 1; }
+.form-control:disabled,
+.form-select:disabled { background: #f1f5f9; opacity: 0.7; }
+
+/* keep the floating label aligned with the taller field */
+.form-floating > .form-control:not(:placeholder-shown),
+.form-floating > .form-control:focus,
+.form-floating > .form-select.filled,
+.form-floating > .form-select:focus {
+    padding-top: 1rem !important;
+    padding-bottom: 0.15rem !important;
+}
+
+/* ---- unified input style: stronger coverage (Choices.js + high-specificity overrides) ---- */
+#app-views input.form-control,
+#app-views select.form-select,
+#app-views .form-floating > .form-control,
+#app-views .form-floating > .form-select,
+#app-views .form-control-sm,
+#app-views .form-select-sm,
+#app-views .input-group > .form-control,
+#app-views .input-group > .form-select,
+#excelDataTableContainer .form-control-sm,
+#offerImportTableContainer .form-control-sm,
+#mccImportTableContainer .form-control-sm {
+    height: 2.3rem !important;
+    min-height: 2.3rem !important;
+    font-size: 0.8rem !important;
+    padding: 0.35rem 0.6rem !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    color: #1e293b !important;
+}
+#app-views input.form-control:focus,
+#app-views select.form-select:focus,
+#app-views .form-floating > .form-control:focus,
+#app-views .form-floating > .form-select:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+}
+#app-views .choices__inner {
+    min-height: 2.3rem !important;
+    font-size: 0.8rem !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    padding: 0.25rem 0.5rem !important;
+}
+#app-views .choices.is-focused .choices__inner {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+}
+
+/* ===== Offer form — sectioned redesign ===== */
+.offer-row { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+.offer-sec { border: 1px solid #eef1f5; border-radius: 8px; padding: 10px 12px 6px; margin-bottom: 10px; background: #fcfdff; }
+.offer-sec-h { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #64748b; margin-bottom: 8px; }
+.offer-row .reward-fields-panel { background: transparent; }
+.offer-row .form-control.is-invalid,
+.offer-row .form-select.is-invalid {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+}

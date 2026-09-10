@@ -245,6 +245,29 @@
         } catch (e) { fail('fetch ' + table + ' where ' + col, e); return []; }
     }
 
+    // Rows where `col` is in `values` (list). Empty list -> no rows.
+    async function fetchWhereIn(table, col, values) {
+        if (!sb) { notConfigured(); return []; }
+        if (!col || !values || !values.length) return [];
+        try {
+            const { data, error } = await sb.from(table).select('*').in(col, values);
+            if (error) throw error;
+            return data || [];
+        } catch (e) { fail('fetch ' + table + ' in ' + col, e); return []; }
+    }
+
+    // Rows matching an {col: value} filter (case-insensitive equals per key).
+    async function fetchByFilter(table, filter) {
+        if (!sb) { notConfigured(); return []; }
+        try {
+            let q = sb.from(table).select('*');
+            Object.entries(filter).forEach(([k, v]) => { if (v) q = q.ilike(k, String(v).trim()); });
+            const { data, error } = await q;
+            if (error) throw error;
+            return data || [];
+        } catch (e) { fail('fetch ' + table + ' by filter', e); return []; }
+    }
+
     // Wipe a table and insert `rows` (chunked). Used by the full-workbook import,
     // where the spreadsheet is the single source of truth for that table.
     async function replaceRows(table, rows) {
@@ -275,6 +298,6 @@
         fetchOffers, saveOffers,
         fetchMcc, saveMcc,
         fetchBenefits, saveBenefits,
-        fetchTable, fetchWhere, replaceRows
+        fetchTable, fetchWhere, fetchWhereIn, fetchByFilter, replaceRows
     };
 })();

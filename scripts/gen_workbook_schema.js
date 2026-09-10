@@ -198,8 +198,6 @@ wb.SheetNames.forEach((sheet) => {
     const cardIdCol = cols[rawHeader.findIndex((h) => /^card ?id$/i.test(h))] || null;
 
     // `cols` is positional: column i in the sheet's header row -> cols[i].
-    // The importer maps by position, so duplicate headers (Lounge Int/Dom blocks)
-    // are all preserved. Re-run the generator if a sheet's columns are reordered.
     // key = real sheet name (needed to find the sheet in the uploaded file);
     // label = bank-stripped, shown on the Extract Benefits checkboxes.
     schema[sheet] = { table, label: stripBank(sheet), cardIdCol, cols };

@@ -577,8 +577,7 @@ function showInitialPage() {
         document.getElementById('search_product').value = '';
     });
     document.getElementById('search_network').addEventListener('change', function() {
-        const subNets = NETWORKS[this.value] || [];
-        populateDropdown('search_subNetwork', subNets);
+        populateDropdown('search_subNetwork', subNetOptions(this.value));
         document.getElementById('search_subNetwork').value = '';
     });
     document.getElementById('search_instrument').addEventListener('change', toggleSearchCardFields);
@@ -658,7 +657,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                     <div class="col-md-3">${createSelectField('issuer', 'Issuer/Bank', Object.keys(ISSUER_PRODUCTS), data.issuer)}</div>
                     <div class="col-md-2">${createSelectField('product', 'Variant', data.issuer ? ISSUER_PRODUCTS[data.issuer] || [] : [], data.product)}</div>
                     <div class="col-md-2">${createSelectField('network', 'Network', Object.keys(NETWORKS), data.network)}</div>
-                    <div class="col-md-3">${createSelectField('subNetwork', 'Sub Network', data.network ? NETWORKS[data.network] || [] : [], data.subNetwork)}</div>
+                    <div class="col-md-3">${createSelectField('subNetwork', 'Sub Network', data.network ? subNetOptions(data.network) : [], data.subNetwork)}</div>
                 </div>
                 <div class="row g-2 mt-2 pt-2 border-top">
                     <div class="col-12"><h6 class="text-primary small fw-bold mb-2"><i class="fas fa-images me-2"></i>Brand & Images</h6></div>
@@ -754,7 +753,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                 <h6><i class="fas fa-check-circle me-2"></i> Eligibility</h6>
                 <div class="row g-2 mb-2">
                     <div class="col-md-4">${createSelectField('ageMin', 'Age Min', ['All', '13+', '18+', '21+', '30+'], elig.ageMin)}</div>
-                    <div class="col-md-4">${createSelectField('ageMax', 'Age Max', ['All', '<40', '<50', '<60', '<70', '<75', '<80'], elig.ageMax)}</div>
+                    <div class="col-md-4">${createSelectField('ageMax', 'Age Max', ['All', '<40', '<45', '<50', '<55', '<60', '<65', '<70', '<75', '<80'], elig.ageMax)}</div>
                     <div class="col-md-4">${createSelectField('creditScore', 'Credit Score', ['Any','<600','<650','<700','<750','<800','600+','650+','700+','750+','800+','850+'], elig.creditScore)}</div>
                 </div>
                 <div class="row g-2 mb-2">
@@ -831,7 +830,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                                     <label for="fuel_max_waiver">Max Waiver (₹)</label>
                                 </div>
                             </div>
-                            <div class="col-md-3">${createSelectField('fuel_period', 'Max Waiver Period', ['Monthly','Quarterly','Yearly'], data.benefits && data.benefits.fuelDetails ? data.benefits.fuelDetails.period : '')}</div>
+                            <div class="col-md-3">${createSelectField('fuel_waiver_period', 'Fuel Waiver Period', ['Monthly','Quarterly','Half-Yearly','Yearly'], data.benefits && data.benefits.fuelDetails ? data.benefits.fuelDetails.period : '')}</div>
                             <div class="col-md-3">
                                 <div class="form-floating">
                                     <input type="text" id="fuel_min_tx" class="form-control form-control-sm" placeholder="500" value="${data.benefits && data.benefits.fuelDetails ? data.benefits.fuelDetails.minTx : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 1, 6)">
@@ -844,6 +843,13 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                                     <label for="fuel_max_tx">Max Tx (₹)</label>
                                 </div>
                             </div>
+                            <div class="col-md-3">
+                                <div class="form-floating">
+                                    <input type="text" id="fuel_max_tx_count" class="form-control form-control-sm" placeholder="e.g. 5" value="${data.benefits && data.benefits.fuelDetails ? (data.benefits.fuelDetails.maxTxCount || '') : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);">
+                                    <label for="fuel_max_tx_count">Max Transaction Count</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">${createSelectField('fuel_count_period', 'Count Period', ['Per Day','Weekly','Monthly','Quarterly','Half-Yearly','Yearly'], data.benefits && data.benefits.fuelDetails ? (data.benefits.fuelDetails.countPeriod || '') : '')}</div>
                         </div>
                     </div>
 
@@ -899,9 +905,10 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                     <div class="col-12 p-2 bg-light rounded border mb-2" id="benefit_dining_details">
                         <h6 class="text-primary small fw-bold mb-1">Dining Discounts Details</h6>
                         <div class="row g-1">
+                            <div class="col-md-3">${createSelectField('dining_platform', 'Platform', ['Zomato','Swiggy','Merchant','Other'], data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.platform : '')}</div>
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <input type="text" id="dining_partner" class="form-control form-control-sm" placeholder="e.g. Zomato, Swiggy" value="${data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.partner : ''}">
+                                    <input type="text" id="dining_partner" class="form-control form-control-sm" placeholder="e.g. EazyDiner, Dineout" value="${data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.partner : ''}">
                                     <label for="dining_partner">Partner</label>
                                 </div>
                             </div>
@@ -909,6 +916,12 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                                 <div class="form-floating">
                                     <input type="text" id="dining_discount_type" class="form-control form-control-sm" placeholder="% or Flat" value="${data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.discountType : ''}">
                                     <label for="dining_discount_type">Discount Type</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-floating">
+                                    <input type="text" id="dining_discount_value" class="form-control form-control-sm" placeholder="e.g. 20% / ₹300" value="${data.benefits && data.benefits.diningDetails ? (data.benefits.diningDetails.discountValue || '') : ''}">
+                                    <label for="dining_discount_value">Discount Type Value</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
@@ -927,6 +940,12 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                                 <div class="form-floating">
                                     <input type="text" id="dining_min_spend" class="form-control form-control-sm" placeholder="₹1000" value="${data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.minSpend : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
                                     <label for="dining_min_spend">Min Spend (₹)</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" id="dining_restaurant_mapping" class="form-control form-control-sm" placeholder="Restaurant mapping (for future)" value="${data.benefits && data.benefits.diningDetails ? (data.benefits.diningDetails.restaurantMapping || '') : ''}">
+                                    <label for="dining_restaurant_mapping">Restaurant Mapping (for future)</label>
                                 </div>
                             </div>
                             <div class="col-12">
@@ -1050,6 +1069,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                         <h6 class="text-primary small fw-bold mb-1">Lounge Access Details</h6>
                         <div class="row g-2 mb-2">
                             <div class="col-md-4">${createSelectField('lounge_program', 'Lounge Program', ['All','Priority Pass','DreamFolks','LoungeKey','Visa Airport Companion','Mastercard Airport Experiences','DragonPass'], data.benefits && data.benefits.loungeDetails ? data.benefits.loungeDetails.program : '')}</div>
+                            <div class="col-md-4">${createSelectField('lounge_usage_type', 'Usage Type', ['Card Swipe','Voucher','PP','Other','TBC'], data.benefits && data.benefits.loungeDetails ? data.benefits.loungeDetails.usageType : '')}</div>
                         </div>
                         <div class="row g-2 border-bottom pb-2 mb-2">
                             <div class="col-12"><span class="badge bg-secondary rounded-pill">Domestic Lounge</span></div>
@@ -1175,7 +1195,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-bold text-primary m-0"><i class="fas fa-tags me-2"></i> Manage Offers</h5>
             <div>
-                <button type="button" class="btn btn-primary" onclick="addOfferRow()"><i class="fas fa-plus me-2"></i> Add Offer</button>
+                <button type="button" class="btn btn-primary" onclick="openOfferTypeModal()"><i class="fas fa-plus me-2"></i> Add Offer</button>
             </div>
         </div>
         <div id="offersContainer"></div>
@@ -1514,6 +1534,18 @@ function clearFieldValue(id) {
     if (el) el.value = '';
 }
 
+// Sub Network options = NETWORKS[net] with the network word stripped
+// ("Mastercard Platinum" -> "Platinum", "World Mastercard" -> "World").
+function stripNetworkWord(sub, net) {
+    if (!sub || !net) return sub;
+    const out = String(sub).replace(new RegExp('\\b' + net.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), '')
+        .replace(/\s{2,}/g, ' ').trim();
+    return out || sub;
+}
+function subNetOptions(net) {
+    return (NETWORKS[net] || []).map(v => stripNetworkWord(v, net));
+}
+
 function attachCardListeners() {
     document.getElementById('issuer').addEventListener('change', function() {
         const products = ISSUER_PRODUCTS[this.value] || [];
@@ -1521,8 +1553,7 @@ function attachCardListeners() {
         autoFillCardId();
     });
     document.getElementById('network').addEventListener('change', function() {
-        const subNets = NETWORKS[this.value] || [];
-        setSelectOptions('subNetwork', subNets);
+        setSelectOptions('subNetwork', subNetOptions(this.value));
         autoFillCardId();
     });
     ['product', 'subNetwork', 'instrument_type'].forEach(id => {
@@ -1710,7 +1741,6 @@ const WIZARD_BENEFIT_SPEC_MAP = {
     benefit_travel: 'Travel',
     benefit_hotel: 'Hotel',
     benefit_airline: 'Airline',
-    benefit_forex: 'Forex / International',
     benefit_airportTransfer: 'Airport Transfer',
     benefit_shopping: 'Shopping',
     benefit_ott: 'OTT / Subscription',
@@ -1758,6 +1788,7 @@ const WIZARD_BENEFIT_GROUPS = [
         ['benefit_roadsideAssistance', 'Roadside Assistance'],
     ]},
     { title: 'Card Features', items: [
+        ['benefit_ltf', 'LTF (Lifetime Free)'],
         ['benefit_statusBenefits', 'Status Benefits'],
         ['benefit_upiSupported', 'UPI Supported'],
         ['benefit_contactless', 'Contactless'],
@@ -1784,8 +1815,15 @@ const WIZARD_BENEFIT_MINI_SPEC = {
     benefit_fees: { label: 'Fees', fields: [['fee_type', 'select', 'fee_type'], 'fee_amount', 'fee_frequency', 'exclusions', 'source_id'] },
     benefit_contactless: { label: 'Contactless', fields: [['available', 'bool'], ['network', 'select', 'network'], 'per_txn_limit', 'notes', 'source_id'] },
     benefit_tokenEnabled: { label: 'Token Enabled', fields: [['available', 'bool'], ['supported_networks', 'multi', 'network'], 'token_provider', 'notes', 'source_id'] },
-    benefit_partnerProgram: { label: 'Partner & Transfer', fields: ['partner_id', ['partner_type', 'select', 'partner_type'], 'partner_name', 'transfer_ratio', 'minimum_transfer', 'transfer_increment', 'transfer_fee', 'transfer_time', 'source_id'] },
-    benefit_upiSupported: { label: 'UPI', fields: ['notes'] }
+    benefit_partnerProgram: { label: 'Partner & Transfer', fields: [
+        ['redemption_mode', 'select', 'partner_redemption_mode'],
+        'partner_name',
+        'conversion_ratio',
+        'minimum_transfer', 'transfer_increment', 'transfer_fee', 'transfer_time', 'notes'
+    ] },
+    benefit_upiSupported: { label: 'UPI', fields: ['notes'] },
+    benefit_ltf: { label: 'LTF (Lifetime Free)', fields: ['notes'] },
+    benefit_forex: { label: 'Forex / International', fields: ['forex_ccy_markup', 'conversion_charge'] }
 };
 
 // One detail box per benefit. If the benefit already has a hand-coded panel
@@ -1872,6 +1910,7 @@ function attachAllListeners() {
     toggleCardFields();
     toggleFeesBlock();
     toggleCardStatusDate();
+    enableOtherOnSelects(document.getElementById('formPanel') || document);
     if (offers.length > 0) {
         document.getElementById('offerTableContainer').style.display = 'block';
     }
@@ -1890,114 +1929,161 @@ function attachAllListeners() {
 // 9. OFFER ROW ENGINE
 // ================================================================
 
+// "Add Offer" -> pick one or more reward types, then open only those offer forms.
+const OFFER_TYPE_GROUPS = {
+    'Currency returned (₹)': ['Cashback', 'Instant Discount', 'Variable Discount', 'Voucher'],
+    'Points / units (non-currency)': ['Reward Points', 'Air Miles', 'Hotel Points', 'Coins'],
+};
+
+function openOfferTypeModal() {
+    let el = document.getElementById('offerTypeModal');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'offerTypeModal';
+        el.className = 'custom-modal-overlay';
+        document.body.appendChild(el);
+    }
+    const groups = Object.entries(OFFER_TYPE_GROUPS).map(([title, types]) => `
+        <div class="mb-2">
+            <div class="fw-bold text-secondary text-uppercase mb-1" style="font-size:0.62rem; letter-spacing:0.5px;">${title}</div>
+            ${types.map(t => createCheckbox('otm_' + t.replace(/\W+/g, '_'), t, false)
+                .replace('type="checkbox"', `type="radio" name="offerRewardType" value="${t}"`)).join('')}
+        </div>`).join('');
+    el.innerHTML = `
+        <div class="custom-modal-box">
+            <h6 class="fw-bold text-primary mb-2"><i class="fas fa-tags me-2"></i>Choose reward type</h6>
+            <div id="offerTypeChecks">${groups}</div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeOfferTypeModal()">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="confirmOfferTypes()"><i class="fas fa-plus me-1"></i>Add offer form</button>
+            </div>
+        </div>`;
+    el.style.display = 'flex';
+}
+function closeOfferTypeModal() {
+    const el = document.getElementById('offerTypeModal');
+    if (el) el.style.display = 'none';
+}
+function confirmOfferTypes() {
+    const picked = (document.querySelector('#offerTypeChecks input[name="offerRewardType"]:checked') || {}).value;
+    if (!picked) { alert('Pick a reward type.'); return; }
+    closeOfferTypeModal();
+    addOfferRow({
+        rewardTypes: [picked], category: '', subCategory: '', paymentScopeType: '',
+        paymentScopeValue: [], merchant: [], rewardFields: {}, platform: ''
+    });
+}
+
+const OFFER_ROW_DEFAULTS = {
+    category: '', subCategory: '', merchant: [], mcc: '', rewardType: '', frequency: '',
+    status: '', days: '', instancePeriod: '', person: '', minTx: '', maxTx: '', maxBenefit: '',
+    startDate: '', endDate: '', weblink: '', paymentScopeType: '', paymentScopeValue: [],
+    rpExpiry: '', rewardCap: '', couponCode: '', platform: '', customPlatform: '', rewardFields: {}
+};
+
 function addOfferRow(data = null) {
+    if (data) data = { ...OFFER_ROW_DEFAULTS, ...data };   // no "undefined" placeholders
     const container = document.getElementById('offersContainer');
     const index = document.querySelectorAll('.offer-row').length;
-    const isEdit = !!data;
+    const isEdit = !!(data && (data.id || data.offerId));
     const row = document.createElement('div');
     row.className = 'offer-row';
     row.dataset.index = index;
+    // one or more reward types (from the Add-Offer picker or a saved "A, B" string)
+    let rewardTypes = [];
+    if (data && Array.isArray(data.rewardTypes) && data.rewardTypes.length) rewardTypes = data.rewardTypes.slice();
+    else if (data && data.rewardType) rewardTypes = String(data.rewardType).split(/\s*,\s*/).filter(Boolean);
+    if (rewardTypes.length) row.dataset.rewardTypes = rewardTypes.join(',');
+    const multiReward = rewardTypes.length > 1;
     let html = `
-    <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
-        <h6 class="fw-bold text-success m-0">${isEdit ? 'Edit' : 'New'} Offer #${index + 1}</h6>
+    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <h6 class="fw-bold text-success m-0">${isEdit ? 'Edit' : 'New'} Offer #${index + 1}</h6>
+            <span class="badge bg-success text-white" style="font-size:0.7rem;">
+                ${rewardTypes.length > 1 ? 'Reward types' : 'Reward type'}: ${rewardTypes.join(' + ') || '—'}
+            </span>
+            <input type="hidden" id="offer_${index}_rewardType" value="${rewardTypes.join(', ')}">
+        </div>
         <button class="btn btn-outline-danger btn-sm" onclick="removeOfferRow(${index})"><i class="fas fa-trash"></i></button>
     </div>
-    <div class="row g-2 mb-2 align-items-end">
-        <div class="col-md-2">${createSelectField(`payment_scope_${index}`, 'Apply Rule By', ['Category','Payment Mode','Location','Merchant'], data ? data.paymentScopeType : '')}</div>
-        <div class="col-md-3">
-            <div class="form-floating">
-                <select id="scope_value_${index}" class="form-select form-select-sm" multiple></select>
-                <label>Apply Value</label>
+
+    <div class="offer-sec">
+        <div class="offer-sec-h">Applies to</div>
+        <div class="row g-2">
+            <div class="col-md-3">${createSelectField(`offer_${index}_category`, 'Category', ['ALL', ...Object.keys(CATEGORY_HIERARCHY)], data ? data.category : '', `onOfferCategoryChange(${index})`)}</div>
+            <div class="col-md-3">${createSelectField(`offer_${index}_subCategory`, 'Sub Category', [])}</div>
+            <div class="col-md-3" id="offer_${index}_scopeTypeWrap">${createSelectField(`payment_scope_${index}`, 'Apply Rule By', ['Category','Payment Mode','Location','Merchant'], data ? data.paymentScopeType : '')}</div>
+            <div class="col-md-3" id="offer_${index}_scopeValWrap">
+                <div class="form-floating"><select id="scope_value_${index}" class="form-select form-select-sm" multiple></select><label>Apply Value</label></div>
             </div>
-        </div>
-        <div class="col-md-2">${createSelectField(`global_rp_expiry_${index}`, 'RP Expiry', ['No Expiry','12 Months','24 Months','36 Months','Custom'], data ? data.rpExpiry : '')}</div>
-    </div>
-    <div class="row g-2 mb-2 align-items-end">
-        <div class="col-md-4">${createSelectField(`offer_${index}_category`, 'Category', ['ALL', ...Object.keys(CATEGORY_HIERARCHY)], data ? data.category : '', `onOfferCategoryChange(${index})`)}</div>
-        <div class="col-md-4">${createSelectField(`offer_${index}_subCategory`, 'Sub Category', [])}</div>
-        <div class="col-md-4">${createSelectField(`offer_${index}_rewardType`, 'Reward Type', Object.keys(REWARD_TYPE_FIELDS), data ? data.rewardType : '', `onRewardTypeChange(${index})`)}</div>
-    </div>
-    <div id="offer_${index}_rewardFields"></div>
-    <div class="row g-2 mb-2">
-        <div class="col-md-2">${createSelectField(`offer_${index}_frequency`, 'Frequency', ['One Time','Monthly','Quarterly','Yearly'], data ? data.frequency : '')}</div>
-        <div class="col-md-2">${createSelectField(`offer_${index}_status`, 'Status', ['Active','Inactive'], data ? data.status : '')}</div>
-        <div class="col-md-3">${createSelectField(`offer_${index}_days`, 'Applicable Days', ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','Weekdays','Weekends','All Days'], data ? data.days : '')}</div>
-        <div class="col-md-2">${createSelectField(`offer_${index}_instance_period`, 'Instance Period', ['Per Transaction','Daily','Weekly','Monthly','Quarterly','Half-Yearly','Yearly'], data ? data.instancePeriod : '')}</div>
-        <div class="col-md-3">${createSelectField(`offer_${index}_person`, 'Applicable Person', ['Primary','Family','Cardholder','Spouse','Children','All Members'], data ? data.person : '')}</div>
-    </div>
-    <div class="row g-2 mb-2">
-        <div class="col-md-3">
-            <div class="form-floating">
-                <input type="text" id="offer_${index}_minTx" class="form-control form-control-sm" placeholder="0" value="${data ? data.minTx : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
-                <label for="offer_${index}_minTx">Min Transaction</label>
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="text" id="offer_${index}_mcc" class="form-control form-control-sm" placeholder="e.g. 5411, 5812" value="${data ? (data.mcc || '') : ''}" onblur="validateMcc(this)">
+                    <label for="offer_${index}_mcc">MCC Code(s) — optional</label>
+                </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-floating">
-                <input type="text" id="offer_${index}_maxTx" class="form-control form-control-sm" placeholder="999999" value="${data ? data.maxTx : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
-                <label for="offer_${index}_maxTx">Max Transaction</label>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-floating">
-                <input type="text" id="offer_${index}_maxBenefit" class="form-control form-control-sm" placeholder="1000" value="${data ? data.maxBenefit : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
-                <label for="offer_${index}_maxBenefit">Max Benefit (₹)</label>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-floating">
-                <input type="url" id="offer_${index}_weblink" class="form-control form-control-sm" placeholder="https://..." value="${data ? data.weblink : ''}">
-                <label for="offer_${index}_weblink">Web Link</label>
+            <div class="col-md-6">
+                <div class="form-floating"><select id="offer_${index}_merchant" class="form-select form-select-sm" multiple></select><label>Merchant — optional</label></div>
             </div>
         </div>
     </div>
-    <div class="row g-2 mb-2">
-        <div class="col-md-3">
-            <div class="form-floating">
+
+    <div class="offer-sec">
+        <div class="offer-sec-h">Reward details</div>
+        <div id="offer_${index}_rewardFields"></div>
+    </div>
+
+    <div class="offer-sec">
+        <div class="offer-sec-h">Limits &amp; timing</div>
+        <div class="row g-2">
+            <div class="col-md-3"><div class="form-floating">
+                <input type="text" id="offer_${index}_minTx" class="form-control form-control-sm" placeholder="0" value="${data ? data.minTx : ''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,7);">
+                <label for="offer_${index}_minTx">Min Transaction (₹)</label></div></div>
+            <div class="col-md-3"><div class="form-floating">
+                <input type="text" id="offer_${index}_maxTx" class="form-control form-control-sm" placeholder="999999" value="${data ? data.maxTx : ''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,7);">
+                <label for="offer_${index}_maxTx">Max Transaction (₹)</label></div></div>
+            <div class="col-md-3" id="offer_${index}_maxBenefitWrap"><div class="form-floating">
+                <input type="text" id="offer_${index}_maxBenefit" class="form-control form-control-sm" placeholder="1000" value="${data ? data.maxBenefit : ''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,7);">
+                <label for="offer_${index}_maxBenefit">Max Benefit (₹)</label></div></div>
+            <div class="col-md-3" id="offer_${index}_rpExpiryWrap">${createSelectField(`global_rp_expiry_${index}`, 'RP Expiry', ['No Expiry','12 Months','24 Months','36 Months','Custom'], data ? data.rpExpiry : '')}</div>
+            <div class="col-md-3" id="offer_${index}_rewardCapWrap" style="display:none;"><div class="form-floating">
+                <input type="text" id="offer_${index}_rewardCap" class="form-control form-control-sm" placeholder="e.g. 5000" value="${data ? (data.rewardCap || '') : ''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,9);">
+                <label for="offer_${index}_rewardCap">Reward Cap (points / units)</label></div></div>
+            <div class="col-md-2">${createSelectField(`offer_${index}_frequency`, 'Frequency', ['One Time','Monthly','Quarterly','Yearly'], data ? data.frequency : '')}</div>
+            <div class="col-md-2">${createSelectField(`offer_${index}_instance_period`, 'Instance Period', ['Per Transaction','Daily','Weekly','Monthly','Quarterly','Half-Yearly','Yearly'], data ? data.instancePeriod : '')}</div>
+            <div class="col-md-3">${createSelectField(`offer_${index}_days`, 'Applicable Days', ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','Weekdays','Weekends','All Days'], data ? data.days : '')}</div>
+            <div class="col-md-3">${createSelectField(`offer_${index}_person`, 'Applicable Person', ['Primary','Family','Cardholder','Spouse','Children','All Members'], data ? data.person : '')}</div>
+            <div class="col-md-2">${createSelectField(`offer_${index}_status`, 'Status', ['Active','Inactive'], data ? data.status : '')}</div>
+        </div>
+    </div>
+
+    <div class="offer-sec">
+        <div class="offer-sec-h">Validity &amp; link</div>
+        <div class="row g-2">
+            <div class="col-md-3"><div class="form-floating">
                 <input type="date" id="offer_${index}_startDate" class="form-control form-control-sm" value="${data ? data.startDate : ''}" placeholder="Start Date">
-                <label for="offer_${index}_startDate">Start Date</label>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-floating">
+                <label for="offer_${index}_startDate">Start Date</label></div></div>
+            <div class="col-md-3"><div class="form-floating">
                 <input type="date" id="offer_${index}_endDate" class="form-control form-control-sm" value="${data ? data.endDate : ''}" placeholder="End Date">
-                <label for="offer_${index}_endDate">End Date</label>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-floating">
+                <label for="offer_${index}_endDate">End Date</label></div></div>
+            <div class="col-md-3"><div class="form-floating">
+                <input type="url" id="offer_${index}_weblink" class="form-control form-control-sm" placeholder="https://..." value="${data ? data.weblink : ''}">
+                <label for="offer_${index}_weblink">Web Link</label></div></div>
+            <div class="col-md-3"><div class="form-floating">
                 <input type="text" id="offer_${index}_couponCode" class="form-control form-control-sm" placeholder="e.g. SUMMER20" value="${data ? data.couponCode || '' : ''}">
-                <label for="offer_${index}_couponCode">Coupon Code</label>
-            </div>
-        </div>
-        <div class="col-md-3">${createSelectField(`offer_${index}_platform`, 'Platform', ['Zomato Gold','Smart Buy','Other'], data ? data.platform : '', `toggleCustomPlatform(${index})`)}</div>
-    </div>
-    <div class="row g-2 mb-2" id="offer_${index}_customPlatformRow" style="${data && data.platform === 'Other' ? '' : 'display:none;'}">
-        <div class="col-md-3 offset-md-9">
-            <div class="form-floating">
-                <input type="text" id="offer_${index}_customPlatform" class="form-control form-control-sm" placeholder="Enter platform name" value="${data && data.platform === 'Other' ? (data.customPlatform || '') : ''}">
-                <label for="offer_${index}_customPlatform">Custom Platform</label>
+                <label for="offer_${index}_couponCode">Coupon Code</label></div></div>
+            <div class="col-md-3">${createSelectField(`offer_${index}_platform`, 'Platform', ['Zomato Gold','Smart Buy','Other'], data ? data.platform : '', `toggleCustomPlatform(${index})`)}</div>
+            <div class="col-md-3" id="offer_${index}_customPlatformRow" style="${data && data.platform === 'Other' ? '' : 'display:none;'}">
+                <div class="form-floating">
+                    <input type="text" id="offer_${index}_customPlatform" class="form-control form-control-sm" placeholder="Enter platform name" value="${data && data.platform === 'Other' ? (data.customPlatform || '') : ''}">
+                    <label for="offer_${index}_customPlatform">Custom Platform</label>
+                </div>
             </div>
         </div>
     </div>
-    <H3><small class="text-muted">Optional Filters</small></H3>
-    <div class="row g-2 mb-2 border-top pt-2">
-        <div class="col-md-6">
-            <div class="form-floating">
-                <input type="text" id="offer_${index}_mcc" class="form-control form-control-sm" placeholder="e.g. 5411, 5812" value="${data ? (data.mcc || '') : ''}" onblur="validateMcc(this)">
-                <label for="offer_${index}_mcc">MCC Code(s)</label>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-floating">
-                <select id="offer_${index}_merchant" class="form-select form-select-sm" multiple></select>
-                <label>Merchant</label>
-            </div>
-        </div>
-        <div class="col-md-6 text-end align-self-center"></div>
-        <div class="col-md-6 text-end align-self-center">
-            <button class="btn btn-success btn-sm" onclick="saveOffer(${index})"><i class="fas fa-save me-1"></i> Save to List</button>
-        </div>
+
+    <div class="d-flex justify-content-end pt-2 border-top">
+        <button class="btn btn-success btn-sm" onclick="saveOffer(${index})"><i class="fas fa-save me-1"></i> Save to List</button>
     </div>`;
     row.innerHTML = html;
     container.appendChild(row);
@@ -2035,6 +2121,61 @@ function wireFloatingLabels(root) {
         });
     });
     refreshFloatingLabels(root);
+    enableOtherOnSelects(root);
+}
+
+// Any <select> that has an "Other" / "Others" option gets an inline text box:
+// choosing Other reveals it, and what you type becomes the select's value
+// (a dynamic <option>), so every existing `select.value` read still works.
+function enableOtherOnSelects(root) {
+    (root || document).querySelectorAll('select').forEach(sel => {
+        if (sel.dataset.otherWired) return;
+        const isOtherOpt = (v) => /^others?$/i.test(String(v).trim());
+        if (![...sel.options].some(o => isOtherOpt(o.value))) return;
+        sel.dataset.otherWired = '1';
+
+        const anchor = sel.closest('.form-floating') || sel;
+        const box = document.createElement('input');
+        box.type = 'text';
+        box.className = 'form-control form-control-sm mt-1 other-inline-box';
+        box.placeholder = 'Specify…';
+        box.style.display = 'none';
+        anchor.insertAdjacentElement('afterend', box);
+
+        const dyn = () => sel.querySelector('option.__dynother');
+        const clearDyn = () => { const d = dyn(); if (d) d.remove(); };
+        const currentIsOther = () => isOtherOpt(sel.value) || !!dyn();
+
+        // preselect state (edit mode): value not among fixed options -> treat as custom
+        const fixed = [...sel.options].map(o => o.value);
+        if (sel.value && !fixed.includes(sel.value)) {
+            const custom = sel.value;
+            const o = document.createElement('option');
+            o.className = '__dynother'; o.value = custom; o.textContent = custom; o.selected = true;
+            sel.appendChild(o);
+            box.value = custom; box.style.display = '';
+        }
+
+        sel.addEventListener('change', () => {
+            if (isOtherOpt(sel.value)) { box.style.display = ''; box.focus(); }
+            else { clearDyn(); box.value = ''; box.style.display = 'none'; }
+        });
+        box.addEventListener('input', () => {
+            clearDyn();
+            const v = box.value.trim();
+            if (v) {
+                const o = document.createElement('option');
+                o.className = '__dynother'; o.value = v; o.textContent = v; o.selected = true;
+                sel.appendChild(o);
+            } else {
+                [...sel.options].forEach(op => { if (isOtherOpt(op.value)) op.selected = true; });
+            }
+            const fl = sel.closest('.form-floating');
+            if (fl) fl.classList.toggle('filled', sel.value !== '');
+        });
+
+        if (currentIsOther()) box.style.display = '';
+    });
 }
 
 function refreshFloatingLabels(root) {
@@ -2225,37 +2366,71 @@ function isCustomValue(value) {
 }
 
 // Opens the reward-specific dropdown panel for the chosen Reward Type.
+// The reward type(s) attached to an offer row.
+function offerRewardTypes(index) {
+    const rowEl = document.querySelector(`.offer-row[data-index="${index}"]`);
+    if (rowEl && rowEl.dataset.rewardTypes) return rowEl.dataset.rewardTypes.split(',').filter(Boolean);
+    const sel = document.getElementById(`offer_${index}_rewardType`);
+    return sel && sel.value ? sel.value.split(/\s*,\s*/).filter(Boolean) : [];
+}
+
 function onRewardTypeChange(index, setValue = null) {
     const rewardSelect = document.getElementById(`offer_${index}_rewardType`);
     const container = document.getElementById(`offer_${index}_rewardFields`);
-    if (!rewardSelect || !container) return;
-    if (setValue !== null && setValue !== undefined && setValue !== '') {
+    if (!container) return;
+    if (rewardSelect && setValue !== null && setValue !== undefined && setValue !== '') {
         rewardSelect.value = setValue;
     }
-    const rewardType = rewardSelect.value;
-    container.innerHTML = '';
-    const floating = rewardSelect.closest('.form-floating');
-    if (floating) floating.classList.toggle('filled', rewardType !== '');
-    if (!rewardType || !REWARD_TYPE_FIELDS[rewardType]) return;
+    const types = offerRewardTypes(index);
+    if (rewardSelect) {
+        const floating = rewardSelect.closest('.form-floating');
+        if (floating) floating.classList.toggle('filled', types.length > 0);
+    }
 
-    const fields = REWARD_TYPE_FIELDS[rewardType];
-    let html = `<div class="bg-light p-2 rounded mb-2 border-start border-4 border-success reward-fields-panel">
-        <div class="small fw-bold text-success mb-2"><i class="fas fa-sliders me-1"></i>${rewardType} Details</div>`;
-    fields.forEach(f => {
-        const supportsCustom = rewardFieldHasCustom(f);
-        html += `<div class="row g-1 mb-1 align-items-start">
-            <div class="col-md-6">${createSelectField(`offer_${index}_${f.id}`, f.label, f.options, '', `onRewardFieldChange(${index}, '${f.id}')`)}</div>`;
-        if (supportsCustom) {
-            html += `<div class="col-md-6 reward-custom-col" id="offer_${index}_${f.id}_customWrap" style="display:none;">
-                <div class="form-floating mb-1">
-                    <input type="text" id="offer_${index}_${f.id}_custom" class="form-control form-control-sm" placeholder="Enter ${f.label}">
-                    <label for="offer_${index}_${f.id}_custom">Custom ${f.label}</label>
-                </div>
-            </div>`;
-        }
-        html += `</div>`;
+    // Currency-return types don't use RP Expiry / Apply Rule By / Apply Value.
+    const CURRENCY = OFFER_TYPE_GROUPS['Currency returned (₹)'];
+    const POINTS = OFFER_TYPE_GROUPS['Points / units (non-currency)'];
+    const allCurrency = types.length > 0 && types.every(t => CURRENCY.includes(t));
+    const anyPoints = types.some(t => POINTS.includes(t));
+    [['rpExpiryWrap', `global_rp_expiry_${index}`],
+     ['scopeTypeWrap', `payment_scope_${index}`],
+     ['scopeValWrap', `scope_value_${index}`]].forEach(([wrapId, fieldId]) => {
+        const w = document.getElementById(`offer_${index}_${wrapId}`);
+        if (w) w.style.display = allCurrency ? 'none' : '';
+        if (allCurrency) { const f = document.getElementById(fieldId); if (f) f.value = ''; }
     });
-    html += `</div>`;
+    // Points-type offers: show Reward Cap (points/units), hide Max Benefit (₹).
+    const capWrap = document.getElementById(`offer_${index}_rewardCapWrap`);
+    if (capWrap) {
+        capWrap.style.display = anyPoints ? '' : 'none';
+        if (!anyPoints) { const c = document.getElementById(`offer_${index}_rewardCap`); if (c) c.value = ''; }
+    }
+    const mbWrap = document.getElementById(`offer_${index}_maxBenefitWrap`);
+    if (mbWrap) {
+        mbWrap.style.display = anyPoints ? 'none' : '';
+        if (anyPoints) { const m = document.getElementById(`offer_${index}_maxBenefit`); if (m) m.value = ''; }
+    }
+
+    // One headed panel per reward type.
+    let html = '';
+    types.forEach(rt => {
+        if (!REWARD_TYPE_FIELDS[rt]) return;
+        html += `<div class="reward-fields-panel mb-2">
+            <div class="offer-sec-h">${rt} details</div>
+            <div class="row g-2">`;
+        REWARD_TYPE_FIELDS[rt].forEach(f => {
+            html += `<div class="col-md-4">${createSelectField(`offer_${index}_${f.id}`, f.label, f.options, '', `onRewardFieldChange(${index}, '${f.id}')`)}</div>`;
+            if (rewardFieldHasCustom(f)) {
+                html += `<div class="col-md-4 reward-custom-col" id="offer_${index}_${f.id}_customWrap" style="display:none;">
+                    <div class="form-floating">
+                        <input type="text" id="offer_${index}_${f.id}_custom" class="form-control form-control-sm" placeholder="Enter ${f.label}">
+                        <label for="offer_${index}_${f.id}_custom">Custom ${f.label}</label>
+                    </div>
+                </div>`;
+            }
+        });
+        html += `</div></div>`;
+    });
     container.innerHTML = html;
     wireFloatingLabels(container);
 }
@@ -2325,7 +2500,8 @@ function saveOffer(index) {
         subCategory: document.getElementById(`${prefix}_subCategory`).value,
         merchant: Array.from(merchantSelectEl.selectedOptions).map(o => o.value),
         mcc: document.getElementById(`${prefix}_mcc`).value,
-        rewardType: document.getElementById(`${prefix}_rewardType`).value,
+        rewardType: (offerRewardTypes(index).join(', ') || document.getElementById(`${prefix}_rewardType`).value),
+        rewardTypes: offerRewardTypes(index),
         frequency: document.getElementById(`${prefix}_frequency`).value,
         status: document.getElementById(`${prefix}_status`).value,
         days: document.getElementById(`${prefix}_days`).value,
@@ -2340,14 +2516,16 @@ function saveOffer(index) {
         paymentScopeType: document.getElementById(`payment_scope_${index}`).value,
         paymentScopeValue: Array.from(document.getElementById(`scope_value_${index}`).selectedOptions).map(o => o.value),
         rpExpiry: document.getElementById(`global_rp_expiry_${index}`).value,
+        rewardCap: (document.getElementById(`${prefix}_rewardCap`) || {}).value || '',
         couponCode: document.getElementById(`${prefix}_couponCode`).value,
         platform: platformValue,
         customPlatform: customPlatform,
         rewardFields: {}
     };
-    if (REWARD_TYPE_FIELDS[offerData.rewardType]) {
-        let missingCustom = null;
-        REWARD_TYPE_FIELDS[offerData.rewardType].forEach(f => {
+    const typesToSave = offerData.rewardTypes.length ? offerData.rewardTypes : [document.getElementById(`${prefix}_rewardType`).value].filter(Boolean);
+    let missingCustom = null;
+    typesToSave.forEach(rt => {
+        (REWARD_TYPE_FIELDS[rt] || []).forEach(f => {
             const sel = document.getElementById(`${prefix}_${f.id}`);
             const val = sel ? sel.value : '';
             offerData.rewardFields[f.id] = val;
@@ -2358,15 +2536,48 @@ function saveOffer(index) {
                 if (!customVal && !missingCustom) missingCustom = f.label;
             }
         });
-        if (missingCustom) {
-            alert(`Please enter a value in the "Custom ${missingCustom}" box.`);
-            return;
-        }
-    }
-    if(!offerData.category || !offerData.rewardType) {
-        alert("Please fill in Category and Reward Type.");
+    });
+    if (missingCustom) {
+        alert(`Please enter a value in the "Custom ${missingCustom}" box.`);
         return;
     }
+
+    // ---- validation ----
+    row.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    const errs = [];
+    const mark = (id) => { const el = document.getElementById(id); if (el) el.classList.add('is-invalid'); };
+    const num = (v) => v === '' ? null : Number(v);
+
+    if (!typesToSave.length) errs.push('Pick at least one reward type.');
+    if (!offerData.category) { errs.push('Category is required.'); mark(`${prefix}_category`); }
+
+    // every reward sub-field must be chosen
+    typesToSave.forEach(rt => (REWARD_TYPE_FIELDS[rt] || []).forEach(f => {
+        if (!String(offerData.rewardFields[f.id] || '').trim()) {
+            errs.push(`${rt}: "${f.label}" is required.`);
+            mark(`${prefix}_${f.id}`);
+        }
+    }));
+
+    const mn = num(offerData.minTx), mx = num(offerData.maxTx), mb = num(offerData.maxBenefit);
+    if (mn !== null && mx !== null && mn > mx) { errs.push('Min Transaction cannot exceed Max Transaction.'); mark(`${prefix}_minTx`); mark(`${prefix}_maxTx`); }
+    if (mb !== null && mb <= 0) { errs.push('Max Benefit must be greater than 0.'); mark(`${prefix}_maxBenefit`); }
+    const rc = num(offerData.rewardCap);
+    if (rc !== null && rc <= 0) { errs.push('Reward Cap must be greater than 0.'); mark(`${prefix}_rewardCap`); }
+
+    if (offerData.startDate && offerData.endDate && offerData.startDate > offerData.endDate) {
+        errs.push('Start Date must be on or before End Date.'); mark(`${prefix}_startDate`); mark(`${prefix}_endDate`);
+    }
+    if (offerData.weblink && !/^https?:\/\/.+/i.test(offerData.weblink)) { errs.push('Web Link must start with http:// or https://'); mark(`${prefix}_weblink`); }
+    if (offerData.mcc && !/^\s*\d{4}(\s*[,;]\s*\d{4})*\s*$/.test(offerData.mcc)) { errs.push('MCC Code(s) must be 4-digit numbers, comma-separated.'); mark(`${prefix}_mcc`); }
+    if (offerData.platform === 'Other' && !String(offerData.customPlatform).trim()) { errs.push('Custom Platform name is required.'); mark(`${prefix}_customPlatform`); }
+    if (offerData.paymentScopeType && !offerData.paymentScopeValue.length) { errs.push(`Pick at least one "Apply Value" for ${offerData.paymentScopeType}.`); }
+
+    if (errs.length) {
+        alert('Please fix:\n\n• ' + errs.join('\n• '));
+        return;
+    }
+
     if (editingOfferIndex !== -1) {
         offers[editingOfferIndex] = offerData;
         editingOfferIndex = -1;
@@ -2388,7 +2599,7 @@ function generateOfferSummary(o) {
             <p class="mb-1"><strong>Earn:</strong> ${o.rewardType || '—'} ${rewardFieldsText ? `(${rewardFieldsText})` : ''}</p>
             <p class="mb-1"><strong>On:</strong> ${o.category || '—'} ${o.subCategory && o.subCategory !== 'ALL' ? '› ' + o.subCategory : ''} — Merchant(s): ${merchantText}</p>
             <p class="mb-1"><strong>MCC:</strong> ${o.mcc || 'Not specified'}</p>
-            <p class="mb-1"><strong>Transaction Range:</strong> ₹${o.minTx || 0} – ₹${o.maxTx || 'No Limit'} &nbsp; | &nbsp; <strong>Max Benefit:</strong> ₹${o.maxBenefit || 0}</p>
+            <p class="mb-1"><strong>Transaction Range:</strong> ₹${o.minTx || 0} – ₹${o.maxTx || 'No Limit'} &nbsp; | &nbsp; <strong>Max Benefit:</strong> ₹${o.maxBenefit || 0}${o.rewardCap ? ` &nbsp; | &nbsp; <strong>Reward Cap:</strong> ${o.rewardCap} pts/units` : ''}</p>
             <p class="mb-1"><strong>Frequency:</strong> ${o.frequency || '—'} &nbsp; | &nbsp; <strong>Instance Period:</strong> ${o.instancePeriod || '—'} &nbsp; | &nbsp; <strong>Applicable Days:</strong> ${o.days || 'All Days'}</p>
             <p class="mb-1"><strong>Applicable To:</strong> ${o.person || '—'} &nbsp; | &nbsp; <strong>RP Expiry:</strong> ${o.rpExpiry || 'No Expiry'} &nbsp; | &nbsp; <strong>Status:</strong> ${o.status || '—'}</p>
             <p class="mb-1"><strong>Validity:</strong> ${o.startDate || 'N/A'} → ${o.endDate || 'N/A'}</p>
@@ -2667,6 +2878,15 @@ const OFFER_IMPORT_COLUMNS = [
 // sub-field (rp_pointType, cb_type, etc.) against its own option list when present.
 function validateOfferRow(row) {
     const invalid = new Set();
+
+    // Base columns — value must be in the allowed dropdown list (same idea as the
+    // Cards import page's IMPORT_VALID_OPTIONS check).
+    const base = getOfferBaseOptions();
+    Object.keys(base).forEach(col => {
+        const v = String(genericVal(row, col) || '').trim();
+        if (v && !base[col].includes(v)) invalid.add(col);
+    });
+
     const rewardType = String(genericVal(row, 'rewardType') || '').trim();
     if (rewardType && !REWARD_TYPE_FIELDS[rewardType]) { invalid.add('rewardType'); return invalid; }
     if (rewardType && REWARD_TYPE_FIELDS[rewardType]) {
@@ -2726,7 +2946,7 @@ function diffSummaryHtml(list, statusVarName, colVarName, columns, renderFn, cle
         <button class="btn btn-sm btn-outline-danger" onclick="${clearFn}">Clear Comparison</button>
     </div>`;
 }
-function diffRowsHtml(list, columns, hasStatus, validateFn, groupFn) {
+function diffRowsHtml(list, columns, hasStatus, validateFn, groupFn, fixFn) {
     const fmt = (v) => { let d = (v === undefined || v === null) ? '' : v; if (typeof d === 'string' && d.length > 50) d = d.substring(0, 50) + '...'; return d; };
     const edgeCls = (i) => {
         if (!groupFn) return '';
@@ -2742,9 +2962,15 @@ function diffRowsHtml(list, columns, hasStatus, validateFn, groupFn) {
         const invalid = validateFn ? validateFn(row) : new Set();
         html += `<tr class="${showOld ? 'diff-new-row' : ''} ${invalid.size > 0 ? 'row-invalid' : ''}">`;
         if (hasStatus) html += `<td class="status-cell"><span class="badge bg-success">New</span></td>`;
+        const listIdx = list.indexOf(row);
         columns.forEach((col, i) => {
-            const cellCls = invalid.has(col) ? 'cell-invalid' : '';
-            html += `<td class="${edgeCls(i)} ${cellCls}" style="font-size:0.75rem;" title="${cellCls ? 'Invalid value — not in the allowed dropdown list' : ''}">${fmt(genericVal(row, col))}</td>`;
+            const bad = invalid.has(col);
+            const cellCls = bad ? 'cell-invalid' : '';
+            const canFix = bad && fixFn && fixFn(col);       // fixFn(col) -> true if a dropdown exists
+            const attrs = canFix
+                ? ` data-fixidx="${listIdx}" data-fixcol="${col}" onclick="openDiffCellDropdown(this)"`
+                : '';
+            html += `<td class="${edgeCls(i)} ${cellCls} ${canFix ? 'clickable-fix' : ''}"${attrs} style="font-size:0.75rem;" title="${bad ? (canFix ? 'Invalid — click to pick a valid value' : 'Invalid value') : ''}">${fmt(genericVal(row, col))}</td>`;
         });
         html += '</tr>';
         if (showOld) {
@@ -2836,8 +3062,51 @@ async function compareAllWithDatabase() {
 }
 
 function buildImportOffersPanel() {
-    return buildSheetImportPanel('importOffers', 'Import Offers',
-        'Reads the <b>offers</b> sheet from your workbook (all columns) into <code>wb_offers</code>.');
+    return `
+    <div class="import-panel">
+        <div class="row g-3 mb-4">
+            <div class="col-12" style="margin-top: 0;">
+                <div class="upload-layout">
+                    <div class="upload-zone-button-wrapper">
+                    <div>
+                        <div class="upload-icon-badge"><i class="fas fa-cloud-arrow-up"></i></div>
+                        <button class="btn btn-primary btn-upload" onclick="document.getElementById('offerExcelImportInput').click()">
+                            <i class="fas fa-file-arrow-up me-2"></i> Choose Offer Excel File
+                        </button>
+                        <small class="text-muted d-block mt-1">Upload your Excel file to preview offer data</small>
+                        <input type="file" id="offerExcelImportInput" accept=".xlsx,.xls" style="display:none;" onchange="handleOfferExcelImportTable(event)">
+                    </div>
+                    </div>
+                    ${DIFF_COLOR_LEGEND_HTML}
+                </div>
+            </div>
+        </div>
+        <div id="offerImportTableContainer">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold">Imported Offers <span id="offerRecordCount" class="badge bg-primary">0 records</span></h6>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm" onclick="compareOffersWithDatabase()"><i class="fas fa-code-compare me-1"></i>Compare with Database</button>
+                    <button class="btn btn-outline-success btn-sm" onclick="exportOfferImportData()"><i class="fas fa-download me-1"></i>Export CSV</button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="clearOfferImportData()"><i class="fas fa-times me-1"></i>Clear</button>
+                </div>
+            </div>
+            <div id="offerComparisonSummary" style="display:none;" class="mb-3"></div>
+            <div class="mb-3">
+                <input type="text" id="offerImportSearchInput" class="form-control form-control-sm" placeholder="Search imported offers..." oninput="filterOfferImportTable(this.value)">
+            </div>
+            <div id="offerGroupToggleBar" class="group-toggle-bar mb-3"></div>
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <table class="table table-bordered table-striped table-hover mb-0" id="offerImportTable">
+                    <thead id="offerImportTableHead" class="sticky-top bg-white"></thead>
+                    <tbody id="offerImportTableBody"></tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-end mt-3">
+                <button class="btn btn-success" onclick="saveOfferImportData()"><i class="fas fa-save me-2"></i>Save Offers to Database</button>
+            </div>
+        </div>
+    </div>
+    `;
 }
 
 function renderOfferGroupToggleBar() {
@@ -2894,7 +3163,53 @@ function renderOfferImportTable(data) {
         tbody.innerHTML = `<tr><td colspan="${colCount}" class="text-center text-muted py-3">No offers to display. Please import an Excel file.</td></tr>`;
         return;
     }
-    tbody.innerHTML = diffRowsHtml(filtered, columns, hasStatus, validateOfferRow, getOfferColumnGroup);
+    _diffFixList = filtered;
+    _diffFixTarget = 'offer';
+    tbody.innerHTML = diffRowsHtml(filtered, columns, hasStatus, validateOfferRow, getOfferColumnGroup, offerCellFixOptions);
+}
+
+// Valid-value list for a bad offer cell (base column or reward sub-field). Null = no dropdown.
+function offerCellFixOptions(col) {
+    const base = getOfferBaseOptions();
+    if (base[col] && base[col].length) return base[col];
+    const stem = String(col).replace(/_custom$/, '');
+    for (const rt of Object.keys(REWARD_TYPE_FIELDS)) {
+        const f = REWARD_TYPE_FIELDS[rt].find(x => x.id === stem);
+        if (f && f.options.length) return f.options.slice();
+    }
+    return null;
+}
+
+// Shared click-to-fix for diffRowsHtml tables (Offers / MCC). Shows a <select>
+// in place of the dark-red invalid text when the cell is clicked.
+let _diffFixList = [], _diffFixTarget = '';
+function diffFixOptionsFor(col) {
+    return _diffFixTarget === 'offer' ? offerCellFixOptions(col) : null;
+}
+function openDiffCellDropdown(td) {
+    const i = parseInt(td.dataset.fixidx, 10);
+    const col = td.dataset.fixcol;
+    const row = _diffFixList[i];
+    const opts = diffFixOptionsFor(col);
+    if (!row || !opts || !opts.length) return;
+    const cur = String(genericVal(row, col) || '');
+    td.innerHTML = `<select class="form-select form-select-sm" style="font-size:0.72rem;"
+        onclick="event.stopPropagation()" onchange="applyDiffCellFix(this, ${i}, '${col}')"
+        onblur="rerenderDiffTable()">
+        <option value="">-- Select --</option>
+        ${sortOptions(opts).map(o => `<option value="${o}" ${o === cur ? 'selected' : ''}>${o}</option>`).join('')}
+    </select>`;
+    td.querySelector('select').focus();
+}
+function applyDiffCellFix(sel, i, col) {
+    const row = _diffFixList[i];
+    if (!row) return;
+    const key = Object.keys(row).find(k => k.toLowerCase() === col.toLowerCase()) || col;
+    row[key] = sel.value;
+    rerenderDiffTable();
+}
+function rerenderDiffTable() {
+    if (_diffFixTarget === 'offer') renderOfferImportTable(importedOffersData);
 }
 
 // Friendly hover text for reward sub-field headers (e.g. rp_calc -> "Reward Points › Calculation Basis").
@@ -3515,8 +3830,42 @@ async function saveOfferImportData() {
 let importedBenefitsData = null;
 
 function buildImportBenefitsPanel() {
-    return buildSheetImportPanel('importBenefits', 'Import Preferred Benefits',
-        'Reads every benefit sheet from your workbook (Lounge, Golf, Dining, Concierge, Movie, Spa, Insurance, Fee Waiver, Fuel, Welcome, Milestone, Partner Program, Token/UPI/Contactless, Reward Structure) with all columns, into their <code>wb_*</code> tables.');
+    return `
+    <div class="import-panel">
+        <div class="row g-3 mb-4">
+            <div class="col-12" style="margin-top: 0;">
+                <div class="upload-layout">
+                    <div class="upload-zone-button-wrapper">
+                    <div>
+                        <div class="upload-icon-badge"><i class="fas fa-cloud-arrow-up"></i></div>
+                        <button class="btn btn-primary btn-upload" onclick="document.getElementById('benefitExcelImportInput').click()">
+                            <i class="fas fa-file-arrow-up me-2"></i> Choose Benefits Excel File
+                        </button>
+                        <small class="text-muted d-block mt-1">Upload your Excel file to preview benefit data</small>
+                        <input type="file" id="benefitExcelImportInput" accept=".xlsx,.xls" style="display:none;" onchange="handleBenefitExcelImportTable(event)">
+                    </div>
+                    </div>
+                    ${DIFF_COLOR_LEGEND_HTML}
+                </div>
+            </div>
+        </div>
+        <div id="benefitImportTableContainer">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold">Imported Preferred Benefits</h6>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm" onclick="compareBenefitsWithDatabase()"><i class="fas fa-code-compare me-1"></i>Compare with Database</button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="clearBenefitImportData()"><i class="fas fa-times me-1"></i>Clear</button>
+                </div>
+            </div>
+            <div id="benefitComparisonSummary" style="display:none;" class="mb-3"></div>
+            <div id="benefitImportTablesStandalone"></div>
+            <div class="d-flex justify-content-end mt-3 gap-2">
+                <button class="btn btn-outline-secondary" onclick="saveBenefitImportData()"><i class="fas fa-file-import me-2"></i>Load into Form</button>
+                <button class="btn btn-success" onclick="saveBenefitImportToDb()"><i class="fas fa-save me-2"></i>Save Benefits to Database</button>
+            </div>
+        </div>
+    </div>
+    `;
 }
 
 async function saveBenefitImportToDb() {
@@ -3982,9 +4331,12 @@ function saveBenefitImportData() {
             const mapFuel = {
                 'fuel_rate': 'fuel_rate',
                 'fuel_max_waiver': 'fuel_max_waiver',
-                'fuel_period': 'fuel_period',
+                'fuel_period': 'fuel_waiver_period',
+                'fuel_waiver_period': 'fuel_waiver_period',
                 'fuel_min_tx': 'fuel_min_tx',
-                'fuel_max_tx': 'fuel_max_tx'
+                'fuel_max_tx': 'fuel_max_tx',
+                'fuel_max_tx_count': 'fuel_max_tx_count',
+                'fuel_count_period': 'fuel_count_period'
             };
             for (const [col, id] of Object.entries(mapFuel)) {
                 const el = document.getElementById(id);
@@ -4075,8 +4427,50 @@ let importedMccData = [];
 const MCC_IMPORT_COLUMNS = ['Card', 'Offer ID', 'MCC', 'Inclusion', 'Exclusion'];
 
 function buildImportMccPanel() {
-    return buildSheetImportPanel('importMcc', 'MCC Imports',
-        'Reads the <b>mcc</b> sheet from your workbook (all columns) into <code>wb_mcc</code>.');
+    return `
+    <div class="import-panel">
+        <div class="row g-3 mb-4">
+            <div class="col-12" style="margin-top: 0;">
+                <div class="upload-layout">
+                    <div class="upload-zone-button-wrapper">
+                    <div>
+                        <div class="upload-icon-badge"><i class="fas fa-cloud-arrow-up"></i></div>
+                        <button class="btn btn-primary btn-upload" onclick="document.getElementById('mccExcelImportInput').click()">
+                            <i class="fas fa-file-arrow-up me-2"></i> Choose MCC Excel File
+                        </button>
+                        <small class="text-muted d-block mt-1">Upload your Excel file with MCC data</small>
+                        <input type="file" id="mccExcelImportInput" accept=".xlsx,.xls" style="display:none;" onchange="handleMccExcelImportTable(event)">
+                    </div>
+                    </div>
+                    ${DIFF_COLOR_LEGEND_HTML}
+                </div>
+            </div>
+        </div>
+        <div id="mccImportTableContainer">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold">Imported MCC Data <span id="mccRecordCount" class="badge bg-primary">0 records</span></h6>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm" onclick="compareMccWithDatabase()"><i class="fas fa-code-compare me-1"></i>Compare with Database</button>
+                    <button class="btn btn-outline-success btn-sm" onclick="exportMccImportData()"><i class="fas fa-download me-1"></i>Export CSV</button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="clearMccImportData()"><i class="fas fa-times me-1"></i>Clear</button>
+                </div>
+            </div>
+            <div id="mccComparisonSummary" style="display:none;" class="mb-3"></div>
+            <div class="mb-3">
+                <input type="text" id="mccImportSearchInput" class="form-control form-control-sm" placeholder="Search MCC data..." oninput="filterMccImportTable(this.value)">
+            </div>
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <table class="table table-bordered table-striped table-hover mb-0" id="mccImportTable">
+                    <thead id="mccImportTableHead" class="sticky-top bg-white"></thead>
+                    <tbody id="mccImportTableBody"></tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-end mt-3">
+                <button class="btn btn-success" onclick="saveMccImportData()"><i class="fas fa-save me-2"></i>Save MCC Data</button>
+            </div>
+        </div>
+    </div>
+    `;
 }
 
 function renderMccImportTable(data) {
@@ -4279,17 +4673,48 @@ async function extractSelectedBenefits() {
 // ================================================================
 
 function buildAllDataPanel() {
+    const instTypes = (IMPORT_VALID_OPTIONS.instrument_type || []);
+    const sel = (id, label, opts) => `
+        <div class="col-md-4 col-sm-6 mb-2">
+            ${createSelectField(id, label, opts, '', `allDataDepChange('${id}')`)}
+        </div>`;
     return `
     <div class="import-panel">
         <h6 class="fw-bold m-0 mb-1"><i class="fas fa-magnifying-glass me-2"></i>All Data Check</h6>
-        <small class="text-muted d-block mb-3">Enter a Card ID to pull every stored row for that card.</small>
-        <div class="input-group mb-3" style="max-width:520px;">
-            <input type="text" id="allDataSearch" class="form-control" placeholder="Card ID (e.g. HDFC-INFINIA)"
+        <small class="text-muted d-block mb-3">Search by Card ID, or by Type / Issuer / Variant / Network / Sub Network.</small>
+        <div class="input-group mb-2" style="max-width:520px;">
+            <input type="text" id="allDataSearch" class="form-control" placeholder="Card ID (e.g. HDFC-INF-DIN-0001)"
                    onkeydown="if(event.key==='Enter') runAllDataSearch()">
             <button class="btn btn-primary" onclick="runAllDataSearch()"><i class="fas fa-search me-1"></i> Search</button>
         </div>
-        <div id="allDataResults"><p class="text-muted">No search yet.</p></div>
+        <div class="text-muted small mb-2">— or —</div>
+        <div class="row g-2" id="allDataFilters">
+            ${sel('adf_type', 'Type', instTypes)}
+            ${sel('adf_issuer', 'Issuer/Bank', Object.keys(ISSUER_PRODUCTS))}
+            ${sel('adf_product', 'Variant', [])}
+            ${sel('adf_network', 'Network', Object.keys(NETWORKS))}
+            ${sel('adf_subNetwork', 'Sub Network', [])}
+            <div class="col-md-4 col-sm-6 mb-2 d-flex align-items-center gap-2">
+                <button class="btn btn-primary btn-sm" onclick="runAllDataSearch()"><i class="fas fa-search me-1"></i> Search by filters</button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="clearAllDataFilters()">Clear</button>
+            </div>
+        </div>
+        <div id="allDataResults" class="mt-2"><p class="text-muted">No search yet.</p></div>
     </div>`;
+}
+
+// Variant depends on Issuer; Sub Network depends on Network.
+function allDataDepChange(id) {
+    if (id === 'adf_issuer') {
+        setSelectOptions('adf_product', ISSUER_PRODUCTS[document.getElementById('adf_issuer').value] || []);
+    } else if (id === 'adf_network') {
+        setSelectOptions('adf_subNetwork', subNetOptions(document.getElementById('adf_network').value));
+    }
+}
+function clearAllDataFilters() {
+    ['adf_type', 'adf_issuer', 'adf_product', 'adf_network', 'adf_subNetwork'].forEach(i => {
+        const el = document.getElementById(i); if (el) el.value = '';
+    });
 }
 
 // Every source table + the column that holds the card id.
@@ -4329,24 +4754,53 @@ function allDataTableHtml(def, rows) {
 }
 
 async function runAllDataSearch() {
-    const id = (document.getElementById('allDataSearch').value || '').trim();
     const out = document.getElementById('allDataResults');
-    if (!id) { out.innerHTML = '<p class="text-danger">Enter a Card ID.</p>'; return; }
     if (!window.WORKBOOK_SCHEMA) { out.innerHTML = '<p class="text-danger">workbook_schema.js not loaded.</p>'; return; }
 
+    const id = (document.getElementById('allDataSearch').value || '').trim();
+    const fv = (i) => (document.getElementById(i) || {}).value || '';
+    const filters = {
+        instrument_type: fv('adf_type'), issuer: fv('adf_issuer'), product: fv('adf_product'),
+        network: fv('adf_network'), subnetwork: fv('adf_subNetwork'),
+    };
+    const anyFilter = Object.values(filters).some(Boolean);
+
+    if (!id && !anyFilter) { out.innerHTML = '<p class="text-danger">Enter a Card ID or pick at least one filter.</p>'; return; }
     out.innerHTML = '<p class="text-muted">Searching…</p>';
+
+    // Resolve to a set of card ids.
+    let cardIds = [], label;
+    if (id) {
+        cardIds = [id];
+        label = `Card <strong>${id}</strong>`;
+    } else {
+        const f = { ...filters };
+        if (f.subnetwork) f.subnetwork = '%' + f.subnetwork + '%';   // stored value may keep the network word
+        const wbHits = await RGDB.fetchByFilter('wb_card_details', f);
+        const cardsHits = await RGDB.fetchByFilter('cards', {
+            instrument_type: filters.instrument_type, issuer: filters.issuer, product: filters.product,
+            network: filters.network, sub_network: filters.subnetwork ? '%' + filters.subnetwork + '%' : '',
+        });
+        cardIds = [...new Set([
+            ...wbHits.map(r => r.cardid), ...cardsHits.map(r => r.card_id),
+        ].filter(Boolean).map(String))];
+        const parts = Object.entries(filters).filter(([, v]) => v).map(([k, v]) => `${k}=${v}`);
+        label = `${parts.join(' · ')} → ${cardIds.length} card(s)`;
+        if (!cardIds.length) { out.innerHTML = `<p class="text-muted">No cards match ${parts.join(' · ')}.</p>`; return; }
+    }
+
     const sources = allDataSources();
     const results = await Promise.all(sources.map(def =>
-        RGDB.fetchWhere(def.table, def.cardIdCol, id).then(rows => ({ def, rows }))
+        RGDB.fetchWhereIn(def.table, def.cardIdCol, cardIds).then(rows => ({ def, rows }))
     ));
 
     const withData = results.filter(r => r.rows.length);
     if (!withData.length) {
-        out.innerHTML = `<p class="text-muted">No rows found for <strong>${id}</strong> in any table.</p>`;
+        out.innerHTML = `<p class="text-muted">No rows found (${label}).</p>`;
         return;
     }
     const totalRows = withData.reduce((n, r) => n + r.rows.length, 0);
-    out.innerHTML = `<p class="small text-muted">Card <strong>${id}</strong> — ${totalRows} rows across ${withData.length} table(s).</p>`
+    out.innerHTML = `<p class="small text-muted">${label} — ${totalRows} rows across ${withData.length} table(s).</p>`
         + withData.map(r => allDataTableHtml(r.def, r.rows)).join('');
 }
 
@@ -4444,7 +4898,7 @@ function setColVal(row, key, newValue) {
 // dropdown always matches what the real card form would show.
 function getFieldOptions(key, row) {
     if (key === 'product') return ISSUER_PRODUCTS[getColVal(row, 'issuer')] || [];
-    if (key === 'subNetwork') return NETWORKS[getColVal(row, 'network')] || [];
+    if (key === 'subNetwork') return subNetOptions(getColVal(row, 'network'));
     if (key === 'issuer') return Object.keys(ISSUER_PRODUCTS);
     if (key === 'network') return Object.keys(NETWORKS);
     if (key.startsWith('benefit_')) return ['Yes', 'No'];
@@ -4600,7 +5054,7 @@ function handleMultiSheetExcelImport(event) {
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
@@ -4612,12 +5066,25 @@ function handleMultiSheetExcelImport(event) {
 
             let cardData = [];
             let offerData = [];
-            let benefitData = null;
+            let benefitSheets = [];   // accumulate — one sheet per benefit, or one combined sheet
             let mccData = [];
 
             const cardColumns = ['issuer', 'product', 'network', 'instrument_type'];
             const offerColumns = ['category', 'rewardType', 'minTx'];
-            const benefitColumns = ['lounge_program', 'lounge_dom_visits', 'golf_courses', 'slab_no', 'milestone_amount', 'partner_program', 'ins_provider'];
+            const benefitColumns = [
+                'lounge_program', 'lounge_dom_visits', 'lounge_int_visits',
+                'golf_courses', 'golf_notes', 'golf_rounds',
+                'dining_partner', 'dining_notes', 'dining_discount_type',
+                'movie_partner', 'movie_notes', 'movie_ticket_limit',
+                'spa_partner', 'spa_notes', 'spa_discount',
+                'ins_provider', 'ins_coverage', 'ins_policylink',
+                'concierge_notes',
+                'fee_waiver_spend', 'fee_waiver_period',
+                'fuel_rate', 'fuel_max_waiver', 'fuel_period',
+                'welcome_value', 'welcome_benefit_type', 'welcome_free_text',
+                'slab_no', 'milestone_amount', 'milestone_benefit_value',
+                'partner_no', 'partner_program', 'partner_ratio'
+            ];
             const mccColumns = ['mcc', 'card', 'inclusion', 'exclusion'];
 
             sheetNames.forEach(sheetName => {
@@ -4626,18 +5093,21 @@ function handleMultiSheetExcelImport(event) {
                 if (json.length === 0) return;
 
                 const headers = Object.keys(json[0]).map(h => h.toLowerCase());
-                const isCard = cardColumns.some(col => headers.includes(col.toLowerCase()));
+                // `instrument_type` is unique to the Card Details sheet — decisive.
+                const isCard = headers.includes('instrument_type') ||
+                    (headers.includes('issuer') && headers.includes('product') && headers.includes('network') &&
+                     benefitColumns.every(bc => !headers.includes(bc)));
                 const isOffer = offerColumns.some(col => headers.includes(col.toLowerCase()));
                 const isBenefit = benefitColumns.some(col => headers.includes(col.toLowerCase()));
                 const isMcc = mccColumns.some(col => headers.includes(col.toLowerCase()));
 
-                if (isCard && !isOffer && !isBenefit && !isMcc) {
+                if (isCard) {
                     cardData = json;
-                } else if (isOffer && !isCard && !isBenefit && !isMcc) {
+                } else if (isOffer && !isBenefit && !isMcc) {
                     offerData = json;
-                } else if (isBenefit && !isCard && !isOffer && !isMcc) {
-                    benefitData = json;
-                } else if (isMcc && !isCard && !isOffer && !isBenefit) {
+                } else if (isBenefit && !isMcc) {
+                    benefitSheets.push(json);
+                } else if (isMcc) {
                     const mapped = json.map(row => {
                         const newRow = {};
                         MCC_IMPORT_COLUMNS.forEach(col => {
@@ -4651,6 +5121,43 @@ function handleMultiSheetExcelImport(event) {
                     console.warn(`Sheet "${sheetName}" could not be uniquely identified and was skipped.`);
                 }
             });
+
+            // --- Auto-generate Card IDs on the card sheet, re-link the rest ---
+            if (cardData.length > 0) {
+                const gv = (r, ...keys) => {
+                    for (const k of keys) {
+                        const kk = Object.keys(r).find(x => x.toLowerCase() === k.toLowerCase());
+                        if (kk && String(r[kk]).trim() !== '') return String(r[kk]).trim();
+                    }
+                    return '';
+                };
+                const mkey = (i, p, n) => [i, p, n].map(x => x.toLowerCase()).join('|');
+                const idMap = {};
+                const seqByPrefix = {};
+                for (const row of cardData) {
+                    const issuer = gv(row, 'issuer'), product = gv(row, 'product', 'variant', 'cardName');
+                    const network = gv(row, 'network');
+                    const prefix = [issuerCode(issuer), shortCode(product, 3), networkCode(network)].filter(Boolean).join('-') || 'CARD';
+                    if (seqByPrefix[prefix] === undefined) seqByPrefix[prefix] = await nextCardSeq(prefix);
+                    const newId = `${prefix}-${String(seqByPrefix[prefix]++).padStart(4, '0')}`;
+                    const oldId = gv(row, 'id', 'cardId', 'card_id');
+                    if (oldId) idMap[oldId.toLowerCase()] = newId;
+                    idMap[mkey(issuer, product, network)] = newId;
+                    const idKey = Object.keys(row).find(x => ['id', 'cardid', 'card_id'].includes(x.toLowerCase())) || 'id';
+                    row[idKey] = newId;
+                }
+                const relink = (rows, ...idKeys) => rows.forEach(r => {
+                    const idKey = Object.keys(r).find(x => idKeys.includes(x.toLowerCase()));
+                    if (!idKey) return;
+                    const cur = String(r[idKey] || '').trim().toLowerCase();
+                    const byMatch = idMap[mkey(gv(r, 'issuer'), gv(r, 'variant', 'product', 'cardName'), gv(r, 'network'))];
+                    const to = idMap[cur] || byMatch;
+                    if (to) r[idKey] = to;
+                });
+                relink(offerData, 'cardid', 'card_id');
+                relink(mccData, 'card', 'cardid', 'card_id');
+                benefitSheets.forEach(sheet => relink(sheet, 'cardid', 'card_id', 'id'));
+            }
 
             if (cardData.length > 0) {
                 importedData = cardData;
@@ -4666,12 +5173,27 @@ function handleMultiSheetExcelImport(event) {
                 }
             }
 
-            if (benefitData) {
-                // Same as the standalone Import Benefits page — show every card, not just one.
-                const mainRows = benefitData.filter(r => !r.slab_no && !r.partner_no);
-                const slabRows = benefitData.filter(r => r.slab_no);
-                const partnerRows = benefitData.filter(r => r.partner_no);
-                importedBenefitsData = { main: mainRows[0] || {}, mains: mainRows, slabs: slabRows, partners: partnerRows };
+            if (benefitSheets.length) {
+                // Works for one combined "Preferred Benefits" sheet OR separate
+                // sheets per benefit (Lounge / Golf / Dining / … Milestone / Partner).
+                const allRows = benefitSheets.flat()
+                    .filter(r => Object.values(r).some(v => String(v ?? '').trim() !== ''));
+                const has = (r, k) => r[k] !== undefined && String(r[k]).trim() !== '';
+                const cidOf = (r) => String(r.cardId || r.cardid || r.card_id || r.id || '').trim().toLowerCase();
+
+                const slabRows = allRows.filter(r => has(r, 'slab_no') || has(r, 'milestone_amount') || has(r, 'milestone_benefit_value'));
+                const partnerRows = allRows.filter(r => !slabRows.includes(r) && (has(r, 'partner_no') || has(r, 'partner_program')));
+                const mainRowsRaw = allRows.filter(r => !slabRows.includes(r) && !partnerRows.includes(r));
+
+                // Merge every benefit sheet's columns for the same card into one row.
+                const byCard = {};
+                mainRowsRaw.forEach(r => {
+                    const cid = cidOf(r) || ('_' + Object.keys(byCard).length);
+                    byCard[cid] = Object.assign(byCard[cid] || {}, r);
+                });
+                const mains = Object.values(byCard);
+
+                importedBenefitsData = { main: mains[0] || {}, mains, slabs: slabRows, partners: partnerRows };
                 if (document.getElementById('view-importBenefits').classList.contains('active')) {
                     renderBenefitImportTablesStandalone(importedBenefitsData);
                 }
@@ -4690,7 +5212,8 @@ function handleMultiSheetExcelImport(event) {
                 document.getElementById('recordCount').textContent = `${importedData.length} records`;
             }
 
-            alert(`✅ Import successful!\nCard Data: ${cardData.length} rows\nOffer Data: ${offerData.length} rows\nBenefits: ${benefitData ? benefitData.length + ' row(s)' : 'None'}\nMCC Data: ${mccData.length} rows`);
+            const benefitRowCount = benefitSheets.reduce((n, s) => n + s.length, 0);
+            alert(`✅ Import successful!\nCard Data: ${cardData.length} rows\nOffer Data: ${offerData.length} rows\nBenefits: ${benefitSheets.length} sheet(s), ${benefitRowCount} row(s)\nMCC Data: ${mccData.length} rows`);
             document.getElementById('excelFileInputImport').value = '';
         } catch (err) {
             alert('Error reading Excel file: ' + err.message);
@@ -4751,8 +5274,63 @@ function diffLegendStickyRow(colspan) {
 }
 
 function buildImportPanel() {
-    return buildSheetImportPanel('import', 'Import From Excel',
-        'Upload one workbook with any of the project sheets (Card Details, Lounge, Golf, Dining, … Offers, MCC). Every column is mapped to its field and every sheet is saved to its table. Card IDs on the Card Details sheet are auto-generated — leave that column blank.');
+    return `
+    <div class="import-panel">
+        <div class="row g-3 mb-4">
+            <div class="col-12" style="margin-top: 0;">
+                <div class="upload-layout">
+                    <div class="upload-zone-button-wrapper">
+                    <div>
+                       <div class="upload-icon-badge"><i class="fas fa-cloud-arrow-up"></i></div>
+                       <button class="btn btn-primary btn-upload" onclick="document.getElementById('excelFileInputImport').click()">
+                            <i class="fas fa-file-arrow-up me-2"></i> Choose Excel File
+                        </button>
+                        <small class="text-muted d-block mt-1">Supports multiple sheets: Card Details, Offers, Preferred Benefits, MCC</small>
+                        <input type="file" id="excelFileInputImport" accept=".xlsx,.xls" style="display:none;" onchange="handleMultiSheetExcelImport(event)">
+                    </div>
+                    </div>
+                    ${DIFF_COLOR_LEGEND_HTML}
+                </div>
+            </div>
+        </div>
+
+        <div id="excelDataTableContainer">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h6 class="fw-bold d-inline me-2">Imported Data</h6>
+                    <span id="recordCount" class="badge bg-primary">0 records</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm" onclick="compareAllWithDatabase()" title="Compares Cards + Offers + Benefits + MCC together"><i class="fas fa-code-compare me-1"></i>Compare with Database</button>
+                    <button class="btn btn-outline-success btn-sm" onclick="exportImportData()"><i class="fas fa-download me-1"></i>Export CSV</button>
+                    <span class="filter-icon-group">
+                        <span class="filter-icon-box"><i class="fas fa-sliders"></i></span>
+                        <select class="form-select form-select-sm" style="width:auto;" onchange="if(this.value==='show')showAllGroups(); else if(this.value==='hide')hideAllGroups(); this.selectedIndex=0;">
+                            <option value="" selected disabled>Filter Sheet</option>
+                            <option value="show">Show All Columns</option>
+                            <option value="hide">Hide All Columns</option>
+                        </select>
+                    </span>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="clearImportData()"><i class="fas fa-times me-1"></i>Clear</button>
+                </div>
+            </div>
+            <div id="comparisonSummary" style="display:none;" class="mb-3"></div>
+            <div class="mb-3">
+                <input type="text" id="importSearchInput" class="form-control form-control-sm" placeholder="Search imported data..." oninput="filterImportTable(this.value)">
+            </div>
+            <div id="cardGroupToggleBar" class="group-toggle-bar mb-3"></div>
+            <div class="table-responsive" style="max-height: 600px; overflow-y: auto; border: 1px solid #0b0b0b; border-radius: 8px;">
+                <table class="table table-bordered table-striped table-hover mb-0" id="excelDataTable">
+                    <thead id="excelTableHead" class="sticky-top bg-white"></thead>
+                    <tbody id="excelTableBody"></tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-end mt-3">
+                <button class="btn btn-success" onclick="saveImportData()"><i class="fas fa-save me-2"></i>Save in Database</button>
+            </div>
+        </div>
+    </div>
+    `;
 }
 
 // FIXED_COLUMNS – removed fuel detail columns, kept benefit_fuel
@@ -4980,7 +5558,7 @@ const IMPORT_VALID_OPTIONS = {
     card_bill_cycle_duration: ['15 Days','18 Days','20 Days','25 Days','30 Days (Monthly)','Custom'],
     creditScore: ['Any','<600','<650','<700','<750','<800','600+','650+','700+','750+','800+','850+'],
     ageMin: ['All','13+','18+','21+','30+'],
-    ageMax: ['All','<40','<50','<60','<70','<75','<80'],
+    ageMax: ['All','<40','<45','<50','<55','<60','<65','<70','<75','<80'],
     empType: ['Salaried','Business','Self Employed','All'],
     salary: ['NA','1.8L+','2.4L+','3L+','3.6L+','6L+','10L+','12L+','18L+','24L+','30L+'],
     productType: ['General','Retail','Consumer','Business','Commercial','Corporate','FD backed','Invite Only','Others'],
@@ -5010,7 +5588,7 @@ function validateImportedRow(row) {
 
     const network = val('network'), subNetwork = val('subNetwork');
     if (network && !NETWORKS[network]) invalid.add('network');
-    if (subNetwork && network && NETWORKS[network] && !NETWORKS[network].includes(subNetwork)) invalid.add('subNetwork');
+    if (subNetwork && network && NETWORKS[network] && !subNetOptions(network).includes(subNetwork)) invalid.add('subNetwork');
 
     return invalid;
 }
@@ -5232,10 +5810,10 @@ const PAGE_SHEET_LABELS = {
 const sheetImportState = {};   // pageId -> [{ def, sheetName, rows, compared }]
 
 function schemaDefsForPage(pageId) {
-    const all = Object.entries(window.WORKBOOK_SCHEMA || {}).map(([sheetName, def]) => ({ sheetName, def }));
-    if (pageId === 'import') return all;   // Import From Excel = every sheet
     const want = PAGE_SHEET_LABELS[pageId] || [];
-    return all.filter(({ def }) => want.includes(def.label));
+    return Object.entries(window.WORKBOOK_SCHEMA || {})
+        .filter(([, d]) => want.includes(d.label))
+        .map(([sheetName, def]) => ({ sheetName, def }));
 }
 
 function buildSheetImportPanel(pageId, title, blurb) {
@@ -5271,23 +5849,29 @@ async function onSheetImportFile(pageId, event) {
     try { wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: 'array' }); }
     catch (e) { alert('Could not read the file: ' + e.message); return; }
 
+    const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
     const state = [];
     for (const { sheetName, def } of defs) {
         const ws = wb.Sheets[sheetName];
         if (!ws) continue;
         const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        // Map by header NAME (file column order doesn't matter); positional fallback.
+        const hdrIdx = {};
+        (grid[0] || []).forEach((h, i) => { hdrIdx[norm(h)] = i; });
+        const srcIdx = def.cols.map((c, j) => (hdrIdx[norm(c)] === undefined ? j : hdrIdx[norm(c)]));
         const rows = [];
         for (let r = 1; r < grid.length; r++) {
             const row = grid[r];
             if (!row || row.every(c => c === '' || c == null)) continue;
             const rec = {};
-            def.cols.forEach((c, i) => { const v = row[i]; rec[c] = (v === '' || v == null) ? '' : String(v); });
+            def.cols.forEach((c, j) => { const v = row[srcIdx[j]]; rec[c] = (v === '' || v == null) ? '' : String(v); });
             rows.push(rec);
         }
         if (rows.length) state.push({ def, sheetName, rows, compared: false });
     }
     if (!state.length) {
-        alert("None of this page's sheets were found in that file.\nExpected: " + (PAGE_SHEET_LABELS[pageId] || []).join(', '));
+        alert('No matching project sheets found in that file.\nExpected sheet names like: ' +
+            Object.keys(window.WORKBOOK_SCHEMA).slice(0, 6).map(s => s.trim()).join(', ') + ' …');
         return;
     }
     sheetImportState[pageId] = state;
@@ -5302,24 +5886,65 @@ function siStatusBadge(s) {
     return '';
 }
 
+// per-cell validation -> returns a Set of invalid column names for a row
+function sheetRowInvalid(def, row) {
+    const bad = new Set();
+    const val = (c) => String(row[c] ?? '').trim();
+    if (def.cardIdCol && !val(def.cardIdCol)) bad.add(def.cardIdCol);      // card id required
+    def.cols.forEach(c => {
+        const v = val(c);
+        if (!v) return;
+        if (/(^|_)mcc(_|$)/i.test(c) && !/^\d{4}(\s*[,;]\s*\d{4})*$/.test(v)) bad.add(c);  // MCC = 4 digits
+        if (/_url$/i.test(c) && !/^https?:\/\/.+/i.test(v)) bad.add(c);                    // URL shape
+        if (/(_y_n|_yn|_available|_enabled|_supported)$/i.test(c) && !/^(y|n|yes|no|true|false|1|0|conditional|n\/a)$/i.test(v)) bad.add(c);
+    });
+    return bad;
+}
+
 function renderSheetImportPreview(pageId) {
     const el = document.getElementById('si_preview_' + pageId);
     const state = sheetImportState[pageId] || [];
     if (!state.length) { el.innerHTML = '<p class="text-muted">No file loaded.</p>'; return; }
 
-    el.innerHTML = state.map((s) => {
+    const legend = `<div class="d-flex flex-wrap gap-3 small mb-2">
+        <span><span class="diff-swatch diff-added"></span> new value</span>
+        <span><span class="diff-swatch diff-changed"></span> changed</span>
+        <span><span class="diff-swatch diff-removed"></span> removed / blank now</span>
+        <span><span class="diff-swatch cell-invalid"></span> invalid</span>
+    </div>`;
+
+    el.innerHTML = legend + state.map((s) => {
         const cols = s.def.cols;
         const counts = s.compared ? (() => {
             const c = { new: 0, updated: 0, unchanged: 0 };
             s.rows.forEach(r => { c[r._status] = (c[r._status] || 0) + 1; });
-            return ` <span class="badge bg-success">New ${c.new}</span> <span class="badge bg-warning text-dark">Updated ${c.updated}</span> <span class="badge bg-secondary">Unchanged ${c.unchanged}</span>`;
-        })() : '';
+            const inv = s.rows.filter(r => sheetRowInvalid(s.def, r).size).length;
+            return ` <span class="badge bg-success">New ${c.new}</span> <span class="badge bg-warning text-dark">Updated ${c.updated}</span> <span class="badge bg-secondary">Unchanged ${c.unchanged}</span>` +
+                (inv ? ` <span class="badge bg-danger">Invalid ${inv}</span>` : '');
+        })() : (() => {
+            const inv = s.rows.filter(r => sheetRowInvalid(s.def, r).size).length;
+            return inv ? ` <span class="badge bg-danger">Invalid ${inv}</span>` : '';
+        })();
+
         const head = `<th style="font-size:.68rem">#</th>${s.compared ? '<th style="font-size:.68rem">Status</th>' : ''}` +
             cols.map(c => `<th class="text-nowrap" style="font-size:.68rem">${c}</th>`).join('');
-        const body = s.rows.map((row, ri) =>
-            `<tr><td style="font-size:.68rem">${ri + 1}</td>${s.compared ? `<td>${siStatusBadge(row._status)}</td>` : ''}` +
-            cols.map(c => `<td style="font-size:.68rem">${String(row[c] ?? '').slice(0, 80)}</td>`).join('') + '</tr>'
-        ).join('');
+
+        const body = s.rows.map((row, ri) => {
+            const inv = sheetRowInvalid(s.def, row);
+            const db = row._dbMatch;
+            const cellCls = (c) => {
+                if (inv.has(c)) return 'cell-invalid';
+                if (!s.compared || !db) return '';
+                const now = String(row[c] ?? '').trim(), was = String(db[c] ?? '').trim();
+                if (was === '' && now !== '') return 'diff-added';
+                if (was !== '' && now === '') return 'diff-removed';
+                if (was !== now) return 'diff-changed';
+                return '';
+            };
+            return `<tr><td style="font-size:.68rem">${ri + 1}</td>${s.compared ? `<td>${siStatusBadge(row._status)}</td>` : ''}` +
+                cols.map(c => `<td class="${cellCls(c)}" style="font-size:.68rem">${String(row[c] ?? '').slice(0, 80)}</td>`).join('') + '</tr>';
+        }).join('');
+
         return `
         <div class="mb-3">
             <h6 class="fw-bold text-primary mb-1">${s.def.label}
@@ -5347,9 +5972,15 @@ async function compareSheetImport(pageId) {
         db.forEach(d => { (dbByKey[keyOf(d)] = dbByKey[keyOf(d)] || []).push(d); });
         s.rows.forEach(row => {
             const matches = dbByKey[keyOf(row)] || [];
-            if (!matches.length) { row._status = 'new'; return; }
-            const identical = matches.some(m => s.def.cols.every(c => String(m[c] ?? '').trim() === String(row[c] ?? '').trim()));
-            row._status = identical ? 'unchanged' : 'updated';
+            if (!matches.length) { row._status = 'new'; row._dbMatch = null; return; }
+            // pick the closest match (fewest differing cells)
+            let best = matches[0], bestDiff = Infinity;
+            matches.forEach(m => {
+                const d = s.def.cols.reduce((n, c) => n + (String(m[c] ?? '').trim() !== String(row[c] ?? '').trim() ? 1 : 0), 0);
+                if (d < bestDiff) { bestDiff = d; best = m; }
+            });
+            row._dbMatch = best;
+            row._status = bestDiff === 0 ? 'unchanged' : 'updated';
         });
         s.compared = true;
     }
@@ -5360,17 +5991,8 @@ async function saveSheetImport(pageId) {
     const state = sheetImportState[pageId] || [];
     if (!state.length) { alert('Load a file first.'); return; }
     if (!confirm(`This REPLACES ${state.map(s => s.def.table).join(', ')} with the loaded rows. Continue?`)) return;
-
-    // Card Details sheet: auto-generate every Card ID (ignore the sheet's value).
-    let idMap = null;
-    const cardSheet = state.find(s => s.def.table === 'wb_card_details');
-    if (cardSheet) idMap = await regenCardSheetIds(cardSheet);
-
     let total = 0, failed = 0;
     for (const s of state) {
-        // Re-point child sheets to the regenerated Card IDs where we can match them.
-        if (idMap && s !== cardSheet && s.def.cardIdCol) remapChildCardIds(s, idMap);
-
         const recs = s.rows.map(r => {
             const rec = {};
             s.def.cols.forEach(c => { rec[c] = (r[c] === '' || r[c] == null) ? null : r[c]; });
@@ -5379,46 +6001,8 @@ async function saveSheetImport(pageId) {
         const n = await RGDB.replaceRows(s.def.table, recs);
         if (n < 0) failed++; else total += n;
     }
-    alert(`Saved ${total} rows to ${state.length - failed} table(s)${failed ? `, ${failed} failed (see console)` : ''}.`
-        + (idMap ? `\nCard IDs auto-generated.` : ''));
-}
-
-// Overwrite each card row's id with a fresh ISSUER-VAR-NET-NNNN. Returns a map
-// { oldId|matchKey -> newId } so child sheets can be re-linked.
-async function regenCardSheetIds(s) {
-    const idc = s.def.cardIdCol || 'cardid';
-    const col = (row, name) => {
-        const k = s.def.cols.find(c => c === name) || name;
-        return String(row[k] || '').trim();
-    };
-    const matchKey = (issuer, name, network) => [issuer, name, network].map(x => x.toLowerCase()).join('|');
-    const nextByPrefix = {};
-    const map = {};
-    for (const row of s.rows) {
-        const issuer = col(row, 'issuer'), name = col(row, 'product') || col(row, 'card_name') || col(row, 'cardname');
-        const network = col(row, 'network');
-        const prefix = [issuerCode(issuer), shortCode(name, 3), networkCode(network)].filter(Boolean).join('-') || 'CARD';
-        if (nextByPrefix[prefix] === undefined) nextByPrefix[prefix] = await nextCardSeq(prefix);
-        const newId = `${prefix}-${String(nextByPrefix[prefix]++).padStart(4, '0')}`;
-        const old = String(row[idc] || '').trim();
-        if (old) map[old.toLowerCase()] = newId;
-        map[matchKey(issuer, name, network)] = newId;
-        row[idc] = newId;
-    }
-    return map;
-}
-
-function remapChildCardIds(s, idMap) {
-    const idc = s.def.cardIdCol;
-    const col = (row, name) => String(row[(s.def.cols.find(c => c === name) || name)] || '').trim();
-    s.rows.forEach(row => {
-        const cur = String(row[idc] || '').trim().toLowerCase();
-        const byOld = idMap[cur];
-        const byMatch = idMap[[col(row, 'issuer'), col(row, 'card_name') || col(row, 'cardname'), col(row, 'network')]
-            .map(x => x.toLowerCase()).join('|')];
-        const to = byOld || byMatch;
-        if (to) row[idc] = to;
-    });
+    renderSheetImportPreview(pageId);
+    alert(`Saved ${total} rows to ${state.length - failed} table(s)${failed ? `, ${failed} failed (see console)` : ''}.`);
 }
 
 function clearSheetImport(pageId) {
@@ -5472,11 +6056,14 @@ async function saveAllToDatabase() {
             conciergeDetails: document.getElementById('benefit_concierge').checked ? { notes: document.getElementById('concierge_notes').value } : null,
             dining: document.getElementById('benefit_dining').checked,
             diningDetails: document.getElementById('benefit_dining').checked ? {
+                platform: (document.getElementById('dining_platform') || {}).value || '',
                 partner: document.getElementById('dining_partner').value,
                 discountType: document.getElementById('dining_discount_type').value,
+                discountValue: (document.getElementById('dining_discount_value') || {}).value || '',
                 maxDiscount: document.getElementById('dining_max_discount').value,
                 frequency: document.getElementById('dining_frequency').value,
                 minSpend: document.getElementById('dining_min_spend').value,
+                restaurantMapping: (document.getElementById('dining_restaurant_mapping') || {}).value || '',
                 notes: document.getElementById('dining_notes').value
             } : null,
             golf: document.getElementById('benefit_golf').checked,
@@ -5513,9 +6100,11 @@ async function saveAllToDatabase() {
             fuelDetails: document.getElementById('benefit_fuel').checked ? {
                 rate: document.getElementById('fuel_rate').value,
                 maxWaiver: document.getElementById('fuel_max_waiver').value,
-                period: document.getElementById('fuel_period').value,
+                period: (document.getElementById('fuel_waiver_period') || {}).value || '',
                 minTx: document.getElementById('fuel_min_tx').value,
-                maxTx: document.getElementById('fuel_max_tx').value
+                maxTx: document.getElementById('fuel_max_tx').value,
+                maxTxCount: (document.getElementById('fuel_max_tx_count') || {}).value || '',
+                countPeriod: (document.getElementById('fuel_count_period') || {}).value || ''
             } : null,
             lounge: document.getElementById('benefit_lounge').checked,
             loungeDetails: document.getElementById('benefit_lounge').checked ? {
@@ -5531,7 +6120,8 @@ async function saveAllToDatabase() {
                     frequency: document.getElementById('lounge_int_frequency').value,
                     criteria: document.getElementById('lounge_int_criteria').value
                 },
-                program: document.getElementById('lounge_program').value
+                program: document.getElementById('lounge_program').value,
+                usageType: (document.getElementById('lounge_usage_type') || {}).value || ''
             } : null,
             milestone: document.getElementById('benefit_milestone').checked,
             milestoneDetails: document.getElementById('benefit_milestone').checked ?
@@ -5661,21 +6251,24 @@ function showPage(pageId) {
     if (pageId === 'dataEntry') {
         showInitialPage();
     } else if (pageId === 'import') {
-        document.getElementById('importContainer').innerHTML = buildImportPanel();
-        renderSheetImportPreview('import');
-        if (sheetImportState['import']) document.getElementById('si_actions_import').hidden = false;
+        const container = document.getElementById('importContainer');
+        container.innerHTML = buildImportPanel();
+        renderImportTable(importedData);
+        if (importedData.some(r => r._status)) {
+            updateComparisonSummary();
+            document.getElementById('comparisonSummary').style.display = 'block';
+        }
     } else if (pageId === 'importOffers') {
         document.getElementById('importOffersContainer').innerHTML = buildImportOffersPanel();
-        renderSheetImportPreview('importOffers');
-        if (sheetImportState['importOffers']) document.getElementById('si_actions_importOffers').hidden = false;
+        renderOfferImportTable(importedOffersData);
+        document.getElementById('offerRecordCount').textContent = `${importedOffersData.length} records`;
     } else if (pageId === 'importBenefits') {
         document.getElementById('importBenefitsContainer').innerHTML = buildImportBenefitsPanel();
-        renderSheetImportPreview('importBenefits');
-        if (sheetImportState['importBenefits']) document.getElementById('si_actions_importBenefits').hidden = false;
+        renderBenefitImportTablesStandalone(importedBenefitsData);
     } else if (pageId === 'importMcc') {
         document.getElementById('importMccContainer').innerHTML = buildImportMccPanel();
-        renderSheetImportPreview('importMcc');
-        if (sheetImportState['importMcc']) document.getElementById('si_actions_importMcc').hidden = false;
+        renderMccImportTable(importedMccData);
+        document.getElementById('mccRecordCount').textContent = `${importedMccData.length} records`;
     } else if (pageId === 'extractBenefits') {
         document.getElementById('extractBenefitsContainer').innerHTML = buildExtractBenefitsPanel();
     } else if (pageId === 'allData') {
