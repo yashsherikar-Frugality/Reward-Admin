@@ -5104,6 +5104,7 @@ function handleMultiSheetExcelImport(event) {
 
             sheetNames.forEach(sheetName => {
                 if (benefitSheetNames.has(sheetName)) return;   // already pulled into benefitSheetState above
+                if (sheetName === '_lists') return;             // hidden dropdown-options sheet, not data
                 const sheet = workbook.Sheets[sheetName];
                 const json = smartSheetToJson(sheet);
                 if (json.length === 0) return;
@@ -5801,15 +5802,43 @@ function exportImportData() {
     URL.revokeObjectURL(url);
 }
 
+// Saves everything the "Import From Excel" upload found in one go: Card Details,
+// Offers, MCC, and every preferred-benefit sheet — all already linked to the same
+// auto-generated Card IDs by handleMultiSheetExcelImport at upload time, so this
+// does NOT regenerate them (that would desync offers/benefits from their card).
 async function saveImportData() {
-    if (importedData.length === 0) {
+    const benefitState = sheetImportState['importBenefits'] || [];
+    if (!importedData.length && !importedOffersData.length && !importedMccData.length && !benefitState.length) {
         alert('No data to save. Please import an Excel file first.');
         return;
     }
-    await assignAutoCardIds(importedData);   // ignore any Card ID in the sheet
-    if (await RGDB.saveCards(importedData)) {
-        alert(`✅ ${importedData.length} card records saved to Supabase (Card IDs auto-generated).`);
+    const results = [];
+    if (importedData.length) {
+        const ok = await RGDB.saveCards(importedData);
+        results.push(`${importedData.length} card record(s)` + (ok ? '' : ' — FAILED'));
     }
+    if (importedOffersData.length) {
+        const ok = await RGDB.saveOffers(importedOffersData);
+        results.push(`${importedOffersData.length} offer(s)` + (ok ? '' : ' — FAILED'));
+    }
+    if (importedMccData.length) {
+        const ok = await RGDB.saveMcc(importedMccData);
+        results.push(`${importedMccData.length} MCC row(s)` + (ok ? '' : ' — FAILED'));
+    }
+    if (benefitState.length) {
+        let total = 0, failed = 0;
+        for (const s of benefitState) {
+            const recs = s.rows.map(r => {
+                const rec = {};
+                s.def.cols.forEach(c => { rec[c] = (r[c] === '' || r[c] == null) ? null : r[c]; });
+                return rec;
+            });
+            const n = await RGDB.replaceRows(s.def.table, recs);
+            if (n < 0) failed++; else total += n;
+        }
+        results.push(`${total} preferred-benefit row(s) across ${benefitState.length - failed} sheet(s)` + (failed ? `, ${failed} sheet(s) failed` : ''));
+    }
+    alert('✅ Saved to Supabase:\n\n• ' + results.join('\n• '));
 }
 
 // Overwrite every row's Card ID with a fresh ISSUER-VAR-NET-NNNN, whatever the

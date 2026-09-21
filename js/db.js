@@ -48,7 +48,11 @@
         rewardProgram: 'reward_program', ageMin: 'age_min', ageMax: 'age_max',
         creditScore: 'credit_score', empType: 'emp_type', productType: 'product_type',
         benefit_tokenEnabled: 'benefit_token_enabled', benefit_upiSupported: 'benefit_upi_supported',
-        benefit_feeWaiver: 'benefit_fee_waiver', benefit_partnerProgram: 'benefit_partner_program'
+        benefit_feeWaiver: 'benefit_fee_waiver', benefit_partnerProgram: 'benefit_partner_program',
+        benefit_airportTransfer: 'benefit_airport_transfer', benefit_rewardPoints: 'benefit_reward_points',
+        benefit_renewalBenefit: 'benefit_renewal_benefit', benefit_travelInsurance: 'benefit_travel_insurance',
+        benefit_purchaseProtection: 'benefit_purchase_protection', benefit_personalAccident: 'benefit_personal_accident',
+        benefit_roadsideAssistance: 'benefit_roadside_assistance', benefit_statusBenefits: 'benefit_status_benefits'
     };
     const cardCol = (k) => CARD_COL[k] || k;
 
