@@ -5070,8 +5070,19 @@ function handleMultiSheetExcelImport(event) {
 
             let cardData = [];
             let offerData = [];
-            let benefitSheets = [];   // accumulate — one sheet per benefit, or one combined sheet
+            let benefitSheets = [];   // legacy fallback — one combined old-style benefits sheet
             let mccData = [];
+
+            // Each benefit now lives on its own sheet (Lounge, Dining, Golf, Milestone,
+            // Partner & Transfer, …), matched by NAME against the workbook schema —
+            // one row per card, per sheet, saved to that sheet's own wb_* table.
+            // (A flat one-row-per-card merge like the old benefitColumns sniffing did
+            // would clobber same-named fields across different benefit sheets.)
+            const benefitDefs = schemaDefsForPage('importBenefits').filter(d => workbook.Sheets[d.sheetName]);
+            const benefitSheetNames = new Set(benefitDefs.map(d => d.sheetName));
+            const benefitSheetState = benefitDefs
+                .map(({ sheetName, def }) => ({ def, sheetName, rows: extractSheetRowsForDef(workbook, sheetName, def), compared: false }))
+                .filter(s => s.rows.length);
 
             const cardColumns = ['issuer', 'product', 'network', 'instrument_type'];
             const offerColumns = ['category', 'rewardType', 'minTx'];
@@ -5092,6 +5103,7 @@ function handleMultiSheetExcelImport(event) {
             const mccColumns = ['mcc', 'card', 'inclusion', 'exclusion'];
 
             sheetNames.forEach(sheetName => {
+                if (benefitSheetNames.has(sheetName)) return;   // already pulled into benefitSheetState above
                 const sheet = workbook.Sheets[sheetName];
                 const json = smartSheetToJson(sheet);
                 if (json.length === 0) return;
@@ -5203,6 +5215,15 @@ function handleMultiSheetExcelImport(event) {
                 }
             }
 
+            if (benefitSheetState.length) {
+                sheetImportState['importBenefits'] = benefitSheetState;
+                const actions = document.getElementById('si_actions_importBenefits');
+                if (actions && document.getElementById('view-importBenefits').classList.contains('active')) {
+                    actions.hidden = false;
+                    renderSheetImportPreview('importBenefits');
+                }
+            }
+
             if (mccData.length > 0) {
                 importedMccData = mccData;
                 if (document.getElementById('view-importMcc').classList.contains('active')) {
@@ -5216,8 +5237,10 @@ function handleMultiSheetExcelImport(event) {
                 document.getElementById('recordCount').textContent = `${importedData.length} records`;
             }
 
-            const benefitRowCount = benefitSheets.reduce((n, s) => n + s.length, 0);
-            alert(`✅ Import successful!\nCard Data: ${cardData.length} rows\nOffer Data: ${offerData.length} rows\nBenefits: ${benefitSheets.length} sheet(s), ${benefitRowCount} row(s)\nMCC Data: ${mccData.length} rows`);
+            const legacyBenefitRowCount = benefitSheets.reduce((n, s) => n + s.length, 0);
+            const benefitSheetCount = benefitSheetState.length + benefitSheets.length;
+            const benefitRowCount = benefitSheetState.reduce((n, s) => n + s.rows.length, 0) + legacyBenefitRowCount;
+            alert(`✅ Import successful!\nCard Data: ${cardData.length} rows\nOffer Data: ${offerData.length} rows\nBenefits: ${benefitSheetCount} sheet(s), ${benefitRowCount} row(s) — go to "Import Preferred Benefits" to review and save them\nMCC Data: ${mccData.length} rows`);
             document.getElementById('excelFileInputImport').value = '';
         } catch (err) {
             alert('Error reading Excel file: ' + err.message);
@@ -5861,6 +5884,29 @@ function buildSheetImportPanel(pageId, title, blurb) {
     </div>`;
 }
 
+// Pulls one workbook sheet's rows into { def.cols } shaped records, matched by
+// header NAME (column order in the file doesn't matter; falls back to position).
+// Shared by onSheetImportFile (per-page uploader) and handleMultiSheetExcelImport
+// (the "Import From Excel" one-file-does-everything uploader).
+function extractSheetRowsForDef(wb, sheetName, def) {
+    const ws = wb.Sheets[sheetName];
+    if (!ws) return [];
+    const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+    const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+    const hdrIdx = {};
+    (grid[0] || []).forEach((h, i) => { hdrIdx[norm(h)] = i; });
+    const srcIdx = def.cols.map((c, j) => (hdrIdx[norm(c)] === undefined ? j : hdrIdx[norm(c)]));
+    const rows = [];
+    for (let r = 1; r < grid.length; r++) {
+        const row = grid[r];
+        if (!row || row.every(c => c === '' || c == null)) continue;
+        const rec = {};
+        def.cols.forEach((c, j) => { const v = row[srcIdx[j]]; rec[c] = (v === '' || v == null) ? '' : String(v); });
+        rows.push(rec);
+    }
+    return rows;
+}
+
 async function onSheetImportFile(pageId, event) {
     const file = event.target.files[0];
     event.target.value = '';
@@ -5872,24 +5918,9 @@ async function onSheetImportFile(pageId, event) {
     try { wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: 'array' }); }
     catch (e) { alert('Could not read the file: ' + e.message); return; }
 
-    const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
     const state = [];
     for (const { sheetName, def } of defs) {
-        const ws = wb.Sheets[sheetName];
-        if (!ws) continue;
-        const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-        // Map by header NAME (file column order doesn't matter); positional fallback.
-        const hdrIdx = {};
-        (grid[0] || []).forEach((h, i) => { hdrIdx[norm(h)] = i; });
-        const srcIdx = def.cols.map((c, j) => (hdrIdx[norm(c)] === undefined ? j : hdrIdx[norm(c)]));
-        const rows = [];
-        for (let r = 1; r < grid.length; r++) {
-            const row = grid[r];
-            if (!row || row.every(c => c === '' || c == null)) continue;
-            const rec = {};
-            def.cols.forEach((c, j) => { const v = row[srcIdx[j]]; rec[c] = (v === '' || v == null) ? '' : String(v); });
-            rows.push(rec);
-        }
+        const rows = extractSheetRowsForDef(wb, sheetName, def);
         if (rows.length) state.push({ def, sheetName, rows, compared: false });
     }
     if (!state.length) {
