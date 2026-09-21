@@ -85,7 +85,7 @@
     const OFFER_COL = {
         cardId: 'card_id', offerId: 'offer_id', subCategory: 'sub_category',
         rewardType: 'reward_type', instancePeriod: 'instance_period', minTx: 'min_tx',
-        maxTx: 'max_tx', maxBenefit: 'max_benefit', startDate: 'start_date', endDate: 'end_date',
+        maxTx: 'max_tx', maxBenefit: 'max_benefit', rewardCap: 'reward_cap', startDate: 'start_date', endDate: 'end_date',
         paymentScopeType: 'payment_scope_type', paymentScopeValue: 'payment_scope_value',
         rpExpiry: 'rp_expiry', couponCode: 'coupon_code', customPlatform: 'custom_platform'
     };

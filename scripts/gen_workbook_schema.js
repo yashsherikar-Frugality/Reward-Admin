@@ -52,7 +52,7 @@ function dedupe(names) {
 }
 
 // Sheets to ignore entirely (matched on bank-stripped, case-insensitive name).
-const SKIP_SHEETS = ['audit log'];
+const SKIP_SHEETS = ['audit log', '_lists'];
 
 // Per-sheet column corrections — align the workbook headers to the Preferred
 // Benefits / Benefit Detail field names. Keyed by bank-stripped sheet name, then

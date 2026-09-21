@@ -214,14 +214,14 @@ const COUNTRIES = [
 
 const NETWORKS = {
     "Visa": ["Visa Classic","Visa Gold","Visa Platinum","Visa Signature","Visa Infinite","Visa Infinite Privilege","Visa Business","Visa Corporate","Visa Purchasing","Visa Commercial"],
-    "Mastercard": ["Mastercard Standard","Mastercard Gold","Mastercard Platinum","World Mastercard","World Elite Mastercard","Titanium Mastercard","Business Mastercard","Corporate Mastercard"],
+    "Mastercard": ["Mastercard Standard","Mastercard Gold","Mastercard Platinum","World Mastercard","World Elite Mastercard","Titanium Mastercard","Business Mastercard","Corporate Mastercard","Mastercard Commercial"],
     "Maestro": ["Maestro Standard","Maestro Gold","Maestro Debit","Maestro International"],
-    "RuPay": ["RuPay Classic","RuPay Platinum","RuPay Select","RuPay Platinum Plus","RuPay JCB","RuPay Business","RuPay Corporate","RuPay Credit on UPI"],
+    "RuPay": ["RuPay Classic","RuPay Platinum","RuPay Select","RuPay Platinum Plus","RuPay JCB","RuPay Business","RuPay Corporate","RuPay Credit on UPI","RuPay Commercial"],
     "Amex": ["Green Card","Gold Card","Gold Charge","Membership Rewards","Platinum Travel","Platinum Reserve","Platinum Charge","Centurion","Business Gold","Corporate Platinum"],
     "Diners Club": ["Diners Club Privilege","Diners Club Black","Diners Club Black Metal","Diners Club Premium"],
     "JCB": ["JCB Standard","JCB Gold","JCB Platinum","JCB World"],
-    "UnionPay": ["UnionPay Classic","UnionPay Platinum","UnionPay Diamond","UnionPay Business"],
-    "Discover": ["Discover Standard","Discover Platinum","Discover Business"]
+    "UnionPay": ["UnionPay Classic","UnionPay Platinum","UnionPay Diamond","UnionPay Business","UnionPay Commercial"],
+    "Discover": ["Discover Standard","Discover Platinum","Discover Business","Discover Commercial"]
 };
 
 // ================================================================
@@ -668,7 +668,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                 </div>
                 <div class="row g-2 mt-2">
                     <div class="col-md-4">${createSelectField('issuerCountry', 'Issuer Country', COUNTRIES, data.issuerCountry || 'India')}</div>
-                    <div class="col-md-4">${createSelectField('cardStatus', 'Card Status', ['Active','Discontinued','Upcoming','ToBeDiscontinued'], data.cardStatus || '')}</div>
+                    <div class="col-md-4">${createSelectField('cardStatus', 'Card Status', ['Active','Functional','Discontinued','Upcoming','ToBeDiscontinued'], data.cardStatus || '')}</div>
                     <div class="col-md-4" id="cardStatusDateWrapper" style="${(data.cardStatus === 'Upcoming' || data.cardStatus === 'ToBeDiscontinued' || data.cardStatus === 'Discontinued') ? '' : 'display:none;'}">
                         <div class="form-floating">
                             <input type="date" id="cardStatusDate" class="form-control form-control-sm" value="${data.cardStatusDate || ''}" placeholder="Effective Date">
@@ -1636,6 +1636,7 @@ function updateCardStatusBadge() {
     const s = (document.getElementById('cardStatus') || {}).value || '';
     const map = {
         Active:           ['bg-success', 'ACTIVE'],
+        Functional:       ['bg-success', 'FUNCTIONAL'],
         Upcoming:         ['bg-primary', 'UPCOMING'],
         ToBeDiscontinued: ['bg-warning text-dark', 'TO BE DISCONTINUED'],
         Discontinued:     ['bg-secondary', 'DISCONTINUED'],
@@ -2721,6 +2722,7 @@ function getOfferColumnGroup(key) {
         'minTx': 'offergrp-3',
         'maxTx': 'offergrp-3',
         'maxBenefit': 'offergrp-3',
+        'rewardCap': 'offergrp-3',
         'startDate': 'offergrp-4',
         'endDate': 'offergrp-4',
         'weblink': 'offergrp-4',
@@ -2772,7 +2774,7 @@ const OFFER_COLUMN_LABELS = {
     cardId: 'Card ID', offerId: 'Offer ID', category: 'Category', subCategory: 'Sub Category',
     rewardType: 'Reward Type', frequency: 'Frequency', status: 'Status', days: 'Applicable Days',
     instancePeriod: 'Instance Period', person: 'Applicable Person', minTx: 'Min Transaction',
-    maxTx: 'Max Transaction', maxBenefit: 'Max Benefit', startDate: 'Start Date',
+    maxTx: 'Max Transaction', maxBenefit: 'Max Benefit', rewardCap: 'Reward Cap', startDate: 'Start Date',
     endDate: 'End Date', weblink: 'Web Link', paymentScopeType: 'Apply Rule By',
     paymentScopeValue: 'Apply Value', rpExpiry: 'RP Expiry', couponCode: 'Coupon Code',
     platform: 'Platform', customPlatform: 'Custom Platform'
@@ -2869,7 +2871,7 @@ function autoMatchOfferHeader(header, catalogue) {
 
 const OFFER_IMPORT_COLUMNS = [
     'cardId', 'offerId', 'category', 'subCategory', 'rewardType', 'frequency', 'status', 'days',
-    'instancePeriod', 'person', 'minTx', 'maxTx', 'maxBenefit',
+    'instancePeriod', 'person', 'minTx', 'maxTx', 'maxBenefit', 'rewardCap',
     'startDate', 'endDate', 'weblink', 'paymentScopeType', 'paymentScopeValue',
     'rpExpiry', 'couponCode', 'platform', 'customPlatform'
 ];
@@ -3736,6 +3738,7 @@ async function saveOfferImportData() {
         'minTx': 'minTx',
         'maxTx': 'maxTx',
         'maxBenefit': 'maxBenefit',
+        'rewardCap': 'rewardCap',
         'startDate': 'startDate',
         'endDate': 'endDate',
         'weblink': 'weblink',
@@ -3765,6 +3768,7 @@ async function saveOfferImportData() {
             minTx: '',
             maxTx: '',
             maxBenefit: '',
+            rewardCap: '',
             startDate: '',
             endDate: '',
             weblink: '',
@@ -5381,7 +5385,22 @@ const FIXED_COLUMNS = [
     { key: 'benefit_fuel', label: 'Fuel Surcharge' },
     { key: 'benefit_lounge', label: 'Lounge Access' },
     { key: 'benefit_milestone', label: 'Milestone' },
-    { key: 'benefit_partnerProgram', label: 'Partner Program' }
+    { key: 'benefit_partnerProgram', label: 'Partner Program' },
+    { key: 'benefit_airportTransfer', label: 'Airport Transfer' },
+    { key: 'benefit_travel', label: 'Travel Benefits' },
+    { key: 'benefit_hotel', label: 'Hotel Benefits' },
+    { key: 'benefit_airline', label: 'Airline Benefits' },
+    { key: 'benefit_forex', label: 'Forex / International' },
+    { key: 'benefit_rewardPoints', label: 'Reward Points' },
+    { key: 'benefit_renewalBenefit', label: 'Renewal Benefit' },
+    { key: 'benefit_shopping', label: 'Shopping / Merchant Offers' },
+    { key: 'benefit_ott', label: 'OTT / Subscription' },
+    { key: 'benefit_travelInsurance', label: 'Travel Insurance' },
+    { key: 'benefit_purchaseProtection', label: 'Purchase Protection' },
+    { key: 'benefit_personalAccident', label: 'Personal Accident' },
+    { key: 'benefit_roadsideAssistance', label: 'Roadside Assistance' },
+    { key: 'benefit_ltf', label: 'LTF (Lifetime Free)' },
+    { key: 'benefit_statusBenefits', label: 'Status Benefits' }
 ];
 
 // COLUMN_ALIASES – removed fuel detail aliases
@@ -5554,7 +5573,7 @@ function getColumnGroup(key) {
 // in the actual card form. Returns a Set of FIXED_COLUMNS keys that are invalid. =====
 const IMPORT_VALID_OPTIONS = {
     instrument_type: ['Credit Card','Debit Card','UPI','Bank Account','Wallet','Digi Wallet','Crypto Wallet'],
-    cardStatus: ['Active','Discontinued','Upcoming','ToBeDiscontinued'],
+    cardStatus: ['Active','Functional','Discontinued','Upcoming','ToBeDiscontinued'],
     card_bill_cycle_duration: ['15 Days','18 Days','20 Days','25 Days','30 Days (Monthly)','Custom'],
     creditScore: ['Any','<600','<650','<700','<750','<800','600+','650+','700+','750+','800+','850+'],
     ageMin: ['All','13+','18+','21+','30+'],
@@ -5798,12 +5817,16 @@ function handleExcelImport(event) {
 const PAGE_SHEET_LABELS = {
     importOffers: ['offers'],
     importMcc: ['mcc'],
+    // every benefit sheet in the FINAL import template (js/benefit_spec.js + the
+    // wizard checklist) — one wb_* table per sheet, kept in sync by
+    // scripts/gen_workbook_schema.js.
     importBenefits: [
-        'Lounge Details', 'Golf Benefits', 'Dining Discounts', 'Concierge Service',
-        'Movie BOGO', 'Spa-Wellness Privileges', 'Insurance Benefits', 'Fee Waiver',
-        'Fuel Surcharge Waiver', 'Welcome Benefits-Bonus', 'Milestone Details',
-        'Partner Program Details', 'Token Enabled', 'UPI Supported', 'contactless',
-        'Reward Structure'
+        'Lounge', 'Airport Transfer', 'Travel', 'Hotel', 'Airline', 'Forex - International',
+        'Reward Points', 'Milestone', 'Welcome', 'Renewal Benefit', 'Fee Waiver',
+        'Partner & Transfer', 'Fuel', 'Dining', 'Golf', 'Movie', 'SPA - Wellness', 'Concierge',
+        'Shopping', 'OTT - Subscription', 'Insurance - Protection', 'Travel Insurance',
+        'Purchase Protection', 'Personal Accident', 'Roadside Assistance', 'LTF (Lifetime Free)',
+        'Status Benefits', 'UPI', 'Contactless', 'Token Enabled', 'Fees'
     ]
 };
 
@@ -6191,11 +6214,8 @@ async function saveAllToDatabase() {
         fee_joining_type: f.joiningType, fee_joining: f.joining, fee_annual: f.annual, fee_renewal: f.renewal,
         fee_waiver_spend: b.feeWaiverDetails ? b.feeWaiverDetails.spend : '',
         fee_waiver_period: b.feeWaiverDetails ? b.feeWaiverDetails.period : '',
-        benefit_concierge: b.concierge, benefit_dining: b.dining, benefit_golf: b.golf, benefit_movie: b.movie,
-        benefit_spa: b.spa, benefit_insurance: b.insurance, benefit_fees: b.fees, benefit_contactless: b.contactless,
-        benefit_tokenEnabled: b.tokenEnabled, benefit_upiSupported: b.upiSupported, benefit_welcome: b.welcome,
-        benefit_feeWaiver: b.feeWaiver, benefit_fuel: b.fuel, benefit_lounge: b.lounge,
-        benefit_milestone: b.milestone, benefit_partnerProgram: b.partnerProgram
+        // every benefit flag in the wizard checklist, not just the ones with a hand-coded panel
+        ...Object.fromEntries(allWizardBenefitIds().map(id => [id, b[id.replace('benefit_', '')]]))
     };
     if (!flatCard.id) { alert('Enter a Card ID before saving.'); return; }
     const cardOk = await RGDB.saveCards([flatCard]);
@@ -6263,8 +6283,14 @@ function showPage(pageId) {
         renderOfferImportTable(importedOffersData);
         document.getElementById('offerRecordCount').textContent = `${importedOffersData.length} records`;
     } else if (pageId === 'importBenefits') {
-        document.getElementById('importBenefitsContainer').innerHTML = buildImportBenefitsPanel();
-        renderBenefitImportTablesStandalone(importedBenefitsData);
+        document.getElementById('importBenefitsContainer').innerHTML = buildSheetImportPanel(
+            'importBenefits', 'Import Preferred Benefits',
+            'Upload the workbook — every benefit sheet (Lounge, Dining, Golf, Milestone, Partner & Transfer, Fees, …) previews, validates and saves to its own table independently.'
+        );
+        if ((sheetImportState['importBenefits'] || []).length) {
+            document.getElementById('si_actions_importBenefits').hidden = false;
+            renderSheetImportPreview('importBenefits');
+        }
     } else if (pageId === 'importMcc') {
         document.getElementById('importMccContainer').innerHTML = buildImportMccPanel();
         renderMccImportTable(importedMccData);

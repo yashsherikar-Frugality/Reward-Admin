@@ -1,10 +1,17 @@
 /*
  * FINAL all-in-one import template.
- *  - Card Details: benefit_* = Yes/No dropdowns + every controlled list
- *  - Offers: reward-type-aware columns (only the chosen type's sub-fields open)
- *  - One sheet per benefit with its current fields + dropdowns; a card row greys
- *    out on a benefit sheet when that benefit is "No" in Card Details
- *  - MCC
+ *
+ *  - Card Details : one row per card. Column A = a TEMP Card ID you assign
+ *    (1,2,3 ... or "INFINIA-1"). Every benefit flag from the project wizard is a
+ *    Yes/No dropdown; every controlled field is a dropdown.
+ *  - Offers       : reward-type-aware columns (only the chosen type's sub-fields
+ *    open). cardId must match a row in Card Details, else the cell is rejected
+ *    and shaded pink.
+ *  - One sheet per benefit (every checkbox in WIZARD_BENEFIT_GROUPS). Fields
+ *    come from BENEFIT_DETAIL_SPEC / WIZARD_BENEFIT_MINI_SPEC (same resolution
+ *    the app uses). If that card's benefit flag = "No" in Card Details, the
+ *    whole row greys out and every cell rejects input.
+ *  - MCC          : cardId matched to Card Details.
  *
  *   npm i --no-save exceljs
  *   node scripts/make_final_template.js [out.xlsx]
@@ -15,11 +22,24 @@ const ExcelJS = require('exceljs');
 
 const ROOT = path.join(__dirname, '..');
 const OUT = process.argv[2] || path.join(ROOT, 'import_template_FINAL.xlsx');
+const N = 100;
+
+// ---- pull data straight out of the project source ----
 const script = fs.readFileSync(path.join(ROOT, 'js', 'script1.js'), 'utf8');
+const arrLit = (n) => script.match(new RegExp('const ' + n + '\\s*=\\s*(\\[[\\s\\S]*?\\n\\];)'))[1].replace(/;$/, '');
+const objLit = (n) => script.match(new RegExp('const ' + n + '\\s*=\\s*(\\{[\\s\\S]*?\\n\\};)'))[1].replace(/;$/, '');
 const grab = (n) => eval(script.match(new RegExp('const ' + n + '\\s*=\\s*(\\[[\\s\\S]*?\\]);'))[1]);
 const grabObj = (n) => eval('(' + script.match(new RegExp('const ' + n + '\\s*=\\s*(\\{[\\s\\S]*?\\n\\});'))[1] + ')');
 
-const CARD_COLS = grab('FIXED_COLUMNS').map(c => c.key);
+const win = {}; (function (window) { eval(fs.readFileSync(path.join(ROOT, 'js', 'benefit_spec.js'), 'utf8')); })(win);
+const VOCAB = win.BENEFIT_VOCAB || {};
+const SPEC = win.BENEFIT_DETAIL_SPEC || {};
+const MINI = eval('(' + objLit('WIZARD_BENEFIT_MINI_SPEC') + ')');
+const SPEC_MAP = eval('(' + objLit('WIZARD_BENEFIT_SPEC_MAP') + ')');
+const GROUPS = eval('(' + arrLit('WIZARD_BENEFIT_GROUPS') + ')');
+const BENEFIT_IDS = GROUPS.flatMap(g => g.items.map(i => i[0]));   // every wizard checkbox
+
+const CARD_COLS0 = grab('FIXED_COLUMNS').map(c => c.key);
 const OFFER_BASE = grab('OFFER_IMPORT_COLUMNS');
 const MCC_COLS = grab('MCC_IMPORT_COLUMNS');
 const OPT = grabObj('IMPORT_VALID_OPTIONS');
@@ -29,6 +49,11 @@ const CATS = ['ALL', ...Object.keys(grabObj('CATEGORY_HIERARCHY'))];
 const ISSUERS = Object.keys(grabObj('ISSUER_PRODUCTS'));
 const COUNTRIES = grab('COUNTRIES');
 
+// Card Details gets a Yes/No column for EVERY wizard benefit, not just the
+// FIXED_COLUMNS subset, so every benefit sheet has a flag to look up.
+const EXTRA_FLAGS = BENEFIT_IDS.filter(id => !CARD_COLS0.includes(id));
+const CARD_COLS = [...CARD_COLS0, ...EXTRA_FLAGS];
+
 const stripNet = (s, n) => (String(s).replace(new RegExp('\\b' + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), '').replace(/\s{2,}/g, ' ').trim() || s);
 const SUBNET_ALL = [...new Set([].concat(...Object.keys(NET).map(n => NET[n].map(s => stripNet(s, n)))))];
 
@@ -37,48 +62,65 @@ const POINTS = ['Reward Points', 'Air Miles', 'Hotel Points', 'Coins'];
 const YN = ['Yes', 'No'];
 const PERIOD = ['Monthly', 'Quarterly', 'Half-Yearly', 'Yearly'];
 
-const N = 200;
 const colL = (i) => { let s = ''; i++; while (i > 0) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
 
 const wb = new ExcelJS.Workbook();
 const L = wb.addWorksheet('_lists'); L.state = 'veryHidden';
 L.getCell('A1').value = ''; wb.definedNames.add('_lists!$A$1', 'L_BLANK');
-let lc = 1;
-const named = {};
+let lc = 1; const named = {};
 const list = (name, arr) => {
-    if (named[name]) return named[name];
+    if (named[name]) return name;
     const c = colL(lc++);
-    arr.forEach((v, i) => { L.getCell(`${c}${i + 1}`).value = String(v); });
-    wb.definedNames.add(`_lists!$${c}$1:$${c}$${arr.length}`, name);
-    return (named[name] = name);
+    (arr.length ? arr : ['—']).forEach((v, i) => { L.getCell(`${c}${i + 1}`).value = String(v); });
+    wb.definedNames.add(`_lists!$${c}$1:$${c}$${Math.max(arr.length, 1)}`, name);
+    named[name] = 1; return name;
 };
 
 const sheet = (title, cols) => {
-    const ws = wb.addWorksheet(title);
-    ws.addRow(cols);
-    ws.getRow(1).font = { bold: true };
+    const ws = wb.addWorksheet(title.replace(/[\\/?*[\]:]/g, '-').slice(0, 31));
+    ws.addRow(cols); ws.getRow(1).font = { bold: true };
+    ws.views = [{ state: 'frozen', ySplit: 1, xSplit: 1 }];
     for (let r = 2; r <= N; r++) ws.addRow(cols.map(() => ''));
     return ws;
 };
-const dd = (ws, colName, cols, opts, { multi = false } = {}) => {   // plain list dropdown
+const plainDD = (ws, cols, colName, opts) => {
     const i = cols.indexOf(colName); if (i < 0) return;
     const c = colL(i), nm = list('L_' + colName, opts);
     for (let r = 2; r <= N; r++) ws.getCell(`${c}${r}`).dataValidation = { type: 'list', allowBlank: true, showDropDown: true, formulae: [nm] };
 };
+const greyCF = (ws, cols, colName, whenRow2) => {
+    const i = cols.indexOf(colName); if (i < 0) return null;
+    const c = colL(i);
+    ws.addConditionalFormatting({ ref: `${c}2:${c}${N}`, rules: [{ type: 'expression', priority: 1, formulae: [whenRow2], style: { fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFDDDDDD' } } } }] });
+    return c;
+};
+// cardId column must reference an existing Card Details row.
+const cardIdGuard = (ws, colName) => {
+    const i = ws.getRow(1).values.indexOf(colName) - 1; if (i < 0) return;
+    const c = colL(i);
+    for (let r = 2; r <= N; r++) ws.getCell(`${c}${r}`).dataValidation = {
+        type: 'custom', allowBlank: true, showErrorMessage: true, errorStyle: 'stop',
+        errorTitle: 'Unknown Card ID', error: 'This Card ID is not in the Card Details sheet.',
+        formulae: [`COUNTIF('Card Details'!$A:$A,$${c}${r})>0`],
+    };
+    ws.addConditionalFormatting({
+        ref: `${c}2:${c}${N}`,
+        rules: [{ type: 'expression', priority: 1, formulae: [`AND($${c}2<>"",COUNTIF('Card Details'!$A:$A,$${c}2)=0)`], style: { fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFF8C9C9' } } } }],
+    });
+};
 
-// ---------- Card Details ----------
-const cdCols = [...CARD_COLS];
-const cd = sheet('Card Details', cdCols);
+/* ===================== Card Details ===================== */
+const cd = sheet('Card Details', CARD_COLS);
 CARD_COLS.forEach(k => {
-    if (k.startsWith('benefit_') || k === 'cobrand') dd(cd, k, cdCols, YN);
-    else if (OPT[k]) dd(cd, k, cdCols, OPT[k]);
+    if (k.startsWith('benefit_') || k === 'cobrand') plainDD(cd, CARD_COLS, k, YN);
+    else if (OPT[k]) plainDD(cd, CARD_COLS, k, OPT[k]);
 });
-dd(cd, 'issuer', cdCols, ISSUERS);
-dd(cd, 'network', cdCols, Object.keys(NET));
-dd(cd, 'subNetwork', cdCols, SUBNET_ALL);
-dd(cd, 'issuerCountry', cdCols, COUNTRIES);
+plainDD(cd, CARD_COLS, 'issuer', ISSUERS);
+plainDD(cd, CARD_COLS, 'network', Object.keys(NET));
+plainDD(cd, CARD_COLS, 'subNetwork', SUBNET_ALL);
+plainDD(cd, CARD_COLS, 'issuerCountry', COUNTRIES);
 
-// ---------- Offers (reward-type aware) ----------
+/* ===================== Offers ===================== */
 const OFFER_OPTS = {
     category: CATS, rewardType: [...CURRENCY, ...POINTS],
     frequency: ['One Time', 'Monthly', 'Quarterly', 'Yearly'],
@@ -94,32 +136,28 @@ const subCols = [];
 Object.entries(RTF).forEach(([t, fields]) => fields.forEach(f => subCols.push({ col: f.id, type: t, opts: f.options })));
 const offerCols = [];
 OFFER_BASE.forEach(c => { offerCols.push(c); if (c === 'maxBenefit') offerCols.push('rewardCap'); });
-subCols.forEach(s => offerCols.push(s.col));
+subCols.forEach(s => { if (!offerCols.includes(s.col)) offerCols.push(s.col); });
 const off = sheet('Offers', offerCols);
 const RT_L = colL(offerCols.indexOf('rewardType'));
 const rtCell = (r) => `$${RT_L}${r}`;
-Object.entries(OFFER_OPTS).forEach(([k, v]) => dd(off, k, offerCols, v));
-const grey = (ws, cols, colName, whenExpr) => {
-    const i = cols.indexOf(colName); if (i < 0) return;
-    const c = colL(i);
-    ws.addConditionalFormatting({ ref: `${c}2:${c}${N}`, rules: [{ type: 'expression', priority: 1, formulae: [whenExpr(2)], style: { fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFDDDDDD' } } } }] });
-    return c;
-};
+Object.entries(OFFER_OPTS).forEach(([k, v]) => plainDD(off, offerCols, k, v));
+cardIdGuard(off, 'cardId');
+
 subCols.forEach(s => {
     const c = colL(offerCols.indexOf(s.col));
-    const nm = list('L_' + s.col, s.opts);
+    const nm = list('L_' + s.col, s.opts || []);
     for (let r = 2; r <= N; r++) off.getCell(`${c}${r}`).dataValidation = {
         type: 'list', allowBlank: true, showDropDown: true,
         formulae: [`IF(${rtCell(r)}="${s.type}",${nm},L_BLANK)`],
-        showErrorMessage: true, errorStyle: 'stop', errorTitle: 'Not for this reward type',
+        showErrorMessage: true, errorStyle: 'stop', errorTitle: 'Wrong reward type',
         error: `Fill only when Reward Type = "${s.type}".`,
     };
-    grey(off, offerCols, s.col, (r) => `${rtCell(r)}<>"${s.type}"`);
+    greyCF(off, offerCols, s.col, `${rtCell(2)}<>"${s.type}"`);
 });
 const isPts = (r) => `OR(${POINTS.map(t => `${rtCell(r)}="${t}"`).join(',')})`;
 const isCur = (r) => `OR(${CURRENCY.map(t => `${rtCell(r)}="${t}"`).join(',')})`;
 [['maxBenefit', isPts], ['rewardCap', isCur], ['rpExpiry', isCur], ['paymentScopeType', isCur], ['paymentScopeValue', isCur]].forEach(([col, when]) => {
-    const c = grey(off, offerCols, col, when);
+    const c = greyCF(off, offerCols, col, when(2)); if (!c) return;
     for (let r = 2; r <= N; r++) {
         off.getCell(`${c}${r}`).dataValidation = OFFER_OPTS[col]
             ? { type: 'list', allowBlank: true, showDropDown: true, formulae: [`IF(${when(r)},L_BLANK,${list('L_' + col, OFFER_OPTS[col])})`], showErrorMessage: true, errorStyle: 'stop', errorTitle: 'Not applicable', error: 'Does not apply to the selected Reward Type.' }
@@ -127,63 +165,63 @@ const isCur = (r) => `OR(${CURRENCY.map(t => `${rtCell(r)}="${t}"`).join(',')})`
     }
 });
 
-// ---------- Benefit sheets ----------
-const B = {
-    Lounge: { flag: 'benefit_lounge', cols: ['cardId', 'lounge_program', 'lounge_usage_type', 'lounge_dom_visits', 'lounge_dom_period', 'lounge_dom_frequency', 'lounge_dom_criteria', 'lounge_int_visits', 'lounge_int_period', 'lounge_int_frequency', 'lounge_int_criteria'],
-        drop: { lounge_program: ['All', 'Priority Pass', 'DreamFolks', 'LoungeKey', 'Visa Airport Companion', 'Mastercard Airport Experiences', 'DragonPass'], lounge_usage_type: ['Card Swipe', 'Voucher', 'PP', 'Other', 'TBC'], lounge_dom_period: PERIOD, lounge_int_period: PERIOD } },
-    Golf: { flag: 'benefit_golf', cols: ['cardId', 'golf_courses', 'golf_rounds', 'golf_period', 'golf_notes'],
-        drop: { golf_courses: ['DLF Golf', 'Prestige Golfshire', 'KGA', 'Oxford Golf', 'Jaypee Greens', 'All Partner Courses'], golf_period: PERIOD } },
-    Dining: { flag: 'benefit_dining', cols: ['cardId', 'dining_platform', 'dining_partner', 'dining_discount_type', 'dining_discount_value', 'dining_max_discount', 'dining_frequency', 'dining_min_spend', 'dining_restaurant_mapping', 'dining_notes'],
-        drop: { dining_platform: ['Zomato', 'Swiggy', 'Merchant', 'Other'] } },
-    Movie: { flag: 'benefit_movie', cols: ['cardId', 'movie_partner', 'movie_discount_type', 'movie_max_discount', 'movie_frequency', 'movie_ticket_limit', 'movie_days', 'movie_notes'], drop: {} },
-    Spa: { flag: 'benefit_spa', cols: ['cardId', 'spa_partner', 'spa_discount', 'spa_max_discount', 'spa_frequency', 'spa_notes'], drop: {} },
-    Concierge: { flag: 'benefit_concierge', cols: ['cardId', 'concierge_notes'], drop: {} },
-    Insurance: { flag: 'benefit_insurance', cols: ['cardId', 'ins_provider', 'ins_coverage', 'ins_policyLink'], drop: {} },
-    'Fee Waiver': { flag: 'benefit_feeWaiver', cols: ['cardId', 'fee_waiver_spend', 'fee_waiver_period'],
-        drop: { fee_waiver_period: OPT.fee_waiver_period || PERIOD } },
-    Fuel: { flag: 'benefit_fuel', cols: ['cardId', 'fuel_rate', 'fuel_max_waiver', 'fuel_waiver_period', 'fuel_min_tx', 'fuel_max_tx', 'fuel_max_tx_count', 'fuel_count_period'],
-        drop: { fuel_waiver_period: PERIOD, fuel_count_period: ['Per Day', 'Weekly', 'Monthly', 'Quarterly', 'Half-Yearly', 'Yearly'] } },
-    Welcome: { flag: 'benefit_welcome', cols: ['cardId', 'welcome_value', 'welcome_benefit_type', 'welcome_free_text'],
-        drop: { welcome_benefit_type: OPT.welcome_benefit_type || ['Voucher', 'Rs', 'RP', 'Cashback'] } },
-    Milestone: { flag: 'benefit_milestone', cols: ['cardId', 'slab_no', 'milestone_amount', 'milestone_period', 'milestone_benefit_value', 'milestone_benefit_type', 'milestone_benefit_comment'],
-        drop: { milestone_period: PERIOD, milestone_benefit_type: ['Voucher', 'Reward points', 'Cashback', 'Air miles', 'Membership', 'Fee waiver', 'Gift', 'Bonus points'] } },
-    'Partner Program': { flag: 'benefit_partnerProgram', cols: ['cardId', 'partner_no', 'redemption_mode', 'partner_name', 'conversion_ratio', 'minimum_transfer', 'transfer_increment', 'transfer_fee', 'transfer_time', 'notes'],
-        drop: { redemption_mode: ['Cashback (1 : 0.25 RP)', 'Voucher (1 : 0.5 RP)', 'Travel / Hotel — Partner (1 : 1 RP)', 'Travel / Hotel — Others (1 : 0.5 RP)', 'Miles — KrisFlyer (1 : 1)', 'Miles — Accor (1 : 1.2)', 'Miles — Others (1 : 0.75)', 'Other'] } },
-    Hotel: { flag: 'benefit_partnerProgram', cols: ['cardId', 'hotel_sub_benefits', 'hotel_partner', 'hotel_program', 'discount_percent', 'room_upgrade', 'complimentary_night', 'breakfast_included', 'early_checkin', 'late_checkout', 'status_match', 'eligible_properties', 'blackout_dates'],
-        drop: { hotel_program: ['Marriott Bonvoy', 'Hilton Honors', 'IHG One Rewards', 'Accor ALL', 'World of Hyatt', 'Taj InnerCircle', 'Club ITC', 'Radisson Rewards'], hotel_sub_benefits: ['Room Upgrade', 'Complimentary Night', 'Breakfast', 'Early Check-in', 'Late Check-out', 'Airport Transfer', 'Travel Credit', 'Dining Credit', 'Spa Credit', 'Loyalty Points', 'Status Match', 'Lounge Access', 'Travel Concierge', 'Other'], room_upgrade: YN, complimentary_night: YN, breakfast_included: YN, early_checkin: YN, late_checkout: YN, status_match: YN } },
-    Forex: { flag: 'benefit_forex', cols: ['cardId', 'forex_ccy_markup', 'conversion_charge'], drop: {} },
-    LTF: { flag: 'benefit_ltf', cols: ['cardId', 'notes'], drop: {} },
+/* ===================== Benefit sheets ===================== */
+const BOOLISH = new Set(['room_upgrade', 'complimentary_night', 'breakfast_included', 'early_checkin', 'late_checkout', 'status_match',
+    'boarding_pass_required', 'reservation_required', 'dine_in_only', 'tip_excluded', 'tax_excluded', 'lesson_available', 'caddie_included',
+    'guest_allowed', 'automatic_waiver', 'partial_waiver_allowed', 'gst_reversal', 'dcc_supported', 'international_reward_eligible',
+    'upi_enabled', 'merchant_transaction_eligible', 'p2p_eligible', 'international_support', 'booking_required', 'breakfast']);
+const norm = (f) => {
+    if (Array.isArray(f)) {
+        const [id, kind, vk] = f;
+        if (kind === 'bool') return { id, kind: 'bool' };
+        return { id, kind: 'list', opts: Array.isArray(vk) ? vk : (VOCAB[vk] || []) };
+    }
+    if (BOOLISH.has(f)) return { id: f, kind: 'bool' };
+    return { id: f, kind: 'text' };
+};
+// extra hand-coded panel fields the app added on top of the spec
+const SHEET_EXTRAS = {
+    benefit_lounge: [['lounge_usage_type', 'select', ['Card Swipe', 'Voucher', 'PP', 'Other', 'TBC']]],
+    benefit_dining: [['dining_platform', 'select', ['Zomato', 'Swiggy', 'Merchant', 'Other']], 'dining_discount_value', 'dining_restaurant_mapping'],
+    benefit_fuel: [['fuel_waiver_period', 'select', PERIOD], 'fuel_max_tx_count', ['fuel_count_period', 'select', ['Per Day', 'Weekly', 'Monthly', 'Quarterly', 'Half-Yearly', 'Yearly']]],
+    benefit_forex: ['forex_ccy_markup', 'conversion_charge'],
+    benefit_ltf: ['notes'],
 };
 
-const CARD_FLAG_COL = (flag) => CARD_COLS.indexOf(flag) + 1;   // VLOOKUP col in Card Details
+BENEFIT_IDS.forEach(id => {
+    if (id === 'benefit_fees') return;                       // fees live on Card Details, not a benefit table
+    const def = (SPEC_MAP[id] && SPEC[SPEC_MAP[id]]) || MINI[id] || { fields: ['notes'] };
+    const label = (def.label || id.replace('benefit_', '').replace(/([A-Z])/g, ' $1'))
+        .replace(/[\\/?*[\]:]/g, '-').replace(/\s{2,}/g, ' ').trim();
+    const raw = [...(SHEET_EXTRAS[id] || []), ...(def.fields || [])];
+    const seen = new Set(['cardId']);
+    const fields = raw.map(norm).filter(f => !seen.has(f.id) && seen.add(f.id));
+    const cols = ['cardId', ...fields.map(f => f.id)];
+    const ws = sheet(label, cols);
+    cardIdGuard(ws, 'cardId');
 
-Object.entries(B).forEach(([name, def]) => {
-    const ws = sheet(name, def.cols);
-    Object.entries(def.drop).forEach(([col, opts]) => dd(ws, col, def.cols, opts));
-    // grey + block whole row when this benefit is "No" for the card
-    const vcol = CARD_FLAG_COL(def.flag);
-    const lastL = colL(def.cols.length - 1);
-    const look = (r) => `VLOOKUP($A${r},'Card Details'!$A:$BZ,${vcol},FALSE)="No"`;
-    ws.addConditionalFormatting({ ref: `B2:${lastL}${N}`, rules: [{ type: 'expression', priority: 1, formulae: [look(2)], style: { fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFDDDDDD' } } } }] });
-    for (let r = 2; r <= N; r++) {
-        for (let ci = 1; ci < def.cols.length; ci++) {
-            const cell = ws.getCell(`${colL(ci)}${r}`);
-            if (cell.dataValidation && cell.dataValidation.type === 'list') {
-                cell.dataValidation.formulae = [`IF(${look(r)},L_BLANK,${cell.dataValidation.formulae[0]})`];
-                cell.dataValidation.showErrorMessage = true; cell.dataValidation.errorStyle = 'stop';
-                cell.dataValidation.errorTitle = 'Benefit not available';
-                cell.dataValidation.error = `${def.flag} = No for this card in Card Details.`;
-            } else {
-                cell.dataValidation = { type: 'custom', allowBlank: true, showErrorMessage: true, errorStyle: 'stop', errorTitle: 'Benefit not available', error: `${def.flag} = No for this card in Card Details.`, formulae: [`NOT(${look(r)})`] };
-            }
+    const vcol = CARD_COLS.indexOf(id) + 1;                  // flag column in Card Details
+    const noExpr = (r) => `IFERROR(VLOOKUP($A${r},'Card Details'!$A:$CV,${vcol},FALSE)="No",FALSE)`;
+    const lastC = colL(cols.length - 1);
+    ws.addConditionalFormatting({ ref: `B2:${lastC}${N}`, rules: [{ type: 'expression', priority: 1, formulae: [noExpr(2)], style: { fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFDDDDDD' } } } }] });
+
+    fields.forEach((f, fi) => {
+        const c = colL(fi + 1);
+        const opts = f.kind === 'bool' ? YN : (f.kind === 'list' ? f.opts : null);
+        for (let r = 2; r <= N; r++) {
+            ws.getCell(`${c}${r}`).dataValidation = opts && opts.length
+                ? { type: 'list', allowBlank: true, showDropDown: true, formulae: [`IF(${noExpr(r)},L_BLANK,${list('L_b_' + f.id, opts)})`], showErrorMessage: true, errorStyle: 'stop', errorTitle: 'Benefit = No', error: `${id} = No for this card in Card Details.` }
+                : { type: 'custom', allowBlank: true, showErrorMessage: true, errorStyle: 'stop', errorTitle: 'Benefit = No', error: `${id} = No for this card in Card Details.`, formulae: [`NOT(${noExpr(r)})`] };
         }
-    }
+    });
 });
 
-// ---------- MCC ----------
-sheet('MCC', MCC_COLS);
+/* ===================== MCC ===================== */
+const mcc = sheet('MCC', MCC_COLS);
+cardIdGuard(mcc, 'Card');
 
 wb.xlsx.writeFile(OUT).then(() => {
     console.log('sheets:', wb.worksheets.map(w => w.name).filter(n => n !== '_lists').join(', '));
+    console.log('benefit sheets:', BENEFIT_IDS.length - 1, ' card cols:', CARD_COLS.length, ' extra flags:', EXTRA_FLAGS.length);
     console.log('Written:', OUT);
 });
