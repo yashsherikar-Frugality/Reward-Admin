@@ -6,7 +6,7 @@
 drop table if exists wb_card_details cascade;
 create table wb_card_details (
     id uuid primary key default gen_random_uuid(),
-    id text,
+    cardid text,
     instrument_type text,
     issuer text,
     product text,
@@ -70,6 +70,7 @@ create table wb_card_details (
     benefit_statusbenefits text,
     imported_at timestamptz default now()
 );
+create index wb_card_details_card_idx on wb_card_details (cardid);
 
 -- Offers  (2288 data rows)
 drop table if exists wb_offers cascade;

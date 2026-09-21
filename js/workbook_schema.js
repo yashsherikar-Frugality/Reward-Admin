@@ -3,9 +3,9 @@ window.WORKBOOK_SCHEMA = {
   "Card Details": {
     "table": "wb_card_details",
     "label": "Card Details",
-    "cardIdCol": null,
+    "cardIdCol": "cardid",
     "cols": [
-      "id",
+      "cardid",
       "instrument_type",
       "issuer",
       "product",

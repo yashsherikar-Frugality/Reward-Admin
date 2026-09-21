@@ -59,6 +59,10 @@ const SKIP_SHEETS = ['audit log', '_lists'];
 // by exact header text. Headers not listed fall through to plain snake_case.
 // Positional order still comes from the sheet; this only renames.
 const SHEET_COLUMN_RENAME = {
+    // Card Details' own header is bare "id" — snake-cases to "id", which collides
+    // with the table's reserved PK column. Every other sheet's card-link column is
+    // "cardid"; line this one up with that convention instead of the src_ fallback.
+    'Card Details': { 'id': 'cardid' },
     'Lounge Details': {
         'Variant': 'variant', 'subNetwork': 'sub_network',
         'Loung Access (Y/N)': 'lounge_access',
@@ -194,8 +198,15 @@ wb.SheetNames.forEach((sheet) => {
         cols = dedupe(cols);   // final safety pass
     }
 
-    // which column carries the card id (for indexing)
-    const cardIdCol = cols[rawHeader.findIndex((h) => /^card ?id$/i.test(h))] || null;
+    // "id" / "imported_at" are reserved for the table's own PK / timestamp columns
+    // (added below) — a sheet header that snake-cases to either would collide.
+    const RESERVED = new Set(['id', 'imported_at']);
+    cols = dedupe(cols.map((c) => (RESERVED.has(c) ? `src_${c}` : c)));
+
+    // which column carries the card id (for indexing) — regex match on the raw
+    // header, falling back to a literal "cardid" column (covers renames like
+    // Card Details' bare "id" -> "cardid" above).
+    const cardIdCol = cols[rawHeader.findIndex((h) => /^card ?id$/i.test(h))] || (cols.includes('cardid') ? 'cardid' : null);
 
     // `cols` is positional: column i in the sheet's header row -> cols[i].
     // key = real sheet name (needed to find the sheet in the uploaded file);
