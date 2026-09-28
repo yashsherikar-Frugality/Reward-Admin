@@ -109,6 +109,9 @@
             const v = genVal(row, k);
             if (v !== '' && v != null) rec.reward_fields[k] = v;
         });
+        // Also write flat columns (rp_pointtype, cb_type, ...) alongside the jsonb
+        // blob, for direct SQL/BI access — Postgres column names are lowercase.
+        Object.keys(rec.reward_fields).forEach(k => { rec[k.toLowerCase()] = rec.reward_fields[k]; });
         rec.updated_at = new Date().toISOString();
         return rec;
     }
