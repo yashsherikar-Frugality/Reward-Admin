@@ -50,7 +50,11 @@ const shortCode = (v, n = 3) => String(v || '').replace(/[^A-Za-z0-9]/g, '').sli
 const networkCode = (v) => NETWORK_CODE[v] || shortCode(v, 3);
 
 // ---- sql helpers ----
-const esc = (v) => `'${String(v).replace(/'/g, "''")}'`;
+// Supabase's SQL Editor splits pasted text into statements at every semicolon,
+// even ones inside a quoted value — a source cell like "...bookings; offer
+// valid..." corrupts the paste. Swap embedded semicolons for a comma so the
+// text stays readable but can't be mistaken for a statement boundary.
+const esc = (v) => `'${String(v).replace(/;/g, ',').replace(/'/g, "''")}'`;
 const sqlText = (v) => (v === undefined || v === null || String(v).trim() === '') ? esc('N/A') : esc(v);
 const sqlNullable = (v) => (v === undefined || v === null || String(v).trim() === '') ? 'NULL' : esc(v);
 const sqlBool = (v) => {
