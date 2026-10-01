@@ -1631,6 +1631,33 @@ async function autoFillCardId(force) {
     el.value = `${prefix}-${seq}`;
     el.dataset.auto = '1';
 }
+
+// What a real generated Card ID looks like: ISSUER-NETWORK-SUBNET-VARIANT-NNN.
+// A raw temp ID from a sheet (just "151", or an old-style long descriptive id
+// typed by an analyst) never matches this — used right before Save to catch
+// un-generated IDs before they reach the database.
+const GENERATED_CARD_ID_RE = /^[A-Za-z0-9]+-[A-Za-z0-9]+-[A-Za-z0-9]+-[A-Za-z0-9]+-\d{3}$/;
+// Returns the distinct bad (non-generated) id values found in `rows` under `idKey`.
+function findUngeneratedCardIds(rows, idKey) {
+    const bad = new Set();
+    (rows || []).forEach(r => {
+        const v = String((r && r[idKey]) || '').trim();
+        if (v && !GENERATED_CARD_ID_RE.test(v)) bad.add(v);
+    });
+    return [...bad];
+}
+// Shows a blocking confirm if any row's card id isn't one we generated.
+// Returns true to proceed, false to abort the save.
+function confirmGeneratedCardIds(bad) {
+    if (!bad.length) return true;
+    const sample = bad.slice(0, 8).join(', ') + (bad.length > 8 ? `, +${bad.length - 8} more` : '');
+    return confirm(
+        `${bad.length} row(s) have a Card ID that doesn't look auto-generated (e.g. ${sample}).\n\n` +
+        `This usually means the file was uploaded straight to this page instead of through ` +
+        `"Import From Excel" (which generates real Card IDs and links every sheet to them).\n\n` +
+        `Save anyway?`
+    );
+}
 function regenerateCardId() { autoFillCardId(true); }
 
 function updateCardStatusBadge() {
@@ -3107,7 +3134,7 @@ function buildImportOffersPanel() {
                 </table>
             </div>
             <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-success" onclick="saveOfferImportData()"><i class="fas fa-save me-2"></i>Save Offers to Database</button>
+                <small class="text-muted">Saving happens on the <strong>Import From Excel</strong> page.</small>
             </div>
         </div>
     </div>
@@ -4473,7 +4500,7 @@ function buildImportMccPanel() {
                 </table>
             </div>
             <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-success" onclick="saveMccImportData()"><i class="fas fa-save me-2"></i>Save MCC Data</button>
+                <small class="text-muted">Saving happens on the <strong>Import From Excel</strong> page.</small>
             </div>
         </div>
     </div>
@@ -5815,6 +5842,20 @@ async function saveImportData() {
         alert('No data to save. Please import an Excel file first.');
         return;
     }
+    // Safety net: handleMultiSheetExcelImport should have already generated real
+    // Card IDs for every row above — this just confirms it, in case anything
+    // reached here some other way (e.g. a row added by hand after upload).
+    const rowCardId = (row, candidates) => {
+        const k = Object.keys(row || {}).find(x => candidates.includes(x.toLowerCase()));
+        return k ? row[k] : '';
+    };
+    const badIds = [...new Set([
+        ...importedData.map(r => rowCardId(r, ['id', 'card_id', 'cardid'])),
+        ...importedOffersData.map(r => rowCardId(r, ['cardid', 'card_id'])),
+        ...importedMccData.map(r => rowCardId(r, ['card', 'cardid', 'card_id'])),
+        ...benefitState.flatMap(s => s.rows.map(r => r[s.def.cardIdCol])),
+    ].filter(v => v && !GENERATED_CARD_ID_RE.test(String(v).trim())))];
+    if (!confirmGeneratedCardIds(badIds)) return;
     const results = [];
     if (importedData.length) {
         const ok = await RGDB.saveCards(importedData);
@@ -5907,10 +5948,10 @@ function buildSheetImportPanel(pageId, title, blurb) {
             </button>
             <input type="file" id="si_input_${pageId}" accept=".xlsx,.xls" style="display:none;" onchange="onSheetImportFile('${pageId}', event)">
         </div>
-        <div class="d-flex gap-2 mb-3" id="si_actions_${pageId}" hidden>
+        <div class="d-flex gap-2 align-items-center mb-3" id="si_actions_${pageId}" hidden>
             <button class="btn btn-outline-primary btn-sm" onclick="compareSheetImport('${pageId}')"><i class="fas fa-code-compare me-1"></i> Compare with Database</button>
-            <button class="btn btn-success btn-sm" onclick="saveSheetImport('${pageId}')"><i class="fas fa-save me-1"></i> Save to Database</button>
             <button class="btn btn-outline-secondary btn-sm" onclick="clearSheetImport('${pageId}')"><i class="fas fa-times me-1"></i> Clear</button>
+            <small class="text-muted">Saving happens on the <strong>Import From Excel</strong> page.</small>
         </div>
         <div id="si_preview_${pageId}"><p class="text-muted">No file loaded.</p></div>
     </div>`;
@@ -6076,7 +6117,9 @@ async function compareSheetImport(pageId) {
 async function saveSheetImport(pageId) {
     const state = sheetImportState[pageId] || [];
     if (!state.length) { alert('Load a file first.'); return; }
-    if (!confirm(`This REPLACES ${state.map(s => s.def.table).join(', ')} with the loaded rows. Continue?`)) return;
+    const badIds = [...new Set(state.flatMap(s => findUngeneratedCardIds(s.rows, s.def.cardIdCol)))];
+    if (!confirmGeneratedCardIds(badIds)) return;
+    if (!confirm(`Save ${state.map(s => s.def.table).join(', ')} now?`)) return;
     let total = 0, failed = 0;
     for (const s of state) {
         const recs = s.rows.map(r => {
