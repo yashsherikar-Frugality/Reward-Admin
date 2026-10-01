@@ -44,7 +44,7 @@ const issuerCode = (v) => {
     if (!v) return '';
     if (ISSUER_CODE[v]) return ISSUER_CODE[v];
     const ac = v.replace(/&/g, ' ').split(/\s+/).filter(Boolean).map(w => w[0]).join('').toUpperCase();
-    return ac.length >= 2 ? ac : v.replace(/[^A-Za-z0-9]/g, '').slice(0, 4).toUpperCase();
+    return (ac.length >= 2 ? ac : v.replace(/[^A-Za-z0-9]/g, '').toUpperCase()).slice(0, 3);
 };
 const shortCode = (v, n = 3) => String(v || '').replace(/[^A-Za-z0-9]/g, '').slice(0, n).toUpperCase();
 const networkCode = (v) => NETWORK_CODE[v] || shortCode(v, 3);
@@ -110,10 +110,11 @@ files.forEach(file => {
 
     rows.forEach(row => {
         const issuer = g(row, 'issuer'), product = g(row, 'product'), network = g(row, 'network');
+        const subNetwork = g(row, 'subNetwork');
         const tempId = g(row, 'id');
-        const prefix = [issuerCode(issuer), shortCode(product, 3), networkCode(network)].filter(Boolean).join('-') || 'CARD';
+        const prefix = [issuerCode(issuer), networkCode(network), shortCode(subNetwork, 3), shortCode(product, 3)].filter(Boolean).join('-') || 'CARD';
         seqByPrefix[prefix] = (seqByPrefix[prefix] || 0) + 1;
-        const newId = `${prefix}-${String(seqByPrefix[prefix]).padStart(4, '0')}`;
+        const newId = `${prefix}-${String(seqByPrefix[prefix]).padStart(3, '0')}`;
         cardIds.push(newId);
         if (tempId) idMap[tempId.toLowerCase()] = newId;
         idMap[[issuer, product, network].map(x => x.toLowerCase()).join('|')] = newId;

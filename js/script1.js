@@ -1569,17 +1569,19 @@ function attachCardListeners() {
 // ---- Auto Card ID  (style: ISSUER-VAR-NET-NNNN, all caps) --------
 // Explicit issuer short codes; anything else falls back to an acronym of the
 // name's words (Bank of India -> BOI), or the first 4 letters.
+// Every issuer code is exactly 3 letters, hand-picked so none collide
+// (e.g. IndusInd Bank / Indian Bank both naturally shorten toward "IND").
 const ISSUER_CODE = {
-    'HDFC Bank': 'HDFC', 'ICICI Bank': 'ICICI', 'SBI Card': 'SBI', 'Axis Bank': 'AXIS',
-    'Kotak Mahindra Bank': 'KOTAK', 'IndusInd Bank': 'INDUS', 'IDFC FIRST Bank': 'IDFC',
-    'YES BANK': 'YES', 'RBL Bank': 'RBL', 'HSBC India': 'HSBC', 'Standard Chartered Bank': 'SCB',
-    'American Express': 'AMEX', 'AU Small Finance Bank': 'AU', 'Federal Bank': 'FED',
-    'Bank of Baroda': 'BOB', 'Punjab National Bank': 'PNB', 'Canara Bank': 'CANARA',
-    'Union Bank of India': 'UBI', 'Indian Bank': 'INDBK', 'Bank of India': 'BOI',
+    'HDFC Bank': 'HDF', 'ICICI Bank': 'ICI', 'SBI Card': 'SBI', 'Axis Bank': 'AXI',
+    'Kotak Mahindra Bank': 'KOT', 'IndusInd Bank': 'IDS', 'IDFC FIRST Bank': 'IDF',
+    'YES BANK': 'YES', 'RBL Bank': 'RBL', 'HSBC India': 'HSB', 'Standard Chartered Bank': 'SCB',
+    'American Express': 'AMX', 'AU Small Finance Bank': 'AUB', 'Federal Bank': 'FED',
+    'Bank of Baroda': 'BOB', 'Punjab National Bank': 'PNB', 'Canara Bank': 'CAN',
+    'Union Bank of India': 'UBI', 'Indian Bank': 'IDN', 'Bank of India': 'BOI',
     'Central Bank of India': 'CBI', 'UCO Bank': 'UCO', 'South Indian Bank': 'SIB',
     'Karnataka Bank': 'KBL', 'Karur Vysya Bank': 'KVB', 'CSB Bank': 'CSB',
-    'Dhanlaxmi Bank': 'DHAN', 'Jammu & Kashmir Bank': 'JKB', 'DBS Bank India': 'DBS',
-    'Citi India': 'CITI', 'SBM Bank': 'SBM'
+    'Dhanlaxmi Bank': 'DHA', 'Jammu & Kashmir Bank': 'JKB', 'DBS Bank India': 'DBS',
+    'Citi India': 'CIT', 'SBM Bank': 'SBM'
 };
 const NETWORK_CODE = {
     'Visa': 'VIS', 'Mastercard': 'MC', 'RuPay': 'RUP', 'Diners Club': 'DIN',
@@ -1589,19 +1591,20 @@ const issuerCode = (v) => {
     if (!v) return '';
     if (ISSUER_CODE[v]) return ISSUER_CODE[v];
     const ac = v.replace(/&/g, ' ').split(/\s+/).filter(Boolean).map(w => w[0]).join('').toUpperCase();
-    return ac.length >= 2 ? ac : v.replace(/[^A-Za-z0-9]/g, '').slice(0, 4).toUpperCase();
+    return (ac.length >= 2 ? ac : v.replace(/[^A-Za-z0-9]/g, '').toUpperCase()).slice(0, 3);
 };
 const shortCode = (v, n = 3) => String(v || '').replace(/[^A-Za-z0-9]/g, '').slice(0, n).toUpperCase();
 const networkCode = (v) => NETWORK_CODE[v] || shortCode(v, 3);
 
-// ISSUER-VAR-NET, minus the running number.
+// ISSUER-NETWORK-SUBNETWORK-VARIANT, minus the running number.
+// e.g. HDFC Bank + Amex + Gold Card + AllMiles -> HDF-AMX-GOL-ALL
 function cardIdPrefix() {
     const g = id => (document.getElementById(id) || {}).value || '';
-    const parts = [issuerCode(g('issuer')), shortCode(g('product'), 3), networkCode(g('network'))].filter(Boolean);
+    const parts = [issuerCode(g('issuer')), networkCode(g('network')), shortCode(g('subNetwork'), 3), shortCode(g('product'), 3)].filter(Boolean);
     return parts.length ? parts.join('-') : 'CARD';
 }
 
-// Highest NNNN already used for this prefix, in cards + wb_card_details.
+// Highest NNN already used for this prefix, in cards + wb_card_details.
 async function nextCardSeq(prefix) {
     let max = 0;
     try {
@@ -1624,7 +1627,7 @@ async function autoFillCardId(force) {
     if (!force && el.dataset.auto !== '1') return;
     el.value = 'generating…';
     const prefix = cardIdPrefix();
-    const seq = String(await nextCardSeq(prefix)).padStart(4, '0');
+    const seq = String(await nextCardSeq(prefix)).padStart(3, '0');
     el.value = `${prefix}-${seq}`;
     el.dataset.auto = '1';
 }
@@ -5153,10 +5156,10 @@ function handleMultiSheetExcelImport(event) {
                 const seqByPrefix = {};
                 for (const row of cardData) {
                     const issuer = gv(row, 'issuer'), product = gv(row, 'product', 'variant', 'cardName');
-                    const network = gv(row, 'network');
-                    const prefix = [issuerCode(issuer), shortCode(product, 3), networkCode(network)].filter(Boolean).join('-') || 'CARD';
+                    const network = gv(row, 'network'), subNetwork = gv(row, 'subNetwork', 'sub_network');
+                    const prefix = [issuerCode(issuer), networkCode(network), shortCode(subNetwork, 3), shortCode(product, 3)].filter(Boolean).join('-') || 'CARD';
                     if (seqByPrefix[prefix] === undefined) seqByPrefix[prefix] = await nextCardSeq(prefix);
-                    const newId = `${prefix}-${String(seqByPrefix[prefix]++).padStart(4, '0')}`;
+                    const newId = `${prefix}-${String(seqByPrefix[prefix]++).padStart(3, '0')}`;
                     const oldId = gv(row, 'id', 'cardId', 'card_id');
                     if (oldId) idMap[oldId.toLowerCase()] = newId;
                     idMap[mkey(issuer, product, network)] = newId;
@@ -5841,16 +5844,16 @@ async function saveImportData() {
     alert('✅ Saved to Supabase:\n\n• ' + results.join('\n• '));
 }
 
-// Overwrite every row's Card ID with a fresh ISSUER-VAR-NET-NNNN, whatever the
-// sheet had. Sequence continues from the highest already in the DB per prefix.
+// Overwrite every row's Card ID with a fresh ISSUER-NET-SUBNET-VAR-NNN, whatever
+// the sheet had. Sequence continues from the highest already in the DB per prefix.
 async function assignAutoCardIds(rows) {
     const g = (row, key) => String(getColVal(row, key) || '').trim();
     const nextByPrefix = {};
     for (const row of rows) {
-        const parts = [issuerCode(g(row, 'issuer')), shortCode(g(row, 'product'), 3), networkCode(g(row, 'network'))].filter(Boolean);
+        const parts = [issuerCode(g(row, 'issuer')), networkCode(g(row, 'network')), shortCode(g(row, 'subNetwork'), 3), shortCode(g(row, 'product'), 3)].filter(Boolean);
         const prefix = parts.length ? parts.join('-') : 'CARD';
         if (nextByPrefix[prefix] === undefined) nextByPrefix[prefix] = await nextCardSeq(prefix);
-        const id = `${prefix}-${String(nextByPrefix[prefix]++).padStart(4, '0')}`;
+        const id = `${prefix}-${String(nextByPrefix[prefix]++).padStart(3, '0')}`;
         setColVal(row, 'id', id);
     }
 }
