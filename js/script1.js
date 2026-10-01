@@ -5833,7 +5833,7 @@ async function saveImportData() {
                 s.def.cols.forEach(c => { rec[c] = (r[c] === '' || r[c] == null) ? null : r[c]; });
                 return rec;
             });
-            const n = await RGDB.replaceRows(s.def.table, recs);
+            const n = await RGDB.insertRows(s.def.table, recs);
             if (n < 0) failed++; else total += n;
         }
         results.push(`${total} preferred-benefit row(s) across ${benefitState.length - failed} sheet(s)` + (failed ? `, ${failed} sheet(s) failed` : ''));
@@ -6081,7 +6081,7 @@ async function saveSheetImport(pageId) {
             s.def.cols.forEach(c => { rec[c] = (r[c] === '' || r[c] == null) ? null : r[c]; });
             return rec;
         });
-        const n = await RGDB.replaceRows(s.def.table, recs);
+        const n = await RGDB.insertRows(s.def.table, recs);
         if (n < 0) failed++; else total += n;
     }
     renderSheetImportPreview(pageId);

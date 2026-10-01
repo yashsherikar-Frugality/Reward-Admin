@@ -275,13 +275,13 @@
         } catch (e) { fail('fetch ' + table + ' by filter', e); return []; }
     }
 
-    // Wipe a table and insert `rows` (chunked). Used by the full-workbook import,
-    // where the spreadsheet is the single source of truth for that table.
-    async function replaceRows(table, rows) {
+    // Insert `rows` into `table`. Never deletes anything — Save always appends.
+    // Duplicate detection happens on the "Compare with Database" preview (New /
+    // Updated / Unchanged badges) before Save is even clicked; cleaning up a
+    // real duplicate afterward is a deliberate manual step (SQL), not automatic.
+    async function insertRows(table, rows) {
         if (!sb) { notConfigured(); return 0; }
         try {
-            const del = await sb.from(table).delete().not('id', 'is', null);
-            if (del.error) throw del.error;
             // Replace empty cells with the missing-value placeholder.
             const filled = rows.map(r => {
                 const o = {};
@@ -305,6 +305,6 @@
         fetchOffers, saveOffers,
         fetchMcc, saveMcc,
         fetchBenefits, saveBenefits,
-        fetchTable, fetchWhere, fetchWhereIn, fetchByFilter, replaceRows
+        fetchTable, fetchWhere, fetchWhereIn, fetchByFilter, insertRows
     };
 })();
