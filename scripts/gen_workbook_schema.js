@@ -217,7 +217,7 @@ wb.SheetNames.forEach((sheet) => {
     sqlParts.push(`drop table if exists ${table} cascade;`);
     sqlParts.push(`create table ${table} (`);
     sqlParts.push(`    id uuid primary key default gen_random_uuid(),`);
-    sqlParts.push(cols.map((c) => `    ${c} text`).join(',\n') + ',');
+    sqlParts.push(cols.map((c) => `    ${c} varchar`).join(',\n') + ',');
     sqlParts.push(`    imported_at timestamptz default now()`);
     sqlParts.push(`);`);
     if (cardIdCol) sqlParts.push(`create index ${table}_card_idx on ${table} (${cardIdCol});`);

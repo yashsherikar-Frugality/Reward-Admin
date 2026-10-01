@@ -60,7 +60,7 @@
         const rec = {};
         fixedCols().forEach(({ key }) => {
             const v = colVal(row, key);
-            rec[cardCol(key)] = key.startsWith('benefit_') ? toBool(v) : blank(v);
+            rec[cardCol(key)] = key.startsWith('benefit_') ? String(toBool(v)) : blank(v);
         });
         rec.updated_at = new Date().toISOString();
         return rec;
@@ -206,7 +206,7 @@
             if (!cardId) { alert('Benefits row has no Card ID.'); return false; }
             const rec = { card_id: cardId, updated_at: new Date().toISOString() };
             BENEFIT_TEXT_COLS.forEach(c => { rec[c] = fill(benefitPick(main, c), c); });
-            BENEFIT_BOOL_COLS.forEach(c => { const v = benefitPick(main, c); rec[c] = v === undefined ? false : toBool(v); });
+            BENEFIT_BOOL_COLS.forEach(c => { const v = benefitPick(main, c); rec[c] = String(v === undefined ? false : toBool(v)); });
 
             let r = await sb.from('card_benefits').upsert(rec, { onConflict: 'card_id' });
             if (r.error) throw r.error;
