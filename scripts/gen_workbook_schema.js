@@ -31,6 +31,7 @@ const snake = (s) => String(s)
     .replace(/%/g, ' pct ')
     .replace(/[₹$]/g, ' inr ')
     .replace(/&/g, ' and ')
+    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')   // cardId -> card_Id, so it splits like every other header
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '')
@@ -61,8 +62,8 @@ const SKIP_SHEETS = ['audit log', '_lists'];
 const SHEET_COLUMN_RENAME = {
     // Card Details' own header is bare "id" — snake-cases to "id", which collides
     // with the table's reserved PK column. Every other sheet's card-link column is
-    // "cardid"; line this one up with that convention instead of the src_ fallback.
-    'Card Details': { 'id': 'cardid' },
+    // "card_id"; line this one up with that convention instead of the src_ fallback.
+    'Card Details': { 'id': 'card_id' },
     'Lounge Details': {
         'Variant': 'variant', 'subNetwork': 'sub_network',
         'Loung Access (Y/N)': 'lounge_access',
@@ -206,7 +207,7 @@ wb.SheetNames.forEach((sheet) => {
     // which column carries the card id (for indexing) — regex match on the raw
     // header, falling back to a literal "cardid" column (covers renames like
     // Card Details' bare "id" -> "cardid" above).
-    const cardIdCol = cols[rawHeader.findIndex((h) => /^card ?id$/i.test(h))] || (cols.includes('cardid') ? 'cardid' : null);
+    const cardIdCol = cols[rawHeader.findIndex((h) => /^card ?id$/i.test(h))] || (cols.includes('card_id') ? 'card_id' : null);
 
     // `cols` is positional: column i in the sheet's header row -> cols[i].
     // key = real sheet name (needed to find the sheet in the uploaded file);

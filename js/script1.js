@@ -1610,9 +1610,9 @@ async function nextCardSeq(prefix) {
     try {
         if (window.RGDB && RGDB.configured) {
             const rowsA = await RGDB.fetchWhere('cards', 'card_id', prefix + '-%');
-            const rowsB = await RGDB.fetchWhere('wb_card_details', 'cardid', prefix + '-%');
+            const rowsB = await RGDB.fetchWhere('wb_card_details', 'card_id', prefix + '-%');
             [...rowsA, ...rowsB].forEach(r => {
-                const m = String(r.card_id || r.cardid || '').match(/-(\d+)$/);
+                const m = String(r.card_id || '').match(/-(\d+)$/);
                 if (m) max = Math.max(max, parseInt(m[1], 10));
             });
         }
@@ -4768,7 +4768,7 @@ async function runAllDataSearch() {
     const fv = (i) => (document.getElementById(i) || {}).value || '';
     const filters = {
         instrument_type: fv('adf_type'), issuer: fv('adf_issuer'), product: fv('adf_product'),
-        network: fv('adf_network'), subnetwork: fv('adf_subNetwork'),
+        network: fv('adf_network'), sub_network: fv('adf_subNetwork'),
     };
     const anyFilter = Object.values(filters).some(Boolean);
 
@@ -4782,14 +4782,14 @@ async function runAllDataSearch() {
         label = `Card <strong>${id}</strong>`;
     } else {
         const f = { ...filters };
-        if (f.subnetwork) f.subnetwork = '%' + f.subnetwork + '%';   // stored value may keep the network word
+        if (f.sub_network) f.sub_network = '%' + f.sub_network + '%';   // stored value may keep the network word
         const wbHits = await RGDB.fetchByFilter('wb_card_details', f);
         const cardsHits = await RGDB.fetchByFilter('cards', {
             instrument_type: filters.instrument_type, issuer: filters.issuer, product: filters.product,
-            network: filters.network, sub_network: filters.subnetwork ? '%' + filters.subnetwork + '%' : '',
+            network: filters.network, sub_network: filters.sub_network ? '%' + filters.sub_network + '%' : '',
         });
         cardIds = [...new Set([
-            ...wbHits.map(r => r.cardid), ...cardsHits.map(r => r.card_id),
+            ...wbHits.map(r => r.card_id), ...cardsHits.map(r => r.card_id),
         ].filter(Boolean).map(String))];
         const parts = Object.entries(filters).filter(([, v]) => v).map(([k, v]) => `${k}=${v}`);
         label = `${parts.join(' · ')} → ${cardIds.length} card(s)`;

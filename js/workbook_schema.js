@@ -3,32 +3,32 @@ window.WORKBOOK_SCHEMA = {
   "Card Details": {
     "table": "wb_card_details",
     "label": "Card Details",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "instrument_type",
       "issuer",
       "product",
       "network",
-      "subnetwork",
-      "issuercountry",
-      "cardstatus",
-      "cardstatusdate",
-      "cardweblink",
-      "cardaltlink",
+      "sub_network",
+      "issuer_country",
+      "card_status",
+      "card_status_date",
+      "card_web_link",
+      "card_alt_link",
       "card_spend_per_point",
       "card_rp_conversion",
       "apr",
       "card_bill_cycle_duration",
       "card_bill_date",
       "cobrand",
-      "rewardprogram",
-      "agemin",
-      "agemax",
-      "creditscore",
-      "emptype",
+      "reward_program",
+      "age_min",
+      "age_max",
+      "credit_score",
+      "emp_type",
       "salary",
-      "producttype",
+      "product_type",
       "nationality",
       "fee_joining_type",
       "fee_joining",
@@ -44,60 +44,60 @@ window.WORKBOOK_SCHEMA = {
       "benefit_insurance",
       "benefit_fees",
       "benefit_contactless",
-      "benefit_tokenenabled",
-      "benefit_upisupported",
+      "benefit_token_enabled",
+      "benefit_upi_supported",
       "benefit_welcome",
-      "benefit_feewaiver",
+      "benefit_fee_waiver",
       "benefit_fuel",
       "benefit_lounge",
       "benefit_milestone",
-      "benefit_partnerprogram",
-      "benefit_airporttransfer",
+      "benefit_partner_program",
+      "benefit_airport_transfer",
       "benefit_travel",
       "benefit_hotel",
       "benefit_airline",
       "benefit_forex",
-      "benefit_rewardpoints",
-      "benefit_renewalbenefit",
+      "benefit_reward_points",
+      "benefit_renewal_benefit",
       "benefit_shopping",
       "benefit_ott",
-      "benefit_travelinsurance",
-      "benefit_purchaseprotection",
-      "benefit_personalaccident",
-      "benefit_roadsideassistance",
+      "benefit_travel_insurance",
+      "benefit_purchase_protection",
+      "benefit_personal_accident",
+      "benefit_roadside_assistance",
       "benefit_ltf",
-      "benefit_statusbenefits"
+      "benefit_status_benefits"
     ]
   },
   "Offers": {
     "table": "wb_offers",
     "label": "Offers",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
-      "offerid",
+      "card_id",
+      "offer_id",
       "category",
-      "subcategory",
-      "rewardtype",
+      "sub_category",
+      "reward_type",
       "frequency",
       "status",
       "days",
-      "instanceperiod",
+      "instance_period",
       "person",
-      "mintx",
-      "maxtx",
-      "maxbenefit",
-      "rewardcap",
-      "startdate",
-      "enddate",
+      "min_tx",
+      "max_tx",
+      "max_benefit",
+      "reward_cap",
+      "start_date",
+      "end_date",
       "weblink",
-      "paymentscopetype",
-      "paymentscopevalue",
-      "rpexpiry",
-      "couponcode",
+      "payment_scope_type",
+      "payment_scope_value",
+      "rp_expiry",
+      "coupon_code",
       "platform",
-      "customplatform",
-      "rp_pointtype",
+      "custom_platform",
+      "rp_point_type",
       "rp_calc",
       "cb_type",
       "cb_credit",
@@ -131,9 +131,9 @@ window.WORKBOOK_SCHEMA = {
   "Lounge": {
     "table": "wb_lounge",
     "label": "Lounge",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "lounge_usage_type",
       "lounge_type",
       "access_type",
@@ -154,9 +154,9 @@ window.WORKBOOK_SCHEMA = {
   "Airport Transfer": {
     "table": "wb_airport_transfer",
     "label": "Airport Transfer",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "transfer_provider",
       "transfer_type",
       "free_transfers",
@@ -175,9 +175,9 @@ window.WORKBOOK_SCHEMA = {
   "Travel": {
     "table": "wb_travel",
     "label": "Travel",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "travel_provider",
       "booking_channel",
       "travel_discount",
@@ -193,9 +193,9 @@ window.WORKBOOK_SCHEMA = {
   "Hotel": {
     "table": "wb_hotel",
     "label": "Hotel",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "hotel_sub_benefits",
       "hotel_partner",
       "hotel_program",
@@ -213,9 +213,9 @@ window.WORKBOOK_SCHEMA = {
   "Airline": {
     "table": "wb_airline",
     "label": "Airline",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "airline_partner",
       "airline_program",
       "discount_percent",
@@ -231,9 +231,9 @@ window.WORKBOOK_SCHEMA = {
   "Forex - International": {
     "table": "wb_forex_international",
     "label": "Forex - International",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "forex_ccy_markup",
       "conversion_charge"
     ]
@@ -241,9 +241,9 @@ window.WORKBOOK_SCHEMA = {
   "Reward Points": {
     "table": "wb_reward_points",
     "label": "Reward Points",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "reward_rule_id",
       "earn_category",
       "merchant",
@@ -263,9 +263,9 @@ window.WORKBOOK_SCHEMA = {
   "Milestone": {
     "table": "wb_milestone",
     "label": "Milestone",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "milestone_id",
       "milestone_period",
       "milestone_tier",
@@ -283,9 +283,9 @@ window.WORKBOOK_SCHEMA = {
   "Welcome": {
     "table": "wb_welcome",
     "label": "Welcome",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "welcome_benefit_id",
       "welcome_benefit_type",
       "welcome_benefit_component",
@@ -305,9 +305,9 @@ window.WORKBOOK_SCHEMA = {
   "Renewal Benefit": {
     "table": "wb_renewal_benefit",
     "label": "Renewal Benefit",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "renewal_benefit_id",
       "renewal_benefit_type",
       "renewal_benefit_component",
@@ -344,9 +344,9 @@ window.WORKBOOK_SCHEMA = {
   "Partner & Transfer": {
     "table": "wb_partner_and_transfer",
     "label": "Partner & Transfer",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "redemption_mode",
       "partner_name",
       "conversion_ratio",
@@ -360,9 +360,9 @@ window.WORKBOOK_SCHEMA = {
   "Fuel": {
     "table": "wb_fuel",
     "label": "Fuel",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "fuel_waiver_period",
       "fuel_max_tx_count",
       "fuel_count_period",
@@ -384,9 +384,9 @@ window.WORKBOOK_SCHEMA = {
   "Dining": {
     "table": "wb_dining",
     "label": "Dining",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "dining_platform",
       "dining_discount_value",
       "dining_restaurant_mapping",
@@ -410,9 +410,9 @@ window.WORKBOOK_SCHEMA = {
   "Golf": {
     "table": "wb_golf",
     "label": "Golf",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "golf_benefit_type",
       "free_rounds",
       "round_frequency",
@@ -430,9 +430,9 @@ window.WORKBOOK_SCHEMA = {
   "Movie": {
     "table": "wb_movie",
     "label": "Movie",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "movie_platform",
       "ticket_benefit_type",
       "free_tickets",
@@ -449,9 +449,9 @@ window.WORKBOOK_SCHEMA = {
   "SPA - Wellness": {
     "table": "wb_spa_wellness",
     "label": "SPA - Wellness",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "spa_provider",
       "spa_location",
       "service_type",
@@ -468,9 +468,9 @@ window.WORKBOOK_SCHEMA = {
   "Concierge": {
     "table": "wb_concierge",
     "label": "Concierge",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "concierge_provider",
       "service_categories",
       "availability",
@@ -484,9 +484,9 @@ window.WORKBOOK_SCHEMA = {
   "Shopping": {
     "table": "wb_shopping",
     "label": "Shopping",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "merchant",
       "merchant_category",
       "discount_percent",
@@ -502,9 +502,9 @@ window.WORKBOOK_SCHEMA = {
   "OTT - Subscription": {
     "table": "wb_ott_subscription",
     "label": "OTT - Subscription",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "platform",
       "subscription_type",
       "subscription_duration",
@@ -519,9 +519,9 @@ window.WORKBOOK_SCHEMA = {
   "Insurance - Protection": {
     "table": "wb_insurance_protection",
     "label": "Insurance - Protection",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "policy_type",
       "insurer",
       "coverage_amount",
@@ -537,9 +537,9 @@ window.WORKBOOK_SCHEMA = {
   "Travel Insurance": {
     "table": "wb_travel_insurance",
     "label": "Travel Insurance",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "policy_type",
       "insurer",
       "policy_number_reference",
@@ -562,9 +562,9 @@ window.WORKBOOK_SCHEMA = {
   "Purchase Protection": {
     "table": "wb_purchase_protection",
     "label": "Purchase Protection",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "purchase_protection_amount",
       "coverage_period_days",
       "eligible_purchase_type",
@@ -577,9 +577,9 @@ window.WORKBOOK_SCHEMA = {
   "Personal Accident": {
     "table": "wb_personal_accident",
     "label": "Personal Accident",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "accident_cover_amount",
       "activation_condition",
       "travel_requirement",
@@ -591,9 +591,9 @@ window.WORKBOOK_SCHEMA = {
   "Roadside Assistance": {
     "table": "wb_roadside_assistance",
     "label": "Roadside Assistance",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "service_provider",
       "free_service_count",
       "service_types",
@@ -605,18 +605,18 @@ window.WORKBOOK_SCHEMA = {
   "LTF (Lifetime Free)": {
     "table": "wb_ltf_lifetime_free",
     "label": "LTF (Lifetime Free)",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "notes"
     ]
   },
   "Status Benefits": {
     "table": "wb_status_benefits",
     "label": "Status Benefits",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "status_program",
       "status_level",
       "qualification_method",
@@ -630,18 +630,18 @@ window.WORKBOOK_SCHEMA = {
   "UPI": {
     "table": "wb_upi",
     "label": "UPI",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "notes"
     ]
   },
   "Contactless": {
     "table": "wb_contactless",
     "label": "Contactless",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "available",
       "network",
       "per_txn_limit",
@@ -652,9 +652,9 @@ window.WORKBOOK_SCHEMA = {
   "Token Enabled": {
     "table": "wb_token_enabled",
     "label": "Token Enabled",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
+      "card_id",
       "available",
       "supported_networks",
       "token_provider",
@@ -677,29 +677,29 @@ window.WORKBOOK_SCHEMA = {
   "Fees": {
     "table": "wb_fees",
     "label": "Fees",
-    "cardIdCol": "cardid",
+    "cardIdCol": "card_id",
     "cols": [
-      "cardid",
-      "cardname",
+      "card_id",
+      "card_name",
       "issuer",
       "network",
-      "subnetwork",
-      "cardstatus",
-      "feetype",
-      "feeamount",
-      "feeperiod",
-      "applicabletaxes",
-      "feewaivereligible",
-      "feewaiverspend",
-      "feewaiverperiod",
-      "termsandconditions",
-      "sourceofficial",
-      "sourcesecondary",
-      "startdate",
-      "enddate",
-      "cardstatusdate",
-      "cobrand",
-      "cobrandname",
+      "sub_network",
+      "card_status",
+      "fee_type",
+      "fee_amount",
+      "fee_period",
+      "applicable_taxes",
+      "fee_waiver_eligible",
+      "fee_waiver_spend",
+      "fee_waiver_period",
+      "terms_and_conditions",
+      "source_official",
+      "source_secondary",
+      "start_date",
+      "end_date",
+      "card_status_date",
+      "co_brand",
+      "co_brand_name",
       "status"
     ]
   }

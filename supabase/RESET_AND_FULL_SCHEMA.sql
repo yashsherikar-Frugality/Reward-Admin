@@ -307,30 +307,30 @@ end $$;
 drop table if exists wb_card_details cascade;
 create table wb_card_details (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     instrument_type varchar,
     issuer varchar,
     product varchar,
     network varchar,
-    subnetwork varchar,
-    issuercountry varchar,
-    cardstatus varchar,
-    cardstatusdate varchar,
-    cardweblink varchar,
-    cardaltlink varchar,
+    sub_network varchar,
+    issuer_country varchar,
+    card_status varchar,
+    card_status_date varchar,
+    card_web_link varchar,
+    card_alt_link varchar,
     card_spend_per_point varchar,
     card_rp_conversion varchar,
     apr varchar,
     card_bill_cycle_duration varchar,
     card_bill_date varchar,
     cobrand varchar,
-    rewardprogram varchar,
-    agemin varchar,
-    agemax varchar,
-    creditscore varchar,
-    emptype varchar,
+    reward_program varchar,
+    age_min varchar,
+    age_max varchar,
+    credit_score varchar,
+    emp_type varchar,
     salary varchar,
-    producttype varchar,
+    product_type varchar,
     nationality varchar,
     fee_joining_type varchar,
     fee_joining varchar,
@@ -346,61 +346,61 @@ create table wb_card_details (
     benefit_insurance varchar,
     benefit_fees varchar,
     benefit_contactless varchar,
-    benefit_tokenenabled varchar,
-    benefit_upisupported varchar,
+    benefit_token_enabled varchar,
+    benefit_upi_supported varchar,
     benefit_welcome varchar,
-    benefit_feewaiver varchar,
+    benefit_fee_waiver varchar,
     benefit_fuel varchar,
     benefit_lounge varchar,
     benefit_milestone varchar,
-    benefit_partnerprogram varchar,
-    benefit_airporttransfer varchar,
+    benefit_partner_program varchar,
+    benefit_airport_transfer varchar,
     benefit_travel varchar,
     benefit_hotel varchar,
     benefit_airline varchar,
     benefit_forex varchar,
-    benefit_rewardpoints varchar,
-    benefit_renewalbenefit varchar,
+    benefit_reward_points varchar,
+    benefit_renewal_benefit varchar,
     benefit_shopping varchar,
     benefit_ott varchar,
-    benefit_travelinsurance varchar,
-    benefit_purchaseprotection varchar,
-    benefit_personalaccident varchar,
-    benefit_roadsideassistance varchar,
+    benefit_travel_insurance varchar,
+    benefit_purchase_protection varchar,
+    benefit_personal_accident varchar,
+    benefit_roadside_assistance varchar,
     benefit_ltf varchar,
-    benefit_statusbenefits varchar,
+    benefit_status_benefits varchar,
     imported_at timestamptz default now()
 );
-create index wb_card_details_card_idx on wb_card_details (cardid);
+create index wb_card_details_card_idx on wb_card_details (card_id);
 
 -- Offers  (2288 data rows)
 drop table if exists wb_offers cascade;
 create table wb_offers (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
-    offerid varchar,
+    card_id varchar,
+    offer_id varchar,
     category varchar,
-    subcategory varchar,
-    rewardtype varchar,
+    sub_category varchar,
+    reward_type varchar,
     frequency varchar,
     status varchar,
     days varchar,
-    instanceperiod varchar,
+    instance_period varchar,
     person varchar,
-    mintx varchar,
-    maxtx varchar,
-    maxbenefit varchar,
-    rewardcap varchar,
-    startdate varchar,
-    enddate varchar,
+    min_tx varchar,
+    max_tx varchar,
+    max_benefit varchar,
+    reward_cap varchar,
+    start_date varchar,
+    end_date varchar,
     weblink varchar,
-    paymentscopetype varchar,
-    paymentscopevalue varchar,
-    rpexpiry varchar,
-    couponcode varchar,
+    payment_scope_type varchar,
+    payment_scope_value varchar,
+    rp_expiry varchar,
+    coupon_code varchar,
     platform varchar,
-    customplatform varchar,
-    rp_pointtype varchar,
+    custom_platform varchar,
+    rp_point_type varchar,
     rp_calc varchar,
     cb_type varchar,
     cb_credit varchar,
@@ -431,13 +431,13 @@ create table wb_offers (
     c_validity varchar,
     imported_at timestamptz default now()
 );
-create index wb_offers_card_idx on wb_offers (cardid);
+create index wb_offers_card_idx on wb_offers (card_id);
 
 -- Lounge  (999 data rows)
 drop table if exists wb_lounge cascade;
 create table wb_lounge (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     lounge_usage_type varchar,
     lounge_type varchar,
     access_type varchar,
@@ -455,13 +455,13 @@ create table wb_lounge (
     spend_lookback_period varchar,
     imported_at timestamptz default now()
 );
-create index wb_lounge_card_idx on wb_lounge (cardid);
+create index wb_lounge_card_idx on wb_lounge (card_id);
 
 -- Airport Transfer  (999 data rows)
 drop table if exists wb_airport_transfer cascade;
 create table wb_airport_transfer (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     transfer_provider varchar,
     transfer_type varchar,
     free_transfers varchar,
@@ -477,13 +477,13 @@ create table wb_airport_transfer (
     guest_policy varchar,
     imported_at timestamptz default now()
 );
-create index wb_airport_transfer_card_idx on wb_airport_transfer (cardid);
+create index wb_airport_transfer_card_idx on wb_airport_transfer (card_id);
 
 -- Travel  (999 data rows)
 drop table if exists wb_travel cascade;
 create table wb_travel (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     travel_provider varchar,
     booking_channel varchar,
     travel_discount varchar,
@@ -496,13 +496,13 @@ create table wb_travel (
     travel_portal varchar,
     imported_at timestamptz default now()
 );
-create index wb_travel_card_idx on wb_travel (cardid);
+create index wb_travel_card_idx on wb_travel (card_id);
 
 -- Hotel  (999 data rows)
 drop table if exists wb_hotel cascade;
 create table wb_hotel (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     hotel_sub_benefits varchar,
     hotel_partner varchar,
     hotel_program varchar,
@@ -517,13 +517,13 @@ create table wb_hotel (
     blackout_dates varchar,
     imported_at timestamptz default now()
 );
-create index wb_hotel_card_idx on wb_hotel (cardid);
+create index wb_hotel_card_idx on wb_hotel (card_id);
 
 -- Airline  (999 data rows)
 drop table if exists wb_airline cascade;
 create table wb_airline (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     airline_partner varchar,
     airline_program varchar,
     discount_percent varchar,
@@ -536,24 +536,24 @@ create table wb_airline (
     maximum_discount varchar,
     imported_at timestamptz default now()
 );
-create index wb_airline_card_idx on wb_airline (cardid);
+create index wb_airline_card_idx on wb_airline (card_id);
 
 -- Forex - International  (999 data rows)
 drop table if exists wb_forex_international cascade;
 create table wb_forex_international (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     forex_ccy_markup varchar,
     conversion_charge varchar,
     imported_at timestamptz default now()
 );
-create index wb_forex_international_card_idx on wb_forex_international (cardid);
+create index wb_forex_international_card_idx on wb_forex_international (card_id);
 
 -- Reward Points  (999 data rows)
 drop table if exists wb_reward_points cascade;
 create table wb_reward_points (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     reward_rule_id varchar,
     earn_category varchar,
     merchant varchar,
@@ -570,13 +570,13 @@ create table wb_reward_points (
     excluded_transaction_types varchar,
     imported_at timestamptz default now()
 );
-create index wb_reward_points_card_idx on wb_reward_points (cardid);
+create index wb_reward_points_card_idx on wb_reward_points (card_id);
 
 -- Milestone  (999 data rows)
 drop table if exists wb_milestone cascade;
 create table wb_milestone (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     milestone_id varchar,
     milestone_period varchar,
     milestone_tier varchar,
@@ -591,13 +591,13 @@ create table wb_milestone (
     stacking_rule varchar,
     imported_at timestamptz default now()
 );
-create index wb_milestone_card_idx on wb_milestone (cardid);
+create index wb_milestone_card_idx on wb_milestone (card_id);
 
 -- Welcome  (999 data rows)
 drop table if exists wb_welcome cascade;
 create table wb_welcome (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     welcome_benefit_id varchar,
     welcome_benefit_type varchar,
     welcome_benefit_component varchar,
@@ -614,13 +614,13 @@ create table wb_welcome (
     component_realistic_value varchar,
     imported_at timestamptz default now()
 );
-create index wb_welcome_card_idx on wb_welcome (cardid);
+create index wb_welcome_card_idx on wb_welcome (card_id);
 
 -- Renewal Benefit  (999 data rows)
 drop table if exists wb_renewal_benefit cascade;
 create table wb_renewal_benefit (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     renewal_benefit_id varchar,
     renewal_benefit_type varchar,
     renewal_benefit_component varchar,
@@ -636,7 +636,7 @@ create table wb_renewal_benefit (
     realistic_value varchar,
     imported_at timestamptz default now()
 );
-create index wb_renewal_benefit_card_idx on wb_renewal_benefit (cardid);
+create index wb_renewal_benefit_card_idx on wb_renewal_benefit (card_id);
 
 -- Fee Waiver  (999 data rows)
 drop table if exists wb_fee_waiver cascade;
@@ -661,7 +661,7 @@ create index wb_fee_waiver_card_idx on wb_fee_waiver (card_id);
 drop table if exists wb_partner_and_transfer cascade;
 create table wb_partner_and_transfer (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     redemption_mode varchar,
     partner_name varchar,
     conversion_ratio varchar,
@@ -672,13 +672,13 @@ create table wb_partner_and_transfer (
     notes varchar,
     imported_at timestamptz default now()
 );
-create index wb_partner_and_transfer_card_idx on wb_partner_and_transfer (cardid);
+create index wb_partner_and_transfer_card_idx on wb_partner_and_transfer (card_id);
 
 -- Fuel  (999 data rows)
 drop table if exists wb_fuel cascade;
 create table wb_fuel (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     fuel_waiver_period varchar,
     fuel_max_tx_count varchar,
     fuel_count_period varchar,
@@ -697,13 +697,13 @@ create table wb_fuel (
     net_effective_fuel_benefit varchar,
     imported_at timestamptz default now()
 );
-create index wb_fuel_card_idx on wb_fuel (cardid);
+create index wb_fuel_card_idx on wb_fuel (card_id);
 
 -- Dining  (999 data rows)
 drop table if exists wb_dining cascade;
 create table wb_dining (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     dining_platform varchar,
     dining_discount_value varchar,
     dining_restaurant_mapping varchar,
@@ -724,13 +724,13 @@ create table wb_dining (
     tax_excluded varchar,
     imported_at timestamptz default now()
 );
-create index wb_dining_card_idx on wb_dining (cardid);
+create index wb_dining_card_idx on wb_dining (card_id);
 
 -- Golf  (999 data rows)
 drop table if exists wb_golf cascade;
 create table wb_golf (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     golf_benefit_type varchar,
     free_rounds varchar,
     round_frequency varchar,
@@ -745,13 +745,13 @@ create table wb_golf (
     additional_round_fee varchar,
     imported_at timestamptz default now()
 );
-create index wb_golf_card_idx on wb_golf (cardid);
+create index wb_golf_card_idx on wb_golf (card_id);
 
 -- Movie  (999 data rows)
 drop table if exists wb_movie cascade;
 create table wb_movie (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     movie_platform varchar,
     ticket_benefit_type varchar,
     free_tickets varchar,
@@ -765,13 +765,13 @@ create table wb_movie (
     minimum_spend varchar,
     imported_at timestamptz default now()
 );
-create index wb_movie_card_idx on wb_movie (cardid);
+create index wb_movie_card_idx on wb_movie (card_id);
 
 -- SPA - Wellness  (999 data rows)
 drop table if exists wb_spa_wellness cascade;
 create table wb_spa_wellness (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     spa_provider varchar,
     spa_location varchar,
     service_type varchar,
@@ -785,13 +785,13 @@ create table wb_spa_wellness (
     guest_policy varchar,
     imported_at timestamptz default now()
 );
-create index wb_spa_wellness_card_idx on wb_spa_wellness (cardid);
+create index wb_spa_wellness_card_idx on wb_spa_wellness (card_id);
 
 -- Concierge  (999 data rows)
 drop table if exists wb_concierge cascade;
 create table wb_concierge (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     concierge_provider varchar,
     service_categories varchar,
     availability varchar,
@@ -802,13 +802,13 @@ create table wb_concierge (
     service_fee varchar,
     imported_at timestamptz default now()
 );
-create index wb_concierge_card_idx on wb_concierge (cardid);
+create index wb_concierge_card_idx on wb_concierge (card_id);
 
 -- Shopping  (999 data rows)
 drop table if exists wb_shopping cascade;
 create table wb_shopping (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     merchant varchar,
     merchant_category varchar,
     discount_percent varchar,
@@ -821,13 +821,13 @@ create table wb_shopping (
     stacking_rule varchar,
     imported_at timestamptz default now()
 );
-create index wb_shopping_card_idx on wb_shopping (cardid);
+create index wb_shopping_card_idx on wb_shopping (card_id);
 
 -- OTT - Subscription  (999 data rows)
 drop table if exists wb_ott_subscription cascade;
 create table wb_ott_subscription (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     platform varchar,
     subscription_type varchar,
     subscription_duration varchar,
@@ -839,13 +839,13 @@ create table wb_ott_subscription (
     minimum_spend varchar,
     imported_at timestamptz default now()
 );
-create index wb_ott_subscription_card_idx on wb_ott_subscription (cardid);
+create index wb_ott_subscription_card_idx on wb_ott_subscription (card_id);
 
 -- Insurance - Protection  (999 data rows)
 drop table if exists wb_insurance_protection cascade;
 create table wb_insurance_protection (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     policy_type varchar,
     insurer varchar,
     coverage_amount varchar,
@@ -858,13 +858,13 @@ create table wb_insurance_protection (
     claim_sla varchar,
     imported_at timestamptz default now()
 );
-create index wb_insurance_protection_card_idx on wb_insurance_protection (cardid);
+create index wb_insurance_protection_card_idx on wb_insurance_protection (card_id);
 
 -- Travel Insurance  (999 data rows)
 drop table if exists wb_travel_insurance cascade;
 create table wb_travel_insurance (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     policy_type varchar,
     insurer varchar,
     policy_number_reference varchar,
@@ -884,13 +884,13 @@ create table wb_travel_insurance (
     policy_document_url varchar,
     imported_at timestamptz default now()
 );
-create index wb_travel_insurance_card_idx on wb_travel_insurance (cardid);
+create index wb_travel_insurance_card_idx on wb_travel_insurance (card_id);
 
 -- Purchase Protection  (999 data rows)
 drop table if exists wb_purchase_protection cascade;
 create table wb_purchase_protection (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     purchase_protection_amount varchar,
     coverage_period_days varchar,
     eligible_purchase_type varchar,
@@ -900,13 +900,13 @@ create table wb_purchase_protection (
     exclusions varchar,
     imported_at timestamptz default now()
 );
-create index wb_purchase_protection_card_idx on wb_purchase_protection (cardid);
+create index wb_purchase_protection_card_idx on wb_purchase_protection (card_id);
 
 -- Personal Accident  (999 data rows)
 drop table if exists wb_personal_accident cascade;
 create table wb_personal_accident (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     accident_cover_amount varchar,
     activation_condition varchar,
     travel_requirement varchar,
@@ -915,13 +915,13 @@ create table wb_personal_accident (
     exclusions varchar,
     imported_at timestamptz default now()
 );
-create index wb_personal_accident_card_idx on wb_personal_accident (cardid);
+create index wb_personal_accident_card_idx on wb_personal_accident (card_id);
 
 -- Roadside Assistance  (999 data rows)
 drop table if exists wb_roadside_assistance cascade;
 create table wb_roadside_assistance (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     service_provider varchar,
     free_service_count varchar,
     service_types varchar,
@@ -930,23 +930,23 @@ create table wb_roadside_assistance (
     additional_service_fee varchar,
     imported_at timestamptz default now()
 );
-create index wb_roadside_assistance_card_idx on wb_roadside_assistance (cardid);
+create index wb_roadside_assistance_card_idx on wb_roadside_assistance (card_id);
 
 -- LTF (Lifetime Free)  (999 data rows)
 drop table if exists wb_ltf_lifetime_free cascade;
 create table wb_ltf_lifetime_free (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     notes varchar,
     imported_at timestamptz default now()
 );
-create index wb_ltf_lifetime_free_card_idx on wb_ltf_lifetime_free (cardid);
+create index wb_ltf_lifetime_free_card_idx on wb_ltf_lifetime_free (card_id);
 
 -- Status Benefits  (999 data rows)
 drop table if exists wb_status_benefits cascade;
 create table wb_status_benefits (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     status_program varchar,
     status_level varchar,
     qualification_method varchar,
@@ -957,23 +957,23 @@ create table wb_status_benefits (
     eligible_properties varchar,
     imported_at timestamptz default now()
 );
-create index wb_status_benefits_card_idx on wb_status_benefits (cardid);
+create index wb_status_benefits_card_idx on wb_status_benefits (card_id);
 
 -- UPI  (999 data rows)
 drop table if exists wb_upi cascade;
 create table wb_upi (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     notes varchar,
     imported_at timestamptz default now()
 );
-create index wb_upi_card_idx on wb_upi (cardid);
+create index wb_upi_card_idx on wb_upi (card_id);
 
 -- Contactless  (999 data rows)
 drop table if exists wb_contactless cascade;
 create table wb_contactless (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     available varchar,
     network varchar,
     per_txn_limit varchar,
@@ -981,13 +981,13 @@ create table wb_contactless (
     source_id varchar,
     imported_at timestamptz default now()
 );
-create index wb_contactless_card_idx on wb_contactless (cardid);
+create index wb_contactless_card_idx on wb_contactless (card_id);
 
 -- Token Enabled  (999 data rows)
 drop table if exists wb_token_enabled cascade;
 create table wb_token_enabled (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
+    card_id varchar,
     available varchar,
     supported_networks varchar,
     token_provider varchar,
@@ -995,7 +995,7 @@ create table wb_token_enabled (
     source_id varchar,
     imported_at timestamptz default now()
 );
-create index wb_token_enabled_card_idx on wb_token_enabled (cardid);
+create index wb_token_enabled_card_idx on wb_token_enabled (card_id);
 
 -- MCC  (999 data rows)
 drop table if exists wb_mcc cascade;
@@ -1013,31 +1013,31 @@ create table wb_mcc (
 drop table if exists wb_fees cascade;
 create table wb_fees (
     id uuid primary key default gen_random_uuid(),
-    cardid varchar,
-    cardname varchar,
+    card_id varchar,
+    card_name varchar,
     issuer varchar,
     network varchar,
-    subnetwork varchar,
-    cardstatus varchar,
-    feetype varchar,
-    feeamount varchar,
-    feeperiod varchar,
-    applicabletaxes varchar,
-    feewaivereligible varchar,
-    feewaiverspend varchar,
-    feewaiverperiod varchar,
-    termsandconditions varchar,
-    sourceofficial varchar,
-    sourcesecondary varchar,
-    startdate varchar,
-    enddate varchar,
-    cardstatusdate varchar,
-    cobrand varchar,
-    cobrandname varchar,
+    sub_network varchar,
+    card_status varchar,
+    fee_type varchar,
+    fee_amount varchar,
+    fee_period varchar,
+    applicable_taxes varchar,
+    fee_waiver_eligible varchar,
+    fee_waiver_spend varchar,
+    fee_waiver_period varchar,
+    terms_and_conditions varchar,
+    source_official varchar,
+    source_secondary varchar,
+    start_date varchar,
+    end_date varchar,
+    card_status_date varchar,
+    co_brand varchar,
+    co_brand_name varchar,
     status varchar,
     imported_at timestamptz default now()
 );
-create index wb_fees_card_idx on wb_fees (cardid);
+create index wb_fees_card_idx on wb_fees (card_id);
 
 do $$
 declare t text;
@@ -1249,4 +1249,71 @@ begin
         execute format('alter table %I alter column %I type varchar using %I::varchar', r.table_name, r.column_name, r.column_name);
     end loop;
 end $$;
+
+-- Renames the squashed camelCase columns on wb_card_details/wb_offers/wb_fees
+-- to match the underscored snake_case convention every other table already uses.
+-- Safe to re-run: a rename to a name that no longer exists is a no-op skip below.
+
+alter table wb_card_details rename column subnetwork to sub_network;
+alter table wb_card_details rename column issuercountry to issuer_country;
+alter table wb_card_details rename column cardstatus to card_status;
+alter table wb_card_details rename column cardstatusdate to card_status_date;
+alter table wb_card_details rename column cardweblink to card_web_link;
+alter table wb_card_details rename column cardaltlink to card_alt_link;
+alter table wb_card_details rename column rewardprogram to reward_program;
+alter table wb_card_details rename column agemin to age_min;
+alter table wb_card_details rename column agemax to age_max;
+alter table wb_card_details rename column creditscore to credit_score;
+alter table wb_card_details rename column emptype to emp_type;
+alter table wb_card_details rename column producttype to product_type;
+alter table wb_card_details rename column benefit_tokenenabled to benefit_token_enabled;
+alter table wb_card_details rename column benefit_upisupported to benefit_upi_supported;
+alter table wb_card_details rename column benefit_feewaiver to benefit_fee_waiver;
+alter table wb_card_details rename column benefit_partnerprogram to benefit_partner_program;
+alter table wb_card_details rename column benefit_airporttransfer to benefit_airport_transfer;
+alter table wb_card_details rename column benefit_rewardpoints to benefit_reward_points;
+alter table wb_card_details rename column benefit_renewalbenefit to benefit_renewal_benefit;
+alter table wb_card_details rename column benefit_travelinsurance to benefit_travel_insurance;
+alter table wb_card_details rename column benefit_purchaseprotection to benefit_purchase_protection;
+alter table wb_card_details rename column benefit_personalaccident to benefit_personal_accident;
+alter table wb_card_details rename column benefit_roadsideassistance to benefit_roadside_assistance;
+alter table wb_card_details rename column benefit_statusbenefits to benefit_status_benefits;
+
+alter table wb_offers rename column cardid to card_id;
+alter table wb_offers rename column offerid to offer_id;
+alter table wb_offers rename column subcategory to sub_category;
+alter table wb_offers rename column rewardtype to reward_type;
+alter table wb_offers rename column instanceperiod to instance_period;
+alter table wb_offers rename column mintx to min_tx;
+alter table wb_offers rename column maxtx to max_tx;
+alter table wb_offers rename column maxbenefit to max_benefit;
+alter table wb_offers rename column rewardcap to reward_cap;
+alter table wb_offers rename column startdate to start_date;
+alter table wb_offers rename column enddate to end_date;
+alter table wb_offers rename column paymentscopetype to payment_scope_type;
+alter table wb_offers rename column paymentscopevalue to payment_scope_value;
+alter table wb_offers rename column rpexpiry to rp_expiry;
+alter table wb_offers rename column couponcode to coupon_code;
+alter table wb_offers rename column customplatform to custom_platform;
+alter table wb_offers rename column rp_pointtype to rp_point_type;
+
+alter table wb_fees rename column cardid to card_id;
+alter table wb_fees rename column cardname to card_name;
+alter table wb_fees rename column subnetwork to sub_network;
+alter table wb_fees rename column cardstatus to card_status;
+alter table wb_fees rename column feetype to fee_type;
+alter table wb_fees rename column feeamount to fee_amount;
+alter table wb_fees rename column feeperiod to fee_period;
+alter table wb_fees rename column applicabletaxes to applicable_taxes;
+alter table wb_fees rename column feewaivereligible to fee_waiver_eligible;
+alter table wb_fees rename column feewaiverspend to fee_waiver_spend;
+alter table wb_fees rename column feewaiverperiod to fee_waiver_period;
+alter table wb_fees rename column termsandconditions to terms_and_conditions;
+alter table wb_fees rename column sourceofficial to source_official;
+alter table wb_fees rename column sourcesecondary to source_secondary;
+alter table wb_fees rename column startdate to start_date;
+alter table wb_fees rename column enddate to end_date;
+alter table wb_fees rename column cardstatusdate to card_status_date;
+alter table wb_fees rename column cobrand to co_brand;
+alter table wb_fees rename column cobrandname to co_brand_name;
 
