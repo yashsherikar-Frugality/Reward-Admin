@@ -64,6 +64,9 @@ const SHEET_COLUMN_RENAME = {
     // with the table's reserved PK column. Every other sheet's card-link column is
     // "card_id"; line this one up with that convention instead of the src_ fallback.
     'Card Details': { 'id': 'card_id' },
+    // MCC's own header is "Card" (not "Card ID") — every other sheet's link
+    // column is "card_id"; line this one up the same way.
+    'MCC': { 'Card': 'card_id' },
     'Lounge Details': {
         'Variant': 'variant', 'subNetwork': 'sub_network',
         'Loung Access (Y/N)': 'lounge_access',

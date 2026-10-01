@@ -1,8 +1,10 @@
 -- ============================================================
 -- RewardGenius — FULL RESET + REBUILD
 -- Drops every table from any prior schema version, then creates
--- the complete current schema fresh. Paste this whole file into
--- Supabase SQL Editor -> Run. Safe on an empty project too.
+-- the complete current schema fresh — correct column names/types
+-- from the start, so no rename/retype migration is needed after.
+-- Paste this whole file into Supabase SQL Editor -> Run.
+-- Safe on an empty project too.
 -- ============================================================
 
 -- ---- drop old tables (any prior version) ----
@@ -61,7 +63,8 @@ drop table if exists wb_status_benefits cascade;
 drop table if exists wb_upi cascade;
 drop table if exists wb_contactless cascade;
 
--- ---- rebuild complete current schema ----
+-- ---- rebuild complete current schema (0001-0007; 0008 is a rename-only
+--      patch for pre-existing tables and does not apply to a fresh build) ----
 
 -- RewardGenius schema — mapped from js/script1.js
 -- Entities: cards (FIXED_COLUMNS + wizard), offers (OFFER_IMPORT_COLUMNS + reward sub-fields),
@@ -1001,7 +1004,7 @@ create index wb_token_enabled_card_idx on wb_token_enabled (card_id);
 drop table if exists wb_mcc cascade;
 create table wb_mcc (
     id uuid primary key default gen_random_uuid(),
-    card varchar,
+    card_id varchar,
     offer_id varchar,
     mcc varchar,
     inclusion varchar,
@@ -1113,116 +1116,6 @@ alter table offers add column if not exists c_type text;
 alter table offers add column if not exists c_conv text;
 alter table offers add column if not exists c_validity text;
 
--- Type tightening from the Supabase gaps review — the subset that's safe to do
--- automatically (verified against the real column set; tolerant USING clauses so
--- odd/legacy text values become NULL instead of failing the migration).
---
--- Deliberately NOT done here (see chat for why):
---   * text -> varchar with no length cap: Postgres treats these identically
---     (same storage, same behavior) — there's no real gap to fix.
---   * date columns (start_date, end_date, cardstatusdate, expiry_date, ...):
---     several already hold non-date text ("N/A", "TBC", "Ongoing") from the
---     app's own missing-value fill — casting would either fail the migration or
---     silently null out real annotations. Needs a cleanup pass first.
---   * offers.reward_fields jsonb -> text/varchar: would just stringify the JSON,
---     losing per-key querying. Kept as jsonb; flat columns were added alongside
---     it instead (0005_offers_flat_reward_fields.sql).
---   * offers.merchant / offers.mcc "extra" columns: still used by the manual
---     Add Reward Rule wizard — not dropped.
-
--- ---------- booleans (blank/unrecognised -> null, not a hard failure) ----------
-alter table cards alter column cobrand type boolean using
-    (case when cobrand is null or trim(cobrand) = '' then null
-          when lower(trim(cobrand)) in ('yes','true','1','y') then true else false end);
-
-alter table wb_dining alter column dine_in_only type boolean using
-    (case when dine_in_only is null or trim(dine_in_only) = '' then null
-          when lower(trim(dine_in_only)) in ('yes','true','1','y') then true else false end);
-alter table wb_dining alter column tip_excluded type boolean using
-    (case when tip_excluded is null or trim(tip_excluded) = '' then null
-          when lower(trim(tip_excluded)) in ('yes','true','1','y') then true else false end);
-alter table wb_dining alter column tax_excluded type boolean using
-    (case when tax_excluded is null or trim(tax_excluded) = '' then null
-          when lower(trim(tax_excluded)) in ('yes','true','1','y') then true else false end);
-
-alter table wb_fee_waiver alter column partial_waiver_allowed type boolean using
-    (case when partial_waiver_allowed is null or trim(partial_waiver_allowed) = '' then null
-          when lower(trim(partial_waiver_allowed)) in ('yes','true','1','y') then true else false end);
-
-alter table wb_fees alter column feewaivereligible type boolean using
-    (case when feewaivereligible is null or trim(feewaivereligible) = '' then null
-          when lower(trim(feewaivereligible)) in ('yes','true','1','y') then true else false end);
-alter table wb_fees alter column cobrand type boolean using
-    (case when cobrand is null or trim(cobrand) = '' then null
-          when lower(trim(cobrand)) in ('yes','true','1','y') then true else false end);
-
-alter table wb_airport_transfer alter column meet_and_greet type boolean using
-    (case when meet_and_greet is null or trim(meet_and_greet) = '' then null
-          when lower(trim(meet_and_greet)) in ('yes','true','1','y') then true else false end);
-
-alter table wb_contactless alter column available type boolean using
-    (case when available is null or trim(available) = '' then null
-          when lower(trim(available)) in ('yes','true','1','y') then true else false end);
-
-alter table wb_golf alter column lesson_available type boolean using
-    (case when lesson_available is null or trim(lesson_available) = '' then null
-          when lower(trim(lesson_available)) in ('yes','true','1','y') then true else false end);
-
-alter table wb_lounge alter column boarding_pass_required type boolean using
-    (case when boarding_pass_required is null or trim(boarding_pass_required) = '' then null
-          when lower(trim(boarding_pass_required)) in ('yes','true','1','y') then true else false end);
-
-alter table wb_token_enabled alter column available type boolean using
-    (case when available is null or trim(available) = '' then null
-          when lower(trim(available)) in ('yes','true','1','y') then true else false end);
-
--- ---------- numerics (currency symbols/commas/text stripped; blank -> null) ----------
-alter table cards alter column fee_joining type numeric using nullif(regexp_replace(fee_joining, '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table cards alter column fee_annual  type numeric using nullif(regexp_replace(fee_annual,  '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table cards alter column fee_renewal type numeric using nullif(regexp_replace(fee_renewal, '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_dining alter column minimum_bill type numeric using nullif(regexp_replace(minimum_bill, '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_fee_waiver alter column fee_amount       type numeric using nullif(regexp_replace(fee_amount,       '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_fee_waiver alter column waiver_amount    type numeric using nullif(regexp_replace(waiver_amount,    '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_fee_waiver alter column waiver_threshold type numeric using nullif(regexp_replace(waiver_threshold, '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_fuel alter column minimum_fuel_transaction type numeric using nullif(regexp_replace(minimum_fuel_transaction, '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_fuel alter column maximum_fuel_transaction type numeric using nullif(regexp_replace(maximum_fuel_transaction, '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_fuel alter column monthly_waiver_cap       type numeric using nullif(regexp_replace(monthly_waiver_cap,       '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_fuel alter column annual_waiver_cap        type numeric using nullif(regexp_replace(annual_waiver_cap,        '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table mcc_rules alter column mcc type numeric using nullif(regexp_replace(mcc, '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_insurance_protection alter column minimum_spend type numeric using nullif(regexp_replace(minimum_spend, '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_milestone alter column spend_from type numeric using nullif(regexp_replace(spend_from, '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_milestone alter column spend_to   type numeric using nullif(regexp_replace(spend_to,   '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_movie alter column free_tickets         type numeric using nullif(regexp_replace(free_tickets,         '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_movie alter column monthly_ticket_limit type numeric using nullif(regexp_replace(monthly_ticket_limit, '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_movie alter column monthly_benefit_cap  type numeric using nullif(regexp_replace(monthly_benefit_cap,  '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_ott_subscription alter column subscription_value type numeric using nullif(regexp_replace(subscription_value, '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_ott_subscription alter column monthly_value      type numeric using nullif(regexp_replace(monthly_value,      '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_ott_subscription alter column annual_value       type numeric using nullif(regexp_replace(annual_value,       '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_ott_subscription alter column minimum_spend      type numeric using nullif(regexp_replace(minimum_spend,      '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_partner_and_transfer alter column minimum_transfer  type numeric using nullif(regexp_replace(minimum_transfer,  '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_partner_and_transfer alter column transfer_increment type numeric using nullif(regexp_replace(transfer_increment, '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_purchase_protection alter column coverage_period_days type numeric using nullif(regexp_replace(coverage_period_days, '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_renewal_benefit alter column realistic_value type numeric using nullif(regexp_replace(realistic_value, '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_reward_points alter column points_per_rupee   type numeric using nullif(regexp_replace(points_per_rupee,   '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_reward_points alter column minimum_transaction type numeric using nullif(regexp_replace(minimum_transaction, '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_shopping alter column minimum_transaction type numeric using nullif(regexp_replace(minimum_transaction, '[^0-9.\-]', '', 'g'), '')::numeric;
-
-alter table wb_welcome alter column minimum_spend            type numeric using nullif(regexp_replace(minimum_spend,            '[^0-9.\-]', '', 'g'), '')::numeric;
-alter table wb_welcome alter column component_realistic_value type numeric using nullif(regexp_replace(component_realistic_value, '[^0-9.\-]', '', 'g'), '')::numeric;
-
 -- Converts every data column in every table to varchar (unbounded) —
 -- functionally identical to text, but this also fixes every column that got
 -- manually changed to date/integer/boolean/etc. via the Table Editor GUI,
@@ -1249,71 +1142,4 @@ begin
         execute format('alter table %I alter column %I type varchar using %I::varchar', r.table_name, r.column_name, r.column_name);
     end loop;
 end $$;
-
--- Renames the squashed camelCase columns on wb_card_details/wb_offers/wb_fees
--- to match the underscored snake_case convention every other table already uses.
--- Safe to re-run: a rename to a name that no longer exists is a no-op skip below.
-
-alter table wb_card_details rename column subnetwork to sub_network;
-alter table wb_card_details rename column issuercountry to issuer_country;
-alter table wb_card_details rename column cardstatus to card_status;
-alter table wb_card_details rename column cardstatusdate to card_status_date;
-alter table wb_card_details rename column cardweblink to card_web_link;
-alter table wb_card_details rename column cardaltlink to card_alt_link;
-alter table wb_card_details rename column rewardprogram to reward_program;
-alter table wb_card_details rename column agemin to age_min;
-alter table wb_card_details rename column agemax to age_max;
-alter table wb_card_details rename column creditscore to credit_score;
-alter table wb_card_details rename column emptype to emp_type;
-alter table wb_card_details rename column producttype to product_type;
-alter table wb_card_details rename column benefit_tokenenabled to benefit_token_enabled;
-alter table wb_card_details rename column benefit_upisupported to benefit_upi_supported;
-alter table wb_card_details rename column benefit_feewaiver to benefit_fee_waiver;
-alter table wb_card_details rename column benefit_partnerprogram to benefit_partner_program;
-alter table wb_card_details rename column benefit_airporttransfer to benefit_airport_transfer;
-alter table wb_card_details rename column benefit_rewardpoints to benefit_reward_points;
-alter table wb_card_details rename column benefit_renewalbenefit to benefit_renewal_benefit;
-alter table wb_card_details rename column benefit_travelinsurance to benefit_travel_insurance;
-alter table wb_card_details rename column benefit_purchaseprotection to benefit_purchase_protection;
-alter table wb_card_details rename column benefit_personalaccident to benefit_personal_accident;
-alter table wb_card_details rename column benefit_roadsideassistance to benefit_roadside_assistance;
-alter table wb_card_details rename column benefit_statusbenefits to benefit_status_benefits;
-
-alter table wb_offers rename column cardid to card_id;
-alter table wb_offers rename column offerid to offer_id;
-alter table wb_offers rename column subcategory to sub_category;
-alter table wb_offers rename column rewardtype to reward_type;
-alter table wb_offers rename column instanceperiod to instance_period;
-alter table wb_offers rename column mintx to min_tx;
-alter table wb_offers rename column maxtx to max_tx;
-alter table wb_offers rename column maxbenefit to max_benefit;
-alter table wb_offers rename column rewardcap to reward_cap;
-alter table wb_offers rename column startdate to start_date;
-alter table wb_offers rename column enddate to end_date;
-alter table wb_offers rename column paymentscopetype to payment_scope_type;
-alter table wb_offers rename column paymentscopevalue to payment_scope_value;
-alter table wb_offers rename column rpexpiry to rp_expiry;
-alter table wb_offers rename column couponcode to coupon_code;
-alter table wb_offers rename column customplatform to custom_platform;
-alter table wb_offers rename column rp_pointtype to rp_point_type;
-
-alter table wb_fees rename column cardid to card_id;
-alter table wb_fees rename column cardname to card_name;
-alter table wb_fees rename column subnetwork to sub_network;
-alter table wb_fees rename column cardstatus to card_status;
-alter table wb_fees rename column feetype to fee_type;
-alter table wb_fees rename column feeamount to fee_amount;
-alter table wb_fees rename column feeperiod to fee_period;
-alter table wb_fees rename column applicabletaxes to applicable_taxes;
-alter table wb_fees rename column feewaivereligible to fee_waiver_eligible;
-alter table wb_fees rename column feewaiverspend to fee_waiver_spend;
-alter table wb_fees rename column feewaiverperiod to fee_waiver_period;
-alter table wb_fees rename column termsandconditions to terms_and_conditions;
-alter table wb_fees rename column sourceofficial to source_official;
-alter table wb_fees rename column sourcesecondary to source_secondary;
-alter table wb_fees rename column startdate to start_date;
-alter table wb_fees rename column enddate to end_date;
-alter table wb_fees rename column cardstatusdate to card_status_date;
-alter table wb_fees rename column cobrand to co_brand;
-alter table wb_fees rename column cobrandname to co_brand_name;
 

@@ -665,9 +665,9 @@ window.WORKBOOK_SCHEMA = {
   "MCC": {
     "table": "wb_mcc",
     "label": "MCC",
-    "cardIdCol": null,
+    "cardIdCol": "card_id",
     "cols": [
-      "card",
+      "card_id",
       "offer_id",
       "mcc",
       "inclusion",
