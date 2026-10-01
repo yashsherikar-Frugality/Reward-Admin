@@ -5204,6 +5204,9 @@ function handleMultiSheetExcelImport(event) {
                 relink(offerData, 'cardid', 'card_id');
                 relink(mccData, 'card', 'cardid', 'card_id');
                 benefitSheets.forEach(sheet => relink(sheet, 'cardid', 'card_id', 'id'));
+                // The new per-sheet benefit pipeline (benefitSheetState) was never
+                // relinked — it kept whatever raw temp id the sheet had. Fix that here.
+                benefitSheetState.forEach(s => relink(s.rows, s.def.cardIdCol));
             }
 
             if (cardData.length > 0) {
