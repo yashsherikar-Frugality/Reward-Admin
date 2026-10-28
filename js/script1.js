@@ -4,59 +4,19 @@
 
 const ISSUER_PRODUCTS = {
     "HDFC Bank": [
-        "6E Rewards", "6E Rewards XL", "AllMiles", "Best Price Save Max",
-        "Best Price Save Smart", "Bharat CashBack", "BizBlack Metal Card", "BizFirst",
-        "BizGrow", "BizPower", "Business Bharat CashBack", "Business Freedom",
-        "Business MoneyBack", "Business Platinum", "Business Program", "Business Regalia",
-        "Business Regalia First", "CSC Small Business MoneyBack", "Diners Club Black", "Diners Club Black Metal Edition",
-        "Diners Club Miles", "Diners Club Premium", "Diners Club Privilege", "Diners Club Rewardz",
-        "Doctor's Regalia", "Doctors Superia", "Easy EMI", "Flipkart Wholesale",
-        "Freedom", "GIGA Business", "H.O.G Diners Club", "Harley-Davidson Diners Club",
-        "IndianOil", "Infinia", "Infinia (Metal Edition)", "InterMiles Diners Club",
-        "InterMiles Platinum", "InterMiles Signature", "IRCTC", "Marriott Bonvoy",
-        "Micro Enterprise Card", "Millennia", "MoneyBack", "MoneyBack+",
-        "Paytm", "Paytm Business", "Paytm Digital", "Paytm Select",
-        "Paytm Select Business", "Pharmeasy", "PhonePe Ultimo", "PhonePe Uno",
-        "Pine Labs", "Pine Labs Pro", "Pixel Go", "Pixel Play",
-        "Platinum Edge", "Platinum Times", "Regalia", "Regalia Activ",
-        "Regalia First", "Regalia Gold", "Retailio", "Shoppers Stop",
-        "Shoppers Stop Black", "Small Business MoneyBack", "Snapdeal", "Solitaire",
-        "Superia", "Swiggy", "Swiggy BLCK", "Tata Neu Infinity",
-        "Tata Neu Plus", "Teacher's Platinum", "Times Platinum", "Times Titanium",
-        "UPI RuPay", "UPI RuPay Biz", "UPI RuPay Mega Saver"
+        "6E Rewards Indigo", "6E Rewards Indigo XL", "AllMiles", "Best Price Save Max", "Best Price Save Smart", "Bharat CashBack", "BizBlack Metal", "BizFirst", "BizGrow", "BizPower", "Business Bharat CashBack", "Business Freedom", "Business Moneyback", "Business Platinum", "Business Program", "Business Regalia", "Business Regalia First", "CSC Small Business MoneyBack", "Diners Black", "Diners Black Metal Edition", "Diners Club Miles", "Diners Club Premium", "Diners Club Rewardz", "Diners Privilege", "Doctor's Regalia", "Doctors Superia", "Easy EMI", "Equitas Elegance", "Equitas Excite", "Flipkart Wholesale", "Freedom", "GIGA Business", "H.O.G Diners Club", "Harley-Davidson Diners Club", "Indian Oil", "Infinia", "Infinia (Metal Edition)", "InterMiles Diners Club", "InterMiles Platinum", "InterMiles Signature", "IRCTC", "Marriott Bonvoy", "Micro Enterprise", "Millennia", "MoneyBack", "MoneyBack+", "Paytm", "Paytm Business", "Paytm Digital", "Paytm Select", "Paytm Select Business", "Pharmeasy", "PhonePe Ultimo", "PhonePe Uno", "Pine Labs", "Pine Labs Pro", "PIXEL Go", "PIXEL Play", "Platinum Edge", "Regalia", "Regalia Activ", "Regalia First", "Regalia Gold", "Retailio", "Shoppers Stop", "Shoppers Stop Black", "Small Business Moneyback", "Snapdeal", "Solitaire", "Superia", "Swiggy", "Swiggy BLCK", "Swiggy Ornge", "Tata Neu Infinity", "Tata Neu Plus", "Teacher's Platinum", "Times Card Credit Platinum", "Times Platinum", "Times Titanium", "UPI RuPay", "UPI RuPay Biz", "UPI RuPay Mega Saver"
     ],
     "ICICI Bank": [
-        "Emeralde Private Metal", "Emeralde", "Times Black", "Sapphiro",
-        "Rubyx", "Coral", "Rubyx American Express", "HPCL Super Saver",
-        "Amazon Pay Credit Card", "MakeMyTrip Signature", "MakeMyTrip Platinum", "Manchester United Signature",
-        "Manchester United Platinum", "Platinum Chip", "Platinum Chip RuPay", "Instant Platinum",
-        "Expressions Credit Card", "Mine Credit Card", "Adani One Signature", "Adani One Platinum",
-        "Emirates Emeralde", "Emirates Sapphiro", "Emirates Rubyx", "Diamant Credit Card"
+        "Accelero", "Adani One Platinum", "Adani One Signature", "Air Deccan Gold", "Airtel Gold", "Airtel Silver", "Alumni", "Amazon Pay", "American Express Green", "Amway", "Ascent Amex", "Big Bazaar Gold", "Big Bazaar Shakti", "Big Bazaar Silver", "British Airways Classic", "British Airways Premium", "Business Advantage Black", "Business Advantage Blue", "Business Ascent Amex", "Business Essential Amex", "Business Micro", "Carbon", "Central Gold", "CESC Co-Branded", "Chennai Super Kings", "Classic Business", "Coral", "Coral against FD", "Corporate Gold", "Corporate Platinum", "CTA", "Diamant", "Diamant World", "Dual Billing Purchase", "Emeralde", "Emeralde Private", "Emeralde Private Metal", "Emirates Skywards Emeralde", "Emirates Skywards Rubyx", "Emirates Skywards Sapphiro", "Expressions", "Federal Bank Gold", "Federal Bank Silver", "Ferrari Platinum", "Ferrari Signature", "Future Gold", "Future Silver", "Gitanjali Jewellery", "Gold Business", "HelpAge India Affinity", "HPCL Coral", "HPCL Coral American Express", "HPCL Coral Visa Contactless", "HPCL Gold", "HPCL Platinum", "HPCL Silver", "HPCL Super Saver", "Indiatimes", "Instant Platinum", "InterMiles Coral", "InterMiles Rubyx", "InterMiles Sapphiro", "Jet Airways Business Advantage", "Kingfisher Airlines Platinum", "Kingfisher Airlines Titanium", "Kingfisher Airlines World", "LEADTHENEW Coral", "MakeMyTrip", "MakeMyTrip Platinum", "MakeMyTrip Signature", "Manchester United Platinum", "Manchester United Signature", "Megamart", "Mine Credit Card by", "NRI Coral", "NRI Sapphiro", "Orchid on Ecotel", "Parakram", "Parakram Select", "Platinum Business", "Platinum Chip", "Platinum Identity", "Plus (Add-on)", "Preferred Gold", "Preferred Silver", "PRU Life", "Punjab & Sind Blue", "Punjab & Sind Gold", "Punjab & Sind Silver", "Purchase", "Rubyx", "Rubyx against FD", "Sapphiro", "Sarovar Hotels", "Signature", "Singapore Airlines Visa Platinum", "Times Black", "Titanium", "Toyota Co-Branded", "Unifare", "Unifare Bangalore Metro", "Unifare Mumbai Metro", "Utility Purchase", "XBOX360"
     ],
     "SBI Card": [
-        "AURUM", "Elite", "Elite Advantage", "PRIME",
-        "Pulse", "Cashback Card", "SimplyCLICK", "SimplySAVE",
-        "SimplySAVE Advantage", "Miles", "Miles Prime", "Air India Signature",
-        "Air India Platinum", "BPCL Octane", "BPCL", "IRCTC Premier",
-        "IRCTC RuPay", "UCO Bank Platinum", "Shaurya", "Unnati",
-        "Doctor's Card", "Lifestyle Home Centre", "Reliance Credit Card", "FBB StyleUP",
-        "SimplyCLICK Advantage"
+        "Air India Platinum", "Air India Signature", "AURUM", "Central Bank of India ELITE", "Central Bank of India PRIME", "Central Select", "Club Vistara", "Club Vistara PRIME", "Delhi Metro", "ELITE", "ELITE Advantage", "Etihad Guest", "Etihad Guest Premier", "Fabindia", "Fabindia SELECT", "FBB Styleup", "MILES", "MILES ELITE", "MILES PRIME", "OLA Money", "PRIME", "PRIME Advantage", "PRIME NRI Secured", "PRIME Pro", "PSB SimplySAVE", "PULSE", "Reliance", "Reliance PRIME", "Shaurya", "Shaurya Select", "SimplyCLICK", "SimplyCLICK Advantage", "SimplySAVE", "SimplySAVE Advantage", "SimplySAVE Merchant", "SimplySAVE UPI", "South Indian Bank Platinum", "South Indian Bank Prime", "South Indian Bank SimplySAVE", "Tata", "Tata Card SELECT", "Tata Croma", "Tata Croma Card SELECT", "Tata Neu Infinity", "Tata Neu Plus", "Tata Star", "Tata Star Card SELECT", "Titan", "UCO Bank ELITE", "UCO Bank Prime", "UCO Bank SimplySAVE", "Unnati", "Vyapaar Unnati", "Yatra"
     ],
     "Axis Bank": [
-        "Magnus for Burgundy", "Magnus", "Reserve", "Atlas",
-        "Horizon", "Select", "ACE", "Neo",
-        "MY ZONE", "Rewards", "Privilege", "IndianOil Premium",
-        "IndianOil", "Airtel", "Flipkart", "Samsung Infinite",
-        "Samsung Signature", "Vistara Infinite", "Vistara Signature", "Vistara Platinum",
-        "LIC Signature", "LIC Platinum", "Freecharge Plus", "Burgundy Private",
-        "IOCL RuPay"
+        "ACE", "Airtel", "Atlas", "AURA", "Burgundy Private - The One", "Cashback", "Fibe", "Flipkart", "Flipkart Super Elite", "Freecharge", "Freecharge Plus", "Google Pay Flex", "HORIZON", "INDIANOIL", "IndianOil Easy", "IndianOil Premium", "IndiGo", "IndiGo Premium", "Kwik", "LIC Platinum", "LIC Signature", "MAGNUS", "Miles & More World Select", "Miles and More", "My Zone", "MY Zone Easy", "Neo", "Olympus", "Pride Platinum", "Pride Signature", "Primus", "Privilege", "Privilege Easy", "Reserve", "REWARDS", "Samsung Infinite", "Samsung Signature", "Scapia", "Select", "Shoppers Stop", "SpiceJet Voyage", "SpiceJet Voyage Black", "super.money RuPay", "Titanium Smart Traveller", "VISTARA", "Vistara Infinite", "VISTARA SIGNATURE"
     ],
     "Kotak Mahindra Bank": [
-        "White Reserve", "Solitaire", "Zen Signature", "Royale Signature",
-        "League Platinum", "PVR INOX Platinum", "Myntra", "IndianOil",
-        "Mojo Platinum", "Essentia Platinum", "Fortune Gold", "Urbane Gold",
-        "Delight Platinum", "811 Dream Different", "Aqua Gold", "UPI RuPay",
-        "NRI Platinum", "Corporate Platinum", "Business Platinum", "Privy League Signature"
+        "811", "811 Dream Different", "Air", "Air+", "Air+ Prime", "Amazon Pay Business", "Biz", "Biz Edge", "Cashback+", "Cashback+ Prime", "Corporate Gold", "Corporate Platinum", "Corporate Wealth Signature", "IndianOil", "IndiGo", "IndiGo Premium", "IndiGo XL", "Infinite", "Kotak811 Super Money", "League Platinum", "Mojo Platinum", "NRI Royale Signature", "Private", "Privy League Signature", "Purchase", "PVR", "PVR Gold", "PVR INOX", "PVR Platinum", "Royale Signature", "Solitaire", "Solitaire Business", "UPI RuPay", "Urbane Gold", "White", "White Reserve", "Zen"
     ],
     "IndusInd Bank": [
         "Pioneer Heritage Metal", "Pioneer Heritage", "Pioneer Private", "Legend",
@@ -67,23 +27,13 @@ const ISSUER_PRODUCTS = {
         "Business Gold", "Corporate Credit Card"
     ],
     "IDFC FIRST Bank": [
-        "Ashva", "Mayura", "FIRST Private", "Wealth",
-        "Select", "Millennia", "Classic", "WOW",
-        "Power+", "SWYP", "Earn", "Digital RuPay",
-        "Club Vistara", "LIC Classic", "LIC Select", "Business Credit Card",
-        "Corporate Credit Card"
+        "Ashva", "Business", "Business Max", "Business Multiplier", "Classic", "Club Vistara IDFC", "Corporate", "Diamond Reserve", "Digital RuPay", "EA₹N", "Fastag", "Gaj", "Gaj Digital RuPay", "Hello Cashback", "IndiGo IDFC", "LIC Classic", "LIC Select", "Mayura", "Millennia", "Power", "Power+", "Private", "Purchase", "Quantum", "Select", "SWYP", "Wealth", "WOW!", "WOW! Black"
     ],
     "YES BANK": [
-        "Marquee", "Reserv", "Elite+", "Wellness Plus",
-        "Wellness", "Paisabazaar PaisaSave", "Paisabazaar PaisaSave Plus", "BYOC",
-        "Prosperity Rewards Plus", "Prosperity Cashback Plus", "ACE", "FINBOOST",
-        "Kiwi", "RuPay Credit Card", "Business Credit Card", "Corporate Credit Card"
+        "ACE", "AI Inside", "AI Inside RuPay", "Anq Phi", "Build Your Own Card (BYOC)", "ELITE+", "EMI", "Essence", "FinBooster", "First Business", "First Preferred", "FREO", "Klick RuPay", "MARQUEE", "Niyo", "Novio", "Novio RuPay", "Paisabazaar PaisaSave", "Paisabazaar PaisaSave RuPay", "POP-CLUB", "Private", "Private Credit Card for NRI", "Private Prime", "Prosperity Business", "Prosperity Cashback", "Prosperity Cashback Plus", "Prosperity Rewards", "RESERV", "RESERV Credit Card for NRI", "RuPay", "SELECT", "SELECT Credit Card for NRI", "Uni", "UNI RuPay", "Wellness", "Wellness Plus", "Zagg"
     ],
     "RBL Bank": [
-        "World Safari", "Insignia Preferred Banking", "Icon", "Platinum Maxima Plus",
-        "ShopRite", "Popcorn", "BookMyShow Play", "Bajaj Finserv SuperCard",
-        "Bajaj Finserv World Prime SuperCard", "Bajaj Finserv World Plus SuperCard", "Bajaj Finserv Platinum Plus SuperCard", "IndianOil XTRA",
-        "Duet Plus", "Credit Card", "RuPay Credit Card", "Corporate Credit Card"
+        "Apex", "Aspire Banking", "Bankbazaar SaveMax", "Bankbazaar SaveMax Pro", "Binge", "Blockbuster", "Cookies", "DMI Finance", "EasySaver", "Fun+", "Icon", "iGlobe", "IndianOil", "IndianOil XTRA", "Insignia Preferred Banking", "IRCTC", "Jalsa", "Lumière", "MoCash", "MoneyTap", "MoneyTap Black", "Monthly Treats", "Movies and More", "MyFirst", "Nova", "Paisabazaar Duet", "Paisabazaar Duet Plus", "Patanjali Swarn", "Patanjali Vishisht", "Platinum Advantage", "Platinum Bonus", "Platinum Choice", "Platinum Classic", "Platinum Delight", "Platinum Edge", "Platinum LifeEasy", "Platinum Max", "Platinum Maxima", "Platinum Maxima Plus", "Platinum Plus", "Platinum Prime", "Platinum ShopDaily", "Platinum Shopgain", "Platinum ShopSmart", "Platinum TravelEasy", "Platinum ValuePlus", "Play", "Popcorn", "QuickPay", "SalarySe UP", "Shoppers Stop Black", "Shoppers Stop Gold", "Shoppers Stop Platinum", "Shoprite", "Signature Banking", "Titanium Delight", "TVS Credit", "TVS Credit Gold", "World Max", "World Plus", "World Prime", "World Safari", "World Safari Lite", "World Safari Plus"
     ],
     "HSBC India": [
         "Premier Metal", "Premier", "TravelOne", "Live+",
@@ -115,11 +65,7 @@ const ISSUER_PRODUCTS = {
         "Mastercard Platinum", "Corporate Credit Card", "Business Credit Card"
     ],
     "Bank of Baroda": [
-        "Eterna", "Premier", "Select", "Easy",
-        "Prime", "ICAI Exclusive", "IRCTC Credit Card", "HPCL ENERGIE",
-        "Snapdeal", "CMA One", "Vikram", "Defence",
-        "RuPay Platinum", "UPI RuPay Credit Card", "OneCard", "Corporate Credit Card",
-        "Business Credit Card"
+        "Assam Rifles The SENTINEL", "Cashback", "CMA One", "CORPORATE", "EASY", "EMPOWER", "ETERNA", "Etihad Guest", "Etihad Guest Premium", "HPCL Energie", "ICAI Exclusive", "ICSI Diamond", "Indian Army YODDHA", "Indian Coast Guard RAKSHAMAH", "Indian Navy VARUNAH", "Indian Navy VARUNAH Plus", "Indian Navy VARUNAH Premium", "IRCTC", "Micro Enterprise", "Nainital Bank RENAISSANCE", "One", "PM SVANidhi", "PRAGATI BGGB", "PRAGATI BRKGB", "PRAGATI BUPB", "PREMIER", "PRIME", "Scapia", "SELECT", "Snapdeal", "TIARA", "Uni GoldX", "VIKRAM"
     ],
     "Punjab National Bank": [
         "RuPay Platinum Credit Card", "RuPay Select Credit Card", "Visa Platinum Credit Card", "Visa Gold Credit Card",
@@ -1571,36 +1517,587 @@ function attachCardListeners() {
 // name's words (Bank of India -> BOI), or the first 4 letters.
 // Every issuer code is exactly 3 letters, hand-picked so none collide
 // (e.g. IndusInd Bank / Indian Bank both naturally shorten toward "IND").
+// Codes below are pulled from CheckKar_Master_Entity_Code_Registry_v1.xlsx
+// (Issuer_Master / Network_Master / Variant_Master / Product_Master_Starter).
+// Anything that registry doesn't cover falls back to the same mechanical
+// shortCode() generation as before — nothing is ever left un-codeable.
 const ISSUER_CODE = {
-    'HDFC Bank': 'HDF', 'ICICI Bank': 'ICI', 'SBI Card': 'SBI', 'Axis Bank': 'AXI',
-    'Kotak Mahindra Bank': 'KOT', 'IndusInd Bank': 'IDS', 'IDFC FIRST Bank': 'IDF',
-    'YES BANK': 'YES', 'RBL Bank': 'RBL', 'HSBC India': 'HSB', 'Standard Chartered Bank': 'SCB',
-    'American Express': 'AMX', 'AU Small Finance Bank': 'AUB', 'Federal Bank': 'FED',
-    'Bank of Baroda': 'BOB', 'Punjab National Bank': 'PNB', 'Canara Bank': 'CAN',
-    'Union Bank of India': 'UBI', 'Indian Bank': 'IDN', 'Bank of India': 'BOI',
-    'Central Bank of India': 'CBI', 'UCO Bank': 'UCO', 'South Indian Bank': 'SIB',
-    'Karnataka Bank': 'KBL', 'Karur Vysya Bank': 'KVB', 'CSB Bank': 'CSB',
-    'Dhanlaxmi Bank': 'DHA', 'Jammu & Kashmir Bank': 'JKB', 'DBS Bank India': 'DBS',
-    'Citi India': 'CIT', 'SBM Bank': 'SBM'
+    'HDFC Bank': 'HDFC', 'ICICI Bank': 'ICIC', 'SBI Card': 'SBI1', 'Axis Bank': 'UTIB',
+    'Kotak Mahindra Bank': 'KOTA', 'IndusInd Bank': 'INDB', 'IDFC FIRST Bank': 'IDFB',
+    'YES BANK': 'YESB', 'RBL Bank': 'RBLB', 'HSBC India': 'HSBC', 'Standard Chartered Bank': 'SCBL',
+    'American Express': 'AMEX', 'AU Small Finance Bank': 'AUBL', 'Federal Bank': 'FEDB',
+    'Bank of Baroda': 'BARB', 'Punjab National Bank': 'PUNB', 'Canara Bank': 'CNRB',
+    'Union Bank of India': 'UBIN', 'Indian Bank': 'IDIB', 'Bank of India': 'BKID',
+    'Central Bank of India': 'CBIN', 'UCO Bank': 'UCBA', 'South Indian Bank': 'SIBL',
+    'Karnataka Bank': 'KARB', 'Karur Vysya Bank': 'KVBL', 'CSB Bank': 'CSBK',
+    'Dhanlaxmi Bank': 'DHBL', 'Jammu & Kashmir Bank': 'JAKA', 'DBS Bank India': 'DBSS'
+    // Citi India, SBM Bank: not in the registry — fall back to mechanical below.
 };
 const NETWORK_CODE = {
-    'Visa': 'VIS', 'Mastercard': 'MC', 'RuPay': 'RUP', 'Diners Club': 'DIN',
-    'American Express': 'AMX', 'Amex': 'AMX', 'Diners': 'DIN'
+    'Visa': 'VIS', 'Mastercard': 'MST', 'RuPay': 'RUP', 'Diners Club': 'DIN',
+    'American Express': 'AMX', 'Amex': 'AMX', 'Diners': 'DIN', 'JCB': 'JCB',
+    'UnionPay': 'UNP', 'Discover': 'DSC', 'Maestro': 'MAE'
+};
+// Variant_Master — generic tier code, independent of network (matches our
+// subNetwork field far better than the network-locked SubNetwork_Master sheet,
+// since the same tier word shows up under every network: "Platinum" on Visa,
+// Mastercard and RuPay alike).
+const VARIANT_CODE = {
+    'Standard': 'STND', 'Gold': 'GOLD', 'Platinum': 'PLAT', 'Signature': 'SIGN',
+    'Infinite': 'INFI', 'Classic': 'CLAS', 'Select': 'SELC', 'Premium': 'PREM',
+    'Metal': 'METL', 'Metal Private': 'MPRV', 'World': 'WRLD', 'World Elite': 'WELT',
+    'Titanium': 'TITN', 'Corporate': 'CORP', 'Business': 'BUSN', 'Commercial': 'COMM',
+    'Secured': 'SECU', 'Lifetime Free': 'LIFE', 'Zero Annual Fee': 'ZERO',
+    'Co-branded': 'COBR', 'Co-brand': 'COBR', 'Virtual': 'VIRT', 'Physical': 'PHYS',
+    'Youth': 'YOUN',
+    // Added — real tiers our 9 banks use that the registry's 24-entry starter
+    // list doesn't cover yet. Same 4-char convention as the registry's own.
+    'Black': 'BLAK', 'Black Metal': 'BLKM', 'Business Gold': 'BGLD', 'Centurion': 'CENT',
+    'Corporate Platinum': 'CPLT', 'Credit on UPI': 'CUPI', 'Debit': 'DEBT', 'Diamond': 'DIAM',
+    'Gold Card': 'GOLC', 'Gold Charge': 'GLDC', 'Green Card': 'GRCD', 'Infinite Privilege': 'INPR',
+    'International': 'INTL', 'Membership Rewards': 'MREW', 'Platinum Charge': 'PLTC',
+    'Platinum Plus': 'PLTP', 'Platinum Reserve': 'PLTR', 'Platinum Travel': 'PLTT',
+    'Privilege': 'PRIV', 'Purchasing': 'PURC'
+};
+// Product_Master_Starter — card product codes, issuer-scoped (two banks can
+// each have a "Gold" product with unrelated codes). Only the registry's sample
+// set is here; anything else falls back to mechanical shortCode(product, 4).
+const PRODUCT_CODE = {
+    'HDFC Bank': {
+        'Infinia': 'INFI', 'Infinia Metal': 'INFM', 'Regalia Gold': 'REGG', 'Millennia': 'MILL',
+        'Diners Club Black': 'DCBK', 'Tata Neu Infinity': 'TNUI', 'Tata Neu Plus': 'TNUP', 'Swiggy': 'SWIG'
+    },
+    'ICICI Bank': {
+        'Emeralde': 'EMER', 'Emeralde Private Metal': 'EPMT', 'Sapphiro': 'SAPH',
+        'Rubyx': 'RUBX', 'Coral': 'CORL', 'Amazon Pay': 'AMZN'
+    },
+    'Axis Bank': {
+        'Magnus': 'MAGN', 'Magnus Burgundy': 'MAGB', 'Atlas': 'ATLS',
+        'Reserve': 'RSRV', 'Airtel': 'AIRT', 'ACE': 'ACEE'
+    },
+    'SBI Card': {
+        'Cashback': 'CBCK', 'Elite': 'ELIT', 'Prime': 'PRIM', 'SimplyCLICK': 'SCLK',
+        'SimplySAVE': 'SSAV', 'Aurum': 'AURM', 'BPCL Octane': 'BPOC', 'IRCTC': 'IRCT'
+    }
+};
+const PRODUCT_CODE_OVERRIDE = {
+    "811": "8110",
+    "Kotak811 Super Money": "811S",
+    "AI Inside": "AINS",
+    "AI Inside RuPay": "AINS",
+    "Air India Platinum": "AIPL",
+    "Air Deccan Gold": "AIDG",
+    "Air India Signature": "AISI",
+    "Ascent Amex": "ASCE",
+    "Punjab & Sind Blue": "BLUE",
+    "Business Ascent Amex": "BUSA",
+    "Business Essential Amex": "BUSE",
+    "Business Program": "BUSG",
+    "Business Advantage Blue": "BUSL",
+    "Business Micro": "BUSO",
+    "Business Regalia First": "BUST",
+    "Club Vistara IDFC": "CLUV",
+    "Club Vistara": "CLUV",
+    "Digital RuPay": "DIGI",
+    "Equitas Elegance": "ELEG",
+    "Central Bank of India ELITE": "CENE",
+    "UCO Bank ELITE": "UCOE",
+    "Equitas Excite": "EXCI",
+    "Freecharge Plus": "FRGX",
+    "Gaj Digital RuPay": "GAJD",
+    "Central Gold": "CENG",
+    "Federal Bank Gold": "FEDG",
+    "Punjab & Sind Gold": "PUNG",
+    "American Express Green": "GREE",
+    "HPCL Coral": "HPCC",
+    "HPCL Coral American Express": "HPCC",
+    "HPCL Coral Visa Contactless": "HPCC",
+    "Indian Navy VARUNAH Plus": "INDX",
+    "IndiGo": "INGO",
+    "IndiGo IDFC": "INGO",
+    "Klick RuPay": "KLIC",
+    "Novio": "NOVI",
+    "Novio RuPay": "NOVI",
+    "Paisabazaar Duet Plus": "PAIX",
+    "South Indian Bank Platinum": "SOUP",
+    "Plus (Add-on)": "PLUX",
+    "Paisabazaar PaisaSave": "PPAI",
+    "Paisabazaar PaisaSave RuPay": "PPAI",
+    "PRAGATI BGGB": "PRAB",
+    "PRAGATI BRKGB": "PRAR",
+    "PRAGATI BUPB": "PRAU",
+    "Pride Platinum": "PRDP",
+    "Pride Signature": "PRDS",
+    "Central Bank of India PRIME": "CENP",
+    "South Indian Bank Prime": "SPRI",
+    "UCO Bank Prime": "UCOP",
+    "PRIME NRI Secured": "PRIN",
+    "Prosperity Cashback Plus": "PROX",
+    "Platinum Maxima Plus": "PTMX",
+    "Platinum Plus": "PTPX",
+    "Platinum ShopDaily": "PTSD",
+    "Platinum ShopSmart": "PTSS",
+    "Platinum ValuePlus": "PTVX",
+    "Dual Billing Purchase": "PURD",
+    "Utility Purchase": "PURU",
+    "Nainital Bank RENAISSANCE": "NAIR",
+    "Reserve": "RESE",
+    "Central Select": "SELE",
+    "Shoprite": "SHOR",
+    "Federal Bank Silver": "FEDS",
+    "Punjab & Sind Silver": "PUNS",
+    "Singapore Airlines Visa Platinum": "SINP",
+    "PSB SimplySAVE": "PSBS",
+    "South Indian Bank SimplySAVE": "SOUS",
+    "UCO Bank SimplySAVE": "UCOS",
+    "super.money RuPay": "SUPM",
+    "Tata Card SELECT": "TATS",
+    "Tata Croma": "TCRO",
+    "Times Platinum": "TIMP",
+    "Tata Neu Plus": "TNUX",
+    "Uni": "UNI0",
+    "UNI RuPay": "UNI0",
+    "UPI RuPay": "UPI0",
+    "UPI RuPay Biz": "UPIB",
+    "UPI RuPay Mega Saver": "UPIM",
+    "Wellness Plus": "WELX",
+    "World Max": "WOMA",
+    "World Plus": "WOPX",
+    "World Safari Plus": "WOSX",
+    "ACE": "ACE0",
+    "Airtel": "AIRT",
+    "Atlas": "ATLS",
+    "AURA": "AURA",
+    "Burgundy Private - The One": "BURO",
+    "Cashback": "CASH",
+    "Fibe": "FIBE",
+    "Flipkart": "FLIP",
+    "Flipkart Super Elite": "FLIE",
+    "Freecharge": "FRGE",
+    "Google Pay Flex": "GOOF",
+    "HORIZON": "HORI",
+    "INDIANOIL": "INDL",
+    "IndianOil Easy": "INDE",
+    "IndianOil Premium": "INDM",
+    "IndiGo Premium": "INGP",
+    "Kwik": "KWIK",
+    "LIC Platinum": "LICP",
+    "LIC Signature": "LICE",
+    "MAGNUS": "MAGN",
+    "Miles & More World Select": "MILW",
+    "Miles and More": "MILM",
+    "My Zone": "MYZO",
+    "MY Zone Easy": "MYZE",
+    "Neo": "NEO0",
+    "Olympus": "OLYM",
+    "Primus": "PRUS",
+    "Privilege": "PRGE",
+    "Privilege Easy": "PRGY",
+    "REWARDS": "REWA",
+    "Samsung Infinite": "SAMI",
+    "Samsung Signature": "SAMS",
+    "Scapia": "SCAP",
+    "Select": "SELE",
+    "Shoppers Stop": "SHOS",
+    "SpiceJet Voyage": "SPIV",
+    "SpiceJet Voyage Black": "SPIB",
+    "Titanium Smart Traveller": "TITT",
+    "VISTARA": "VIST",
+    "Vistara Infinite": "VISI",
+    "VISTARA SIGNATURE": "VISS",
+    "Assam Rifles The SENTINEL": "ASSS",
+    "CMA One": "CMAO",
+    "CORPORATE": "CORP",
+    "EASY": "EASY",
+    "EMPOWER": "EMPO",
+    "ETERNA": "ETER",
+    "Etihad Guest": "ETIG",
+    "Etihad Guest Premium": "ETIP",
+    "HPCL Energie": "HPCE",
+    "ICAI Exclusive": "ICAE",
+    "ICSI Diamond": "ICSD",
+    "Indian Army YODDHA": "INDY",
+    "Indian Coast Guard RAKSHAMAH": "INDR",
+    "Indian Navy VARUNAH": "INDV",
+    "Indian Navy VARUNAH Premium": "IPRE",
+    "IRCTC": "IRCT",
+    "Micro Enterprise": "MICE",
+    "One": "ONE0",
+    "PM SVANidhi": "PSVA",
+    "PREMIER": "PREM",
+    "PRIME": "PRIM",
+    "SELECT": "SELE",
+    "Snapdeal": "SNAP",
+    "TIARA": "TIAR",
+    "Uni GoldX": "UNIG",
+    "VIKRAM": "VIKR",
+    "6E Rewards Indigo": "6ERE",
+    "6E Rewards Indigo XL": "6ERL",
+    "AllMiles": "ALLM",
+    "Best Price Save Max": "BESM",
+    "Best Price Save Smart": "BESS",
+    "Bharat CashBack": "BHAC",
+    "BizBlack Metal": "BIZM",
+    "BizFirst": "BIZF",
+    "BizGrow": "BIZG",
+    "BizPower": "BIZP",
+    "Business Bharat CashBack": "BUSC",
+    "Business Freedom": "BUSF",
+    "Business Moneyback": "BUSM",
+    "Business Platinum": "BUSP",
+    "Business Regalia": "BUSR",
+    "CSC Small Business MoneyBack": "CSCM",
+    "Diners Black": "DIBK",
+    "Diners Black Metal Edition": "DIBM",
+    "Diners Club Miles": "DCMI",
+    "Diners Club Premium": "DCPR",
+    "Diners Club Rewardz": "DCRE",
+    "Diners Privilege": "DIPR",
+    "Doctor's Regalia": "DOCR",
+    "Doctors Superia": "DOCS",
+    "Easy EMI": "EASE",
+    "Flipkart Wholesale": "FLIW",
+    "Freedom": "FREE",
+    "GIGA Business": "GIGB",
+    "H.O.G Diners Club": "HOGD",
+    "Harley-Davidson Diners Club": "HARD",
+    "Indian Oil": "INDL",
+    "Infinia": "INFI",
+    "Infinia (Metal Edition)": "INFM",
+    "InterMiles Diners Club": "INTD",
+    "InterMiles Platinum": "INTP",
+    "InterMiles Signature": "INTS",
+    "Marriott Bonvoy": "MARB",
+    "Millennia": "MILL",
+    "MoneyBack": "MONE",
+    "MoneyBack+": "MONX",
+    "Paytm": "PAYT",
+    "Paytm Business": "PAYU",
+    "Paytm Digital": "PAYD",
+    "Paytm Select": "PAYS",
+    "Paytm Select Business": "PAYB",
+    "Pharmeasy": "PHAR",
+    "PhonePe Ultimo": "PHOU",
+    "PhonePe Uno": "PHON",
+    "Pine Labs": "PINL",
+    "Pine Labs Pro": "PINP",
+    "PIXEL Go": "PIXG",
+    "PIXEL Play": "PIXP",
+    "Platinum Edge": "PTED",
+    "Regalia": "REGA",
+    "Regalia Activ": "REGV",
+    "Regalia First": "REGF",
+    "Regalia Gold": "REGG",
+    "Retailio": "RETA",
+    "Shoppers Stop Black": "SHOB",
+    "Small Business Moneyback": "SMAM",
+    "Solitaire": "SOLI",
+    "Superia": "SUPE",
+    "Swiggy": "SWIG",
+    "Swiggy BLCK": "SWBK",
+    "Swiggy Ornge": "SWOR",
+    "Tata Neu Infinity": "TNUI",
+    "Teacher's Platinum": "TEAP",
+    "Times Card Credit Platinum": "TIMP",
+    "Times Titanium": "TIMT",
+    "Accelero": "ACCE",
+    "Adani One Platinum": "ADAP",
+    "Adani One Signature": "ADAS",
+    "Airtel Gold": "AIRG",
+    "Airtel Silver": "AIRS",
+    "Alumni": "ALUM",
+    "Amazon Pay": "AMAZ",
+    "Amway": "AMWA",
+    "Big Bazaar Gold": "BIGG",
+    "Big Bazaar Shakti": "BIGS",
+    "Big Bazaar Silver": "BIGR",
+    "British Airways Classic": "BRIC",
+    "British Airways Premium": "BRIP",
+    "Business Advantage Black": "BUSB",
+    "Carbon": "CARB",
+    "CESC Co-Branded": "CESB",
+    "Chennai Super Kings": "CHEK",
+    "Classic Business": "CLAB",
+    "Coral": "CORL",
+    "Coral against FD": "CORF",
+    "Corporate Gold": "CORG",
+    "Corporate Platinum": "CORM",
+    "CTA": "CTA0",
+    "Diamant": "DIAM",
+    "Diamant World": "DIAW",
+    "Emeralde": "EMER",
+    "Emeralde Private": "EMEP",
+    "Emeralde Private Metal": "EMEM",
+    "Emirates Skywards Emeralde": "EMIE",
+    "Emirates Skywards Rubyx": "EMIR",
+    "Emirates Skywards Sapphiro": "EMIS",
+    "Expressions": "EXPR",
+    "Ferrari Platinum": "FERP",
+    "Ferrari Signature": "FERS",
+    "Future Gold": "FUTG",
+    "Future Silver": "FUTS",
+    "Gitanjali Jewellery": "GITJ",
+    "Gold Business": "GOLB",
+    "HelpAge India Affinity": "HELA",
+    "HPCL Gold": "HPCG",
+    "HPCL Platinum": "HPCP",
+    "HPCL Silver": "HPCS",
+    "HPCL Super Saver": "HPCR",
+    "Indiatimes": "INDI",
+    "Instant Platinum": "INSP",
+    "InterMiles Coral": "INTC",
+    "InterMiles Rubyx": "INTR",
+    "InterMiles Sapphiro": "INTO",
+    "Jet Airways Business Advantage": "JETA",
+    "Kingfisher Airlines Platinum": "KINP",
+    "Kingfisher Airlines Titanium": "KINT",
+    "Kingfisher Airlines World": "KINW",
+    "LEADTHENEW Coral": "LEAC",
+    "MakeMyTrip": "MAKE",
+    "MakeMyTrip Platinum": "MAKP",
+    "MakeMyTrip Signature": "MAKS",
+    "Manchester United Platinum": "MANP",
+    "Manchester United Signature": "MANS",
+    "Megamart": "MEGA",
+    "Mine Credit Card by": "MINB",
+    "NRI Coral": "NRIC",
+    "NRI Sapphiro": "NRIS",
+    "Orchid on Ecotel": "ORCE",
+    "Parakram": "PARA",
+    "Parakram Select": "PARS",
+    "Platinum Business": "PTBU",
+    "Platinum Chip": "PTCI",
+    "Platinum Identity": "PTID",
+    "Preferred Gold": "PREG",
+    "Preferred Silver": "PRES",
+    "PRU Life": "PRUL",
+    "Purchase": "PURC",
+    "Rubyx": "RUBX",
+    "Rubyx against FD": "RUBF",
+    "Sapphiro": "SAPH",
+    "Sarovar Hotels": "SARH",
+    "Signature": "SIGN",
+    "Times Black": "TIMB",
+    "Titanium": "TITA",
+    "Toyota Co-Branded": "TOYB",
+    "Unifare": "UNIF",
+    "Unifare Bangalore Metro": "UNIB",
+    "Unifare Mumbai Metro": "UNIM",
+    "XBOX360": "XBOX",
+    "Ashva": "ASHV",
+    "Business": "BUSI",
+    "Business Max": "BMAX",
+    "Business Multiplier": "BMUL",
+    "Classic": "CLAS",
+    "Corporate": "CORP",
+    "Diamond Reserve": "DIAR",
+    "EA₹N": "EARN",
+    "Fastag": "FAST",
+    "Gaj": "GAJ0",
+    "Hello Cashback": "HELC",
+    "LIC Classic": "LICC",
+    "LIC Select": "LICS",
+    "Mayura": "MAYU",
+    "Power": "POWE",
+    "Power+": "POWX",
+    "Private": "PRIV",
+    "Quantum": "QUAN",
+    "SWYP": "SWYP",
+    "Wealth": "WEAL",
+    "WOW!": "WOWX",
+    "WOW! Black": "WOWB",
+    "811 Dream Different": "811D",
+    "Air": "AIR0",
+    "Air+": "AIRX",
+    "Air+ Prime": "AIRP",
+    "Amazon Pay Business": "AMAB",
+    "Biz": "BIZ0",
+    "Biz Edge": "BIZE",
+    "Cashback+": "CASX",
+    "Cashback+ Prime": "CASP",
+    "Corporate Wealth Signature": "CORS",
+    "IndianOil": "INDL",
+    "IndiGo XL": "INGL",
+    "Infinite": "INFE",
+    "League Platinum": "LEAP",
+    "Mojo Platinum": "MOJP",
+    "NRI Royale Signature": "NRIR",
+    "Privy League Signature": "PRIS",
+    "PVR": "PVR0",
+    "PVR Gold": "PVRG",
+    "PVR INOX": "PVRI",
+    "PVR Platinum": "PVRP",
+    "Royale Signature": "ROYS",
+    "Solitaire Business": "SOLB",
+    "Urbane Gold": "URBG",
+    "White": "WHIT",
+    "White Reserve": "WHIR",
+    "Zen": "ZEN0",
+    "Apex": "APEX",
+    "Aspire Banking": "ASPB",
+    "Bankbazaar SaveMax": "BANS",
+    "Bankbazaar SaveMax Pro": "BANP",
+    "Binge": "BING",
+    "Blockbuster": "BLOC",
+    "Cookies": "COOK",
+    "DMI Finance": "DMIF",
+    "EasySaver": "EASR",
+    "Fun+": "FUNX",
+    "Icon": "ICON",
+    "iGlobe": "IGLO",
+    "IndianOil XTRA": "IXTR",
+    "Insignia Preferred Banking": "INSB",
+    "Jalsa": "JALS",
+    "Lumière": "LUMI",
+    "MoCash": "MOCA",
+    "MoneyTap": "MONP",
+    "MoneyTap Black": "MONB",
+    "Monthly Treats": "MONT",
+    "Movies and More": "MOVM",
+    "MyFirst": "MYFI",
+    "Nova": "NOVA",
+    "Paisabazaar Duet": "PAID",
+    "Patanjali Swarn": "PATS",
+    "Patanjali Vishisht": "PATV",
+    "Platinum Advantage": "PTAD",
+    "Platinum Bonus": "PTBO",
+    "Platinum Choice": "PTCH",
+    "Platinum Classic": "PTCL",
+    "Platinum Delight": "PTDE",
+    "Platinum LifeEasy": "PTLE",
+    "Platinum Max": "PTMA",
+    "Platinum Maxima": "PTMI",
+    "Platinum Prime": "PTPR",
+    "Platinum Shopgain": "PTSG",
+    "Platinum TravelEasy": "PTTE",
+    "Play": "PLAY",
+    "Popcorn": "POPC",
+    "QuickPay": "QUIC",
+    "SalarySe UP": "SALU",
+    "Shoppers Stop Gold": "SHOG",
+    "Shoppers Stop Platinum": "SHOP",
+    "Signature Banking": "SIGB",
+    "Titanium Delight": "TITD",
+    "TVS Credit": "TVSC",
+    "TVS Credit Gold": "TVSG",
+    "World Prime": "WOPR",
+    "World Safari": "WOSA",
+    "World Safari Lite": "WOSL",
+    "AURUM": "AURM",
+    "Club Vistara PRIME": "CLUP",
+    "Delhi Metro": "DELM",
+    "ELITE": "ELIT",
+    "ELITE Advantage": "ELIA",
+    "Etihad Guest Premier": "ETIR",
+    "Fabindia": "FABI",
+    "Fabindia SELECT": "FABS",
+    "FBB Styleup": "FBBS",
+    "MILES": "MILE",
+    "MILES ELITE": "MILI",
+    "MILES PRIME": "MILP",
+    "OLA Money": "OLAM",
+    "PRIME Advantage": "PRIA",
+    "PRIME Pro": "PRIP",
+    "PULSE": "PULS",
+    "Reliance": "RELI",
+    "Reliance PRIME": "RELP",
+    "Shaurya": "SHAU",
+    "Shaurya Select": "SHAS",
+    "SimplyCLICK": "SCLK",
+    "SimplyCLICK Advantage": "SCLA",
+    "SimplySAVE": "SSAV",
+    "SimplySAVE Advantage": "SSAA",
+    "SimplySAVE Merchant": "SSAM",
+    "SimplySAVE UPI": "SSAU",
+    "Tata": "TATA",
+    "Tata Croma Card SELECT": "TCRS",
+    "Tata Star": "TSTA",
+    "Tata Star Card SELECT": "TSTS",
+    "Titan": "TITN",
+    "Unnati": "UNNA",
+    "Vyapaar Unnati": "VYAU",
+    "Yatra": "YATR",
+    "Anq Phi": "ANQP",
+    "Build Your Own Card (BYOC)": "BYOC",
+    "ELITE+": "ELIX",
+    "EMI": "EMI0",
+    "Essence": "ESSE",
+    "FinBooster": "FINB",
+    "First Business": "FIRB",
+    "First Preferred": "FIRP",
+    "FREO": "FREO",
+    "POP-CLUB": "PCLU",
+    "Private Credit Card for NRI": "PRIV",
+    "Private Prime": "PRPR",
+    "Prosperity Business": "PROB",
+    "Prosperity Cashback": "PROC",
+    "Prosperity Rewards": "PROR",
+    "RESERV": "RESE",
+    "RESERV Credit Card for NRI": "RESE",
+    "RuPay": "RUPA",
+    "SELECT Credit Card for NRI": "SELE",
+    "Wellness": "WELL",
+    "Zagg": "ZAGG"
 };
 const issuerCode = (v) => {
     if (!v) return '';
     if (ISSUER_CODE[v]) return ISSUER_CODE[v];
     const ac = v.replace(/&/g, ' ').split(/\s+/).filter(Boolean).map(w => w[0]).join('').toUpperCase();
-    return (ac.length >= 2 ? ac : v.replace(/[^A-Za-z0-9]/g, '').toUpperCase()).slice(0, 3);
+    return (ac.length >= 2 ? ac : v.replace(/[^A-Za-z0-9]/g, '').toUpperCase()).slice(0, 4);
 };
 const shortCode = (v, n = 3) => String(v || '').replace(/[^A-Za-z0-9]/g, '').slice(0, n).toUpperCase();
 const networkCode = (v) => NETWORK_CODE[v] || shortCode(v, 3);
+const variantCode = (v) => VARIANT_CODE[v] || shortCode(v, 3);
+// Smarter fallback than a blind first-4-letters substring, which collapses any
+// product family sharing a first word ("BOBCARD Eterna" / "BOBCARD Premier" /
+// "BOBCARD Select" all -> "BOBC"). The LAST word is usually the actual
+// distinguishing part of a "<Brand> <Variant>" name, so lead with that instead:
+// "BOBCARD Eterna" -> ETER, "BOBCARD Premier" -> PREM, "BOBCARD Select" -> SELE.
+// Pads from earlier words only if the last word alone is under 4 letters.
+// Generic trailing filler ("... Credit Card") is skipped first, since it's
+// not distinguishing at all — without this, every "<X> Credit Card" product
+// collapses onto the same "CARD" code and the dedup guard just numbers them
+// CARD/CAR2/CAR3.../CAR15, which is meaningless.
+const PRODUCT_CODE_STOPWORDS = new Set(['CARD', 'CARDS', 'CREDIT']);
+const productFallbackCode = (v) => {
+    let words = String(v || '').split(/[^A-Za-z0-9]+/).filter(Boolean);
+    while (words.length > 1 && PRODUCT_CODE_STOPWORDS.has(words[words.length - 1].toUpperCase())) words = words.slice(0, -1);
+    if (!words.length) return '';
+    // Exactly 2 words: use both (2 letters each) instead of just the last
+    // word — "Paytm Business" -> PABU, "GIGA Business" -> GIBU. Using only
+    // the last word would collapse both onto the same generic "BUSI".
+    if (words.length === 2) {
+        const code = (words[0].toUpperCase().slice(0, 2) + words[1].toUpperCase().slice(0, 2)).replace(/[^A-Z0-9]/g, '');
+        if (code.length === 4) return code;
+    }
+    let code = words[words.length - 1].toUpperCase().slice(0, 4);
+    for (let i = words.length - 2; code.length < 4 && i >= 0; i--) code += words[i].toUpperCase();
+    return code.replace(/[^A-Z0-9]/g, '').slice(0, 4) || shortCode(v, 4);
+};
+const productCode = (issuer, product) => PRODUCT_CODE_OVERRIDE[product] || (PRODUCT_CODE[issuer] && PRODUCT_CODE[issuer][product]) || productFallbackCode(product);
 
-// ISSUER-NETWORK-SUBNETWORK-VARIANT, minus the running number.
-// e.g. HDFC Bank + Amex + Gold Card + AllMiles -> HDF-AMX-GOL-ALL
+// Belt-and-suspenders on top of productFallbackCode: within one import batch,
+// if two DIFFERENT product names would still land on the same issuer+network+
+// productCode, bump the code's last character until it's free. `seen` is a
+// plain object the caller keeps for the whole batch — {issuer|network|code: product}.
+function dedupeProductCode(seen, issuer, network, product, code) {
+    const scope = `${issuer}|${network}`.toLowerCase();
+    let c = code, n = 2;
+    while (seen[`${scope}|${c}`] && seen[`${scope}|${c}`] !== product) {
+        c = code.slice(0, 3) + n;
+        n++;
+    }
+    seen[`${scope}|${c}`] = product;
+    return c;
+}
+
+// ISSUER-NETWORK-PRODUCT-VARIANT, minus the running number — matches the
+// CheckKar Master Entity Code Registry's Composite_ID_Examples field order.
+// e.g. HDFC Bank + Visa + Infinia + Platinum -> HDFC-VIS-INFI-PLAT
 function cardIdPrefix() {
     const g = id => (document.getElementById(id) || {}).value || '';
-    const parts = [issuerCode(g('issuer')), networkCode(g('network')), shortCode(g('subNetwork'), 3), shortCode(g('product'), 3)].filter(Boolean);
+    const issuer = g('issuer'), product = g('product');
+    const parts = [issuerCode(issuer), productCode(issuer, product), networkCode(g('network')), variantCode(g('subNetwork'))].filter(Boolean);
     return parts.length ? parts.join('-') : 'CARD';
 }
 
@@ -5181,10 +5678,12 @@ function handleMultiSheetExcelImport(event) {
                 const mkey = (i, p, n) => [i, p, n].map(x => x.toLowerCase()).join('|');
                 const idMap = {};
                 const seqByPrefix = {};
+                const seenProductCode = {};
                 for (const row of cardData) {
                     const issuer = gv(row, 'issuer'), product = gv(row, 'product', 'variant', 'cardName');
                     const network = gv(row, 'network'), subNetwork = gv(row, 'subNetwork', 'sub_network');
-                    const prefix = [issuerCode(issuer), networkCode(network), shortCode(subNetwork, 3), shortCode(product, 3)].filter(Boolean).join('-') || 'CARD';
+                    const pCode = dedupeProductCode(seenProductCode, issuer, network, product, productCode(issuer, product));
+                    const prefix = [issuerCode(issuer), pCode, networkCode(network), variantCode(subNetwork)].filter(Boolean).join('-') || 'CARD';
                     if (seqByPrefix[prefix] === undefined) seqByPrefix[prefix] = await nextCardSeq(prefix);
                     const newId = `${prefix}-${String(seqByPrefix[prefix]++).padStart(3, '0')}`;
                     const oldId = gv(row, 'id', 'cardId', 'card_id');
@@ -5888,13 +6387,17 @@ async function saveImportData() {
     alert('✅ Saved to Supabase:\n\n• ' + results.join('\n• '));
 }
 
-// Overwrite every row's Card ID with a fresh ISSUER-NET-SUBNET-VAR-NNN, whatever
-// the sheet had. Sequence continues from the highest already in the DB per prefix.
+// Overwrite every row's Card ID with a fresh ISSUER-NET-PRODUCT-VARIANT-NNN,
+// whatever the sheet had. Sequence continues from the highest already in the DB
+// per prefix.
 async function assignAutoCardIds(rows) {
     const g = (row, key) => String(getColVal(row, key) || '').trim();
     const nextByPrefix = {};
+    const seenProductCode = {};
     for (const row of rows) {
-        const parts = [issuerCode(g(row, 'issuer')), networkCode(g(row, 'network')), shortCode(g(row, 'subNetwork'), 3), shortCode(g(row, 'product'), 3)].filter(Boolean);
+        const issuer = g(row, 'issuer'), product = g(row, 'product'), network = g(row, 'network');
+        const pCode = dedupeProductCode(seenProductCode, issuer, network, product, productCode(issuer, product));
+        const parts = [issuerCode(issuer), pCode, networkCode(network), variantCode(g(row, 'subNetwork'))].filter(Boolean);
         const prefix = parts.length ? parts.join('-') : 'CARD';
         if (nextByPrefix[prefix] === undefined) nextByPrefix[prefix] = await nextCardSeq(prefix);
         const id = `${prefix}-${String(nextByPrefix[prefix]++).padStart(3, '0')}`;

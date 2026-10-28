@@ -30,6 +30,9 @@ const MCC_IMPORT_COLUMNS = grab('MCC_IMPORT_COLUMNS');
 const REWARD_TYPE_FIELDS = grabObj('REWARD_TYPE_FIELDS');
 const ISSUER_CODE = grabObj('ISSUER_CODE');
 const NETWORK_CODE = grabObj('NETWORK_CODE');
+const VARIANT_CODE = grabObj('VARIANT_CODE');
+const PRODUCT_CODE = grabObj('PRODUCT_CODE');
+const PRODUCT_CODE_OVERRIDE = grabObj('PRODUCT_CODE_OVERRIDE');
 const CARD_COL = grabObj('CARD_COL', dbjs);
 const OFFER_COL = grabObj('OFFER_COL', dbjs);
 window = {};
@@ -44,10 +47,35 @@ const issuerCode = (v) => {
     if (!v) return '';
     if (ISSUER_CODE[v]) return ISSUER_CODE[v];
     const ac = v.replace(/&/g, ' ').split(/\s+/).filter(Boolean).map(w => w[0]).join('').toUpperCase();
-    return (ac.length >= 2 ? ac : v.replace(/[^A-Za-z0-9]/g, '').toUpperCase()).slice(0, 3);
+    return (ac.length >= 2 ? ac : v.replace(/[^A-Za-z0-9]/g, '').toUpperCase()).slice(0, 4);
 };
 const shortCode = (v, n = 3) => String(v || '').replace(/[^A-Za-z0-9]/g, '').slice(0, n).toUpperCase();
 const networkCode = (v) => NETWORK_CODE[v] || shortCode(v, 3);
+const variantCode = (v) => VARIANT_CODE[v] || shortCode(v, 3);
+const PRODUCT_CODE_STOPWORDS = new Set(['CARD', 'CARDS', 'CREDIT']);
+const productFallbackCode = (v) => {
+    let words = String(v || '').split(/[^A-Za-z0-9]+/).filter(Boolean);
+    while (words.length > 1 && PRODUCT_CODE_STOPWORDS.has(words[words.length - 1].toUpperCase())) words = words.slice(0, -1);
+    if (!words.length) return '';
+    if (words.length === 2) {
+        const code2 = (words[0].toUpperCase().slice(0, 2) + words[1].toUpperCase().slice(0, 2)).replace(/[^A-Z0-9]/g, '');
+        if (code2.length === 4) return code2;
+    }
+    let code = words[words.length - 1].toUpperCase().slice(0, 4);
+    for (let i = words.length - 2; code.length < 4 && i >= 0; i--) code += words[i].toUpperCase();
+    return code.replace(/[^A-Z0-9]/g, '').slice(0, 4) || shortCode(v, 4);
+};
+const productCode = (issuer, product) => PRODUCT_CODE_OVERRIDE[product] || (PRODUCT_CODE[issuer] && PRODUCT_CODE[issuer][product]) || productFallbackCode(product);
+function dedupeProductCode(seen, issuer, network, product, code) {
+    const scope = `${issuer}|${network}`.toLowerCase();
+    let c = code, n = 2;
+    while (seen[`${scope}|${c}`] && seen[`${scope}|${c}`] !== product) {
+        c = code.slice(0, 3) + n;
+        n++;
+    }
+    seen[`${scope}|${c}`] = product;
+    return c;
+}
 
 // ---- sql helpers ----
 // Supabase's SQL Editor splits pasted text into statements at every semicolon,
@@ -97,6 +125,7 @@ const files = fs.readdirSync(SRC_DIR).filter(f => /\.xlsx?$/i.test(f));
 if (!files.length) { console.error('No .xlsx files found in', SRC_DIR); process.exit(1); }
 
 const seqByPrefix = {};
+const seenProductCode = {};
 const cardRows = [];              // sql values for `cards`
 const fileState = [];             // { file, wb, idMap }
 
@@ -112,7 +141,8 @@ files.forEach(file => {
         const issuer = g(row, 'issuer'), product = g(row, 'product'), network = g(row, 'network');
         const subNetwork = g(row, 'subNetwork');
         const tempId = g(row, 'id');
-        const prefix = [issuerCode(issuer), networkCode(network), shortCode(subNetwork, 3), shortCode(product, 3)].filter(Boolean).join('-') || 'CARD';
+        const pCode = dedupeProductCode(seenProductCode, issuer, network, product, productCode(issuer, product));
+        const prefix = [issuerCode(issuer), pCode, networkCode(network), variantCode(subNetwork)].filter(Boolean).join('-') || 'CARD';
         seqByPrefix[prefix] = (seqByPrefix[prefix] || 0) + 1;
         const newId = `${prefix}-${String(seqByPrefix[prefix]).padStart(3, '0')}`;
         cardIds.push(newId);
