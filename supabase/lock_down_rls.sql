@@ -12,7 +12,8 @@ create table if not exists admin_users (email text primary key);
 alter table admin_users enable row level security;   -- no policy = not reachable through the API
 
 insert into admin_users (email) values
-    ('application.support@frugality.in')
+    ('application.support@frugality.in'),
+    ('yash.sherikar@frugality.in')
 on conflict do nothing;
 
 create or replace function is_admin() returns boolean language sql stable security definer set search_path = public as $$

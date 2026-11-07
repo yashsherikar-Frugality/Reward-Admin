@@ -144,20 +144,7 @@ begin
            min(fuel_reward_rate_n), max(fuel_reward_rate_n), count(fuel_reward_rate_n)
     from cleaned;
 end;
-$$ language plpgsql;
-
-create or replace function wb_fuel_stats_trigger() returns trigger as $$
-begin
-    perform refresh_wb_fuel_stats();
-    return null;
-end;
-$$ language plpgsql;
-
-drop trigger if exists wb_fuel_stats_trg on wb_fuel;
-create trigger wb_fuel_stats_trg
-    after insert or update or delete on wb_fuel
-    for each statement
-    execute function wb_fuel_stats_trigger();
+$$ language plpgsql security definer set search_path = public;
 
 -- wb_travel_insurance -----------------------------------------------------
 create or replace function refresh_wb_travel_insurance_stats() returns void as $$
@@ -186,20 +173,7 @@ begin
     from long
     group by cur, col;
 end;
-$$ language plpgsql;
-
-create or replace function wb_travel_insurance_stats_trigger() returns trigger as $$
-begin
-    perform refresh_wb_travel_insurance_stats();
-    return null;
-end;
-$$ language plpgsql;
-
-drop trigger if exists wb_travel_insurance_stats_trg on wb_travel_insurance;
-create trigger wb_travel_insurance_stats_trg
-    after insert or update or delete on wb_travel_insurance
-    for each statement
-    execute function wb_travel_insurance_stats_trigger();
+$$ language plpgsql security definer set search_path = public;
 
 -- Every other table: generic -------------------------------------------------
 -- For each text/number column, keep stats only if at least one cell is a
@@ -230,37 +204,66 @@ begin
 end;
 $$ language plpgsql security definer set search_path = public;
 
-create or replace function table_stats_trigger() returns trigger as $$
+-- Writes must stay fast (the website's anon role times out after 3s), so the trigger
+-- only marks the table as changed; a one-minute pg_cron job does the recompute.
+create table if not exists stats_dirty (source_table text primary key);
+alter table stats_dirty enable row level security;   -- no policy: only the security-definer functions touch it
+
+create or replace function mark_stats_dirty() returns trigger as $$
 begin
-    perform refresh_table_stats(tg_table_name);
+    insert into stats_dirty (source_table) values (tg_table_name) on conflict do nothing;
     return null;
 end;
 $$ language plpgsql security definer set search_path = public;
 
--- Stats are readable by everyone, writable only by the security-definer functions.
+create or replace function refresh_dirty_stats() returns void as $$
+declare
+    t text;
+begin
+    if not pg_try_advisory_lock(7351001) then return; end if;
+    for t in delete from stats_dirty returning source_table loop
+        if t = 'wb_fuel' then perform refresh_wb_fuel_stats();
+        elsif t = 'wb_travel_insurance' then perform refresh_wb_travel_insurance_stats();
+        else perform refresh_table_stats(t);
+        end if;
+    end loop;
+    perform pg_advisory_unlock(7351001);
+end;
+$$ language plpgsql security definer set search_path = public;
+
+create extension if not exists pg_cron;
+select cron.unschedule(jobid) from cron.job where jobname = 'refresh-stats';
+select cron.schedule('refresh-stats', '* * * * *', 'select refresh_dirty_stats()');
+
+-- Stats are readable by signed-in admins only, written only by the security-definer functions.
 alter table benefit_numeric_stats enable row level security;
 drop policy if exists benefit_numeric_stats_read on benefit_numeric_stats;
-create policy benefit_numeric_stats_read on benefit_numeric_stats for select using (true);
+drop policy if exists benefit_numeric_stats_admin_all on benefit_numeric_stats;
+create policy benefit_numeric_stats_admin_all on benefit_numeric_stats for select to authenticated using (is_admin());
 
--- Attach the trigger to every table except the stats table and the two custom ones, and seed.
+-- Attach the marker trigger to every table (except the stats/queue/allowlist tables).
 do $$
 declare
     t text;
 begin
     drop trigger if exists wb_welcome_stats_trg on wb_welcome;
     drop trigger if exists wb_milestone_stats_trg on wb_milestone;
+    drop trigger if exists wb_fuel_stats_trg on wb_fuel;
+    drop trigger if exists wb_travel_insurance_stats_trg on wb_travel_insurance;
     drop function if exists wb_welcome_stats_trigger();
     drop function if exists wb_milestone_stats_trigger();
+    drop function if exists wb_fuel_stats_trigger();
+    drop function if exists wb_travel_insurance_stats_trigger();
+    drop function if exists table_stats_trigger() cascade;
     drop function if exists refresh_wb_welcome_stats();
     drop function if exists refresh_wb_milestone_stats();
     for t in
         select table_name from information_schema.tables
         where table_schema = 'public' and table_type = 'BASE TABLE'
-          and table_name not in ('benefit_numeric_stats','wb_fuel','wb_travel_insurance')
+          and table_name not in ('benefit_numeric_stats','stats_dirty','admin_users')
     loop
         execute format('drop trigger if exists table_stats_trg on %I', t);
-        execute format('create trigger table_stats_trg after insert or update or delete on %I for each statement execute function table_stats_trigger()', t);
-        perform refresh_table_stats(t);
+        execute format('create trigger table_stats_trg after insert or update or delete on %I for each statement execute function mark_stats_dirty()', t);
     end loop;
 end $$;
 

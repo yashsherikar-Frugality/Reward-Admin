@@ -1,3 +1,7 @@
+function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 // ================================================================
 // 1. MASTER DATA – ISSUERS, PRODUCTS, NETWORKS, SUBNETWORKS
 // ================================================================
@@ -568,7 +572,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
             <div class="input-group input-group-sm">
                 <div class="form-floating">
                     <input type="text" id="product_id" class="form-control form-control-sm" readonly
-                           data-auto="${data.id ? '0' : '1'}" value="${data.id || ''}">
+                           data-auto="${data.id ? '0' : '1'}" value="${escapeHtml(data.id || '')}">
                     <label for="product_id">Card ID (auto)</label>
                 </div>
                 <button class="btn btn-outline-secondary" type="button" title="Regenerate Card ID" onclick="regenerateCardId()"><i class="fas fa-rotate"></i></button>
@@ -617,7 +621,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                     <div class="col-md-4">${createSelectField('cardStatus', 'Card Status', ['Active','Functional','Discontinued','Upcoming','ToBeDiscontinued'], data.cardStatus || '')}</div>
                     <div class="col-md-4" id="cardStatusDateWrapper" style="${(data.cardStatus === 'Upcoming' || data.cardStatus === 'ToBeDiscontinued' || data.cardStatus === 'Discontinued') ? '' : 'display:none;'}">
                         <div class="form-floating">
-                            <input type="date" id="cardStatusDate" class="form-control form-control-sm" value="${data.cardStatusDate || ''}" placeholder="Effective Date">
+                            <input type="date" id="cardStatusDate" class="form-control form-control-sm" value="${escapeHtml(data.cardStatusDate || '')}" placeholder="Effective Date">
                             <label for="cardStatusDate">Effective Date</label>
                         </div>
                     </div>
@@ -625,13 +629,13 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                 <div class="row g-2">
                     <div class="col-md-6">
                         <div class="form-floating">
-                            <input type="url" id="cardWebLink" class="form-control form-control-sm" placeholder="https://..." pattern="https?://.+" oninput="validateUrl(this)" value="${data.webLink || ''}">
+                            <input type="url" id="cardWebLink" class="form-control form-control-sm" placeholder="https://..." pattern="https?://.+" oninput="validateUrl(this)" value="${escapeHtml(data.webLink || '')}">
                             <label for="cardWebLink">Card Web Link</label>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-floating">
-                            <input type="url" id="cardAltLink" class="form-control form-control-sm" placeholder="https://..." pattern="https?://.+" oninput="validateUrl(this)" value="${data.altLink || ''}">
+                            <input type="url" id="cardAltLink" class="form-control form-control-sm" placeholder="https://..." pattern="https?://.+" oninput="validateUrl(this)" value="${escapeHtml(data.altLink || '')}">
                             <label for="cardAltLink">Application / Landing Page Link</label>
                         </div>
                     </div>
@@ -639,19 +643,19 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                 <div class="row g-2 mt-2 border-top pt-2">
                     <div class="col-md-3">
                         <div class="form-floating">
-                            <input type="text" id="card_spend_per_point" class="form-control form-control-sm" value="${data.spendPerPoint || '100'}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)" placeholder="Spend per Reward Point (₹)">
+                            <input type="text" id="card_spend_per_point" class="form-control form-control-sm" value="${escapeHtml(data.spendPerPoint || '100')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)" placeholder="Spend per Reward Point (₹)">
                             <label for="card_spend_per_point">Spend per Reward Point (₹)</label>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-floating">
-                            <input type="text" id="card_rp_conversion" class="form-control form-control-sm" value="${data.rpConversion || '0.25'}" oninput="this.value = this.value.replace(/[^0-9.]/g, '').slice(0, 6);" placeholder="RP Conversion Value (₹)">
+                            <input type="text" id="card_rp_conversion" class="form-control form-control-sm" value="${escapeHtml(data.rpConversion || '0.25')}" oninput="this.value = this.value.replace(/[^0-9.]/g, '').slice(0, 6);" placeholder="RP Conversion Value (₹)">
                             <label for="card_rp_conversion">RP Conversion Value (₹)</label>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-floating">
-                            <input type="text" id="card_apr" class="form-control form-control-sm" placeholder="e.g. 42" value="${data.apr || ''}" oninput="this.value = this.value.replace(/[^0-9.]/g, '').slice(0, 6);" title="Annual Percentage Rate charged on revolving/unpaid balance">
+                            <input type="text" id="card_apr" class="form-control form-control-sm" placeholder="e.g. 42" value="${escapeHtml(data.apr || '')}" oninput="this.value = this.value.replace(/[^0-9.]/g, '').slice(0, 6);" title="Annual Percentage Rate charged on revolving/unpaid balance">
                             <label for="card_apr">APR %</label>
                         </div>
                     </div>
@@ -672,13 +676,13 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                 <div class="row g-2 mt-2">
                     <div class="col-md-6">
                         <div class="form-floating">
-                            <input type="text" id="cobrand" class="form-control form-control-sm" placeholder="Co-brand" value="${data.cobrand || ''}">
+                            <input type="text" id="cobrand" class="form-control form-control-sm" placeholder="Co-brand" value="${escapeHtml(data.cobrand || '')}">
                             <label for="cobrand">Co-brand</label>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-floating">
-                            <input type="text" id="rewardProgram" class="form-control form-control-sm" placeholder="Reward Program" value="${data.rewardProgram || ''}">
+                            <input type="text" id="rewardProgram" class="form-control form-control-sm" placeholder="Reward Program" value="${escapeHtml(data.rewardProgram || '')}">
                             <label for="rewardProgram">Reward Program</label>
                         </div>
                     </div>
@@ -724,20 +728,20 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                                             <option value="Custom" ${data.fees && data.fees.joiningType === 'Custom' ? 'selected' : ''}>Custom</option>
                                             <option value="LTF" ${data.fees && data.fees.joiningType === 'LTF' ? 'selected' : ''}>LTF</option>
                                         </select>
-                                        <input type="text" id="fee_joining" class="form-control form-control-sm" placeholder="0" value="${data.fees ? data.fees.joining : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
+                                        <input type="text" id="fee_joining" class="form-control form-control-sm" placeholder="0" value="${escapeHtml(data.fees ? data.fees.joining : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
                                     </div>
                                     <label for="fee_joining">Joining Fee</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input type="text" id="fee_annual" class="form-control form-control-sm" placeholder="0" value="${data.fees ? data.fees.annual : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
+                                    <input type="text" id="fee_annual" class="form-control form-control-sm" placeholder="0" value="${escapeHtml(data.fees ? data.fees.annual : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
                                     <label for="fee_annual">Annual Fee</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input type="text" id="fee_renewal" class="form-control form-control-sm" placeholder="0" value="${data.fees ? data.fees.renewal : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
+                                    <input type="text" id="fee_renewal" class="form-control form-control-sm" placeholder="0" value="${escapeHtml(data.fees ? data.fees.renewal : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
                                     <label for="fee_renewal">Renewal Fee</label>
                                 </div>
                             </div>
@@ -753,7 +757,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                         <div class="row g-1">
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" id="fee_waiver_spend" class="form-control form-control-sm" placeholder="e.g. 5000" value="${data.benefits && data.benefits.feeWaiverDetails ? data.benefits.feeWaiverDetails.spend : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
+                                    <input type="text" id="fee_waiver_spend" class="form-control form-control-sm" placeholder="e.g. 5000" value="${escapeHtml(data.benefits && data.benefits.feeWaiverDetails ? data.benefits.feeWaiverDetails.spend : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
                                     <label for="fee_waiver_spend">Spend Condition (₹)</label>
                                 </div>
                             </div>
@@ -766,32 +770,32 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                         <div class="row g-1">
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="number" id="fuel_rate" class="form-control form-control-sm" placeholder="1" min="0" value="${data.benefits && data.benefits.fuelDetails ? data.benefits.fuelDetails.rate : ''}" oninput="if(parseFloat(this.value) < 0) this.value = 0;">
+                                    <input type="number" id="fuel_rate" class="form-control form-control-sm" placeholder="1" min="0" value="${escapeHtml(data.benefits && data.benefits.fuelDetails ? data.benefits.fuelDetails.rate : '')}" oninput="if(parseFloat(this.value) < 0) this.value = 0;">
                                     <label for="fuel_rate">Fuel Waiver Rate (%)</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="text" id="fuel_max_waiver" class="form-control form-control-sm" placeholder="500" value="${data.benefits && data.benefits.fuelDetails ? data.benefits.fuelDetails.maxWaiver : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 1, 6)">
+                                    <input type="text" id="fuel_max_waiver" class="form-control form-control-sm" placeholder="500" value="${escapeHtml(data.benefits && data.benefits.fuelDetails ? data.benefits.fuelDetails.maxWaiver : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 1, 6)">
                                     <label for="fuel_max_waiver">Max Waiver (₹)</label>
                                 </div>
                             </div>
                             <div class="col-md-3">${createSelectField('fuel_waiver_period', 'Fuel Waiver Period', ['Monthly','Quarterly','Half-Yearly','Yearly'], data.benefits && data.benefits.fuelDetails ? data.benefits.fuelDetails.period : '')}</div>
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <input type="text" id="fuel_min_tx" class="form-control form-control-sm" placeholder="500" value="${data.benefits && data.benefits.fuelDetails ? data.benefits.fuelDetails.minTx : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 1, 6)">
+                                    <input type="text" id="fuel_min_tx" class="form-control form-control-sm" placeholder="500" value="${escapeHtml(data.benefits && data.benefits.fuelDetails ? data.benefits.fuelDetails.minTx : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 1, 6)">
                                     <label for="fuel_min_tx">Min Tx (₹)</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="text" id="fuel_max_tx" class="form-control form-control-sm" placeholder="4000" value="${data.benefits && data.benefits.fuelDetails ? data.benefits.fuelDetails.maxTx : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 1, 6)">
+                                    <input type="text" id="fuel_max_tx" class="form-control form-control-sm" placeholder="4000" value="${escapeHtml(data.benefits && data.benefits.fuelDetails ? data.benefits.fuelDetails.maxTx : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 1, 6)">
                                     <label for="fuel_max_tx">Max Tx (₹)</label>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <input type="text" id="fuel_max_tx_count" class="form-control form-control-sm" placeholder="e.g. 5" value="${data.benefits && data.benefits.fuelDetails ? (data.benefits.fuelDetails.maxTxCount || '') : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);">
+                                    <input type="text" id="fuel_max_tx_count" class="form-control form-control-sm" placeholder="e.g. 5" value="${escapeHtml(data.benefits && data.benefits.fuelDetails ? (data.benefits.fuelDetails.maxTxCount || '') : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);">
                                     <label for="fuel_max_tx_count">Max Transaction Count</label>
                                 </div>
                             </div>
@@ -804,14 +808,14 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                         <div class="row g-1">
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <input type="text" id="welcome_value" class="form-control form-control-sm" placeholder="500" value="${data.benefits && data.benefits.welcomeDetails ? data.benefits.welcomeDetails.value : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
+                                    <input type="text" id="welcome_value" class="form-control form-control-sm" placeholder="500" value="${escapeHtml(data.benefits && data.benefits.welcomeDetails ? data.benefits.welcomeDetails.value : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
                                     <label for="welcome_value">Value</label>
                                 </div>
                             </div>
                             <div class="col-md-3">${createSelectField('welcome_benefit_type', 'Type', ['Voucher','Rs','RP','Cashback'], data.benefits && data.benefits.welcomeDetails ? data.benefits.welcomeDetails.type : '')}</div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" id="welcome_free_text" class="form-control form-control-sm" placeholder="e.g., 5000 Spend in 90 Days" value="${data.benefits && data.benefits.welcomeDetails ? data.benefits.welcomeDetails.freeText : ''}">
+                                    <input type="text" id="welcome_free_text" class="form-control form-control-sm" placeholder="e.g., 5000 Spend in 90 Days" value="${escapeHtml(data.benefits && data.benefits.welcomeDetails ? data.benefits.welcomeDetails.freeText : '')}">
                                     <label for="welcome_free_text">Free Text</label>
                                 </div>
                             </div>
@@ -840,7 +844,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                         <div class="row g-1">
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <input type="text" id="concierge_notes" class="form-control form-control-sm" placeholder="e.g. 24/7 premium concierge" value="${data.benefits && data.benefits.conciergeDetails ? data.benefits.conciergeDetails.notes : ''}">
+                                    <input type="text" id="concierge_notes" class="form-control form-control-sm" placeholder="e.g. 24/7 premium concierge" value="${escapeHtml(data.benefits && data.benefits.conciergeDetails ? data.benefits.conciergeDetails.notes : '')}">
                                     <label for="concierge_notes">Description / Notes</label>
                                 </div>
                             </div>
@@ -854,49 +858,49 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                             <div class="col-md-3">${createSelectField('dining_platform', 'Platform', ['Zomato','Swiggy','Merchant','Other'], data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.platform : '')}</div>
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <input type="text" id="dining_partner" class="form-control form-control-sm" placeholder="e.g. EazyDiner, Dineout" value="${data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.partner : ''}">
+                                    <input type="text" id="dining_partner" class="form-control form-control-sm" placeholder="e.g. EazyDiner, Dineout" value="${escapeHtml(data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.partner : '')}">
                                     <label for="dining_partner">Partner</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="text" id="dining_discount_type" class="form-control form-control-sm" placeholder="% or Flat" value="${data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.discountType : ''}">
+                                    <input type="text" id="dining_discount_type" class="form-control form-control-sm" placeholder="% or Flat" value="${escapeHtml(data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.discountType : '')}">
                                     <label for="dining_discount_type">Discount Type</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="text" id="dining_discount_value" class="form-control form-control-sm" placeholder="e.g. 20% / ₹300" value="${data.benefits && data.benefits.diningDetails ? (data.benefits.diningDetails.discountValue || '') : ''}">
+                                    <input type="text" id="dining_discount_value" class="form-control form-control-sm" placeholder="e.g. 20% / ₹300" value="${escapeHtml(data.benefits && data.benefits.diningDetails ? (data.benefits.diningDetails.discountValue || '') : '')}">
                                     <label for="dining_discount_value">Discount Type Value</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="text" id="dining_max_discount" class="form-control form-control-sm" placeholder="₹500" value="${data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.maxDiscount : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
+                                    <input type="text" id="dining_max_discount" class="form-control form-control-sm" placeholder="₹500" value="${escapeHtml(data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.maxDiscount : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
                                     <label for="dining_max_discount">Max Discount (₹)</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="text" id="dining_frequency" class="form-control form-control-sm" placeholder="Monthly" value="${data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.frequency : ''}">
+                                    <input type="text" id="dining_frequency" class="form-control form-control-sm" placeholder="Monthly" value="${escapeHtml(data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.frequency : '')}">
                                     <label for="dining_frequency">Frequency</label>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <input type="text" id="dining_min_spend" class="form-control form-control-sm" placeholder="₹1000" value="${data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.minSpend : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
+                                    <input type="text" id="dining_min_spend" class="form-control form-control-sm" placeholder="₹1000" value="${escapeHtml(data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.minSpend : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
                                     <label for="dining_min_spend">Min Spend (₹)</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" id="dining_restaurant_mapping" class="form-control form-control-sm" placeholder="Restaurant mapping (for future)" value="${data.benefits && data.benefits.diningDetails ? (data.benefits.diningDetails.restaurantMapping || '') : ''}">
+                                    <input type="text" id="dining_restaurant_mapping" class="form-control form-control-sm" placeholder="Restaurant mapping (for future)" value="${escapeHtml(data.benefits && data.benefits.diningDetails ? (data.benefits.diningDetails.restaurantMapping || '') : '')}">
                                     <label for="dining_restaurant_mapping">Restaurant Mapping (for future)</label>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <input type="text" id="dining_notes" class="form-control form-control-sm" placeholder="Additional notes" value="${data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.notes : ''}">
+                                    <input type="text" id="dining_notes" class="form-control form-control-sm" placeholder="Additional notes" value="${escapeHtml(data.benefits && data.benefits.diningDetails ? data.benefits.diningDetails.notes : '')}">
                                     <label for="dining_notes">Notes</label>
                                 </div>
                             </div>
@@ -917,7 +921,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                             <div class="col-md-4">${createSelectField('golf_period', 'Period', ['Monthly','Quarterly','Half-Yearly','Yearly'], data.benefits && data.benefits.golfDetails ? data.benefits.golfDetails.period : '')}</div>
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <input type="text" id="golf_notes" class="form-control form-control-sm" placeholder="e.g. Complimentary rounds at select courses" value="${data.benefits && data.benefits.golfDetails ? data.benefits.golfDetails.notes : ''}">
+                                    <input type="text" id="golf_notes" class="form-control form-control-sm" placeholder="e.g. Complimentary rounds at select courses" value="${escapeHtml(data.benefits && data.benefits.golfDetails ? data.benefits.golfDetails.notes : '')}">
                                     <label for="golf_notes">Description / Notes</label>
                                 </div>
                             </div>
@@ -930,43 +934,43 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                         <div class="row g-1">
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <input type="text" id="movie_partner" class="form-control form-control-sm" placeholder="e.g. BookMyShow, PVR" value="${data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.partner : ''}">
+                                    <input type="text" id="movie_partner" class="form-control form-control-sm" placeholder="e.g. BookMyShow, PVR" value="${escapeHtml(data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.partner : '')}">
                                     <label for="movie_partner">Partner</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="text" id="movie_discount_type" class="form-control form-control-sm" placeholder="BOGO, %" value="${data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.discountType : ''}">
+                                    <input type="text" id="movie_discount_type" class="form-control form-control-sm" placeholder="BOGO, %" value="${escapeHtml(data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.discountType : '')}">
                                     <label for="movie_discount_type">Discount Type</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="text" id="movie_max_discount" class="form-control form-control-sm" placeholder="₹250" value="${data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.maxDiscount : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
+                                    <input type="text" id="movie_max_discount" class="form-control form-control-sm" placeholder="₹250" value="${escapeHtml(data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.maxDiscount : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
                                     <label for="movie_max_discount">Max Discount (₹)</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="text" id="movie_frequency" class="form-control form-control-sm" placeholder="Monthly" value="${data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.frequency : ''}">
+                                    <input type="text" id="movie_frequency" class="form-control form-control-sm" placeholder="Monthly" value="${escapeHtml(data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.frequency : '')}">
                                     <label for="movie_frequency">Frequency</label>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <input type="text" id="movie_ticket_limit" class="form-control form-control-sm" placeholder="2" value="${data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.ticketLimit : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2);">
+                                    <input type="text" id="movie_ticket_limit" class="form-control form-control-sm" placeholder="2" value="${escapeHtml(data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.ticketLimit : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2);">
                                     <label for="movie_ticket_limit">Ticket Limit</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input type="text" id="movie_days" class="form-control form-control-sm" placeholder="Fri, Sat" value="${data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.days : ''}">
+                                    <input type="text" id="movie_days" class="form-control form-control-sm" placeholder="Fri, Sat" value="${escapeHtml(data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.days : '')}">
                                     <label for="movie_days">Applicable Days</label>
                                 </div>
                             </div>
                             <div class="col-md-8">
                                 <div class="form-floating">
-                                    <input type="text" id="movie_notes" class="form-control form-control-sm" placeholder="Additional notes" value="${data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.notes : ''}">
+                                    <input type="text" id="movie_notes" class="form-control form-control-sm" placeholder="Additional notes" value="${escapeHtml(data.benefits && data.benefits.movieDetails ? data.benefits.movieDetails.notes : '')}">
                                     <label for="movie_notes">Notes</label>
                                 </div>
                             </div>
@@ -979,31 +983,31 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                         <div class="row g-1">
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input type="text" id="spa_partner" class="form-control form-control-sm" placeholder="e.g. The Spa, Four Seasons" value="${data.benefits && data.benefits.spaDetails ? data.benefits.spaDetails.partner : ''}">
+                                    <input type="text" id="spa_partner" class="form-control form-control-sm" placeholder="e.g. The Spa, Four Seasons" value="${escapeHtml(data.benefits && data.benefits.spaDetails ? data.benefits.spaDetails.partner : '')}">
                                     <label for="spa_partner">Partner Spa</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="text" id="spa_discount" class="form-control form-control-sm" placeholder="20%" value="${data.benefits && data.benefits.spaDetails ? data.benefits.spaDetails.discount : ''}">
+                                    <input type="text" id="spa_discount" class="form-control form-control-sm" placeholder="20%" value="${escapeHtml(data.benefits && data.benefits.spaDetails ? data.benefits.spaDetails.discount : '')}">
                                     <label for="spa_discount">Discount (%)</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="text" id="spa_max_discount" class="form-control form-control-sm" placeholder="₹1000" value="${data.benefits && data.benefits.spaDetails ? data.benefits.spaDetails.maxDiscount : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
+                                    <input type="text" id="spa_max_discount" class="form-control form-control-sm" placeholder="₹1000" value="${escapeHtml(data.benefits && data.benefits.spaDetails ? data.benefits.spaDetails.maxDiscount : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);">
                                     <label for="spa_max_discount">Max Discount (₹)</label>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-floating">
-                                    <input type="text" id="spa_frequency" class="form-control form-control-sm" placeholder="Monthly" value="${data.benefits && data.benefits.spaDetails ? data.benefits.spaDetails.frequency : ''}">
+                                    <input type="text" id="spa_frequency" class="form-control form-control-sm" placeholder="Monthly" value="${escapeHtml(data.benefits && data.benefits.spaDetails ? data.benefits.spaDetails.frequency : '')}">
                                     <label for="spa_frequency">Frequency</label>
                                 </div>
                             </div>
                             <div class="col-md-12">
                                 <div class="form-floating">
-                                    <input type="text" id="spa_notes" class="form-control form-control-sm" placeholder="Additional notes" value="${data.benefits && data.benefits.spaDetails ? data.benefits.spaDetails.notes : ''}">
+                                    <input type="text" id="spa_notes" class="form-control form-control-sm" placeholder="Additional notes" value="${escapeHtml(data.benefits && data.benefits.spaDetails ? data.benefits.spaDetails.notes : '')}">
                                     <label for="spa_notes">Notes</label>
                                 </div>
                             </div>
@@ -1040,7 +1044,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                             </div>
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <input type="text" id="lounge_dom_criteria" class="form-control form-control-sm" placeholder="Enter amount" value="${data.benefits && data.benefits.loungeDetails ? data.benefits.loungeDetails.domestic.criteria : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
+                                    <input type="text" id="lounge_dom_criteria" class="form-control form-control-sm" placeholder="Enter amount" value="${escapeHtml(data.benefits && data.benefits.loungeDetails ? data.benefits.loungeDetails.domestic.criteria : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
                                     <label for="lounge_dom_criteria">Spend Amount (₹)</label>
                                 </div>
                             </div>
@@ -1068,7 +1072,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                             </div>
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <input type="text" id="lounge_int_criteria" class="form-control form-control-sm" placeholder="Enter amount" value="${data.benefits && data.benefits.loungeDetails ? data.benefits.loungeDetails.international.criteria : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
+                                    <input type="text" id="lounge_int_criteria" class="form-control form-control-sm" placeholder="Enter amount" value="${escapeHtml(data.benefits && data.benefits.loungeDetails ? data.benefits.loungeDetails.international.criteria : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" onblur="validateMinMax(this, 2, 6)">
                                     <label for="lounge_int_criteria">Spend Amount (₹)</label>
                                 </div>
                             </div>
@@ -1099,19 +1103,19 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                         <div class="row g-1">
                             <div class="col-md-5">
                                 <div class="form-floating">
-                                    <input type="text" id="ins_provider" class="form-control form-control-sm" placeholder="e.g. TATA AIG, ICICI Lombard" value="${data.benefits && data.benefits.insuranceDetails ? data.benefits.insuranceDetails.provider : ''}">
+                                    <input type="text" id="ins_provider" class="form-control form-control-sm" placeholder="e.g. TATA AIG, ICICI Lombard" value="${escapeHtml(data.benefits && data.benefits.insuranceDetails ? data.benefits.insuranceDetails.provider : '')}">
                                     <label for="ins_provider">Insurance Provider</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input type="text" id="ins_coverage" class="form-control form-control-sm" placeholder="e.g. 5000000" value="${data.benefits && data.benefits.insuranceDetails ? data.benefits.insuranceDetails.coverage : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9);">
+                                    <input type="text" id="ins_coverage" class="form-control form-control-sm" placeholder="e.g. 5000000" value="${escapeHtml(data.benefits && data.benefits.insuranceDetails ? data.benefits.insuranceDetails.coverage : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9);">
                                     <label for="ins_coverage">Coverage Amount (₹)</label>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-floating">
-                                    <input type="url" id="ins_policyLink" class="form-control form-control-sm" placeholder="https://..." value="${data.benefits && data.benefits.insuranceDetails ? data.benefits.insuranceDetails.policyLink : ''}">
+                                    <input type="url" id="ins_policyLink" class="form-control form-control-sm" placeholder="https://..." value="${escapeHtml(data.benefits && data.benefits.insuranceDetails ? data.benefits.insuranceDetails.policyLink : '')}">
                                     <label for="ins_policyLink">Policy Doc Link</label>
                                 </div>
                             </div>
@@ -1181,7 +1185,7 @@ function sortOptions(options) {
 }
 
 function createSelectField(id, label, options, value = '', onChange = '') {
-    let opts = sortOptions(options).map(o => `<option value="${o}" ${value === o ? 'selected' : ''}>${o}</option>`).join('');
+    let opts = sortOptions(options).map(o => `<option value="${escapeHtml(o)}" ${value === o ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('');
     let placeholderOpt = `<option value="" ${!value ? 'selected' : ''}></option>`;
     const changeAttr = onChange ? ` onchange="${onChange}"` : '';
     return `<div class="form-floating mb-1${value ? ' filled' : ''}">
@@ -1215,21 +1219,21 @@ function createMilestoneSlab(num, slabData = null) {
         </div>
         <div class="col-md-3">
             <div class="form-floating">
-                <input type="text" id="milestone_amt_${num}" class="form-control form-control-sm" placeholder="e.g. 100" value="${slabData ? slabData.amount : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 7);" onblur="validateMinMax(this, 3, 7)">
+                <input type="text" id="milestone_amt_${num}" class="form-control form-control-sm" placeholder="e.g. 100" value="${escapeHtml(slabData ? slabData.amount : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 7);" onblur="validateMinMax(this, 3, 7)">
                 <label for="milestone_amt_${num}">Amount Spent</label>
             </div>
         </div>
         <div class="col-md-3">${createSelectField(`milestone_period_${num}`, 'Duration / Period', ['Monthly','Quarterly','Half-Yearly','Yearly'], slabData ? slabData.period : '')}</div>
         <div class="col-md-2">
             <div class="form-floating">
-                <input type="text" id="milestone_benefit_val_${num}" class="form-control form-control-sm" placeholder="500" value="${slabData ? slabData.benefitValue : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 7);" onblur="validateMinMax(this, 2, 7)">
+                <input type="text" id="milestone_benefit_val_${num}" class="form-control form-control-sm" placeholder="500" value="${escapeHtml(slabData ? slabData.benefitValue : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 7);" onblur="validateMinMax(this, 2, 7)">
                 <label for="milestone_benefit_val_${num}">Value</label>
             </div>
         </div>
         <div class="col-md-2">${createSelectField(`milestone_benefit_type_${num}`, 'Type', ['Voucher','Rs','RP','Cashback'], slabData ? slabData.benefitType : '')}</div>
         <div class="col-md-2">
             <div class="form-floating">
-                <input type="text" id="milestone_benefit_comment_${num}" class="form-control form-control-sm" placeholder="Free text" value="${slabData ? slabData.benefitComment : ''}">
+                <input type="text" id="milestone_benefit_comment_${num}" class="form-control form-control-sm" placeholder="Free text" value="${escapeHtml(slabData ? slabData.benefitComment : '')}">
                 <label for="milestone_benefit_comment_${num}">Comment</label>
             </div>
         </div>
@@ -1250,7 +1254,7 @@ function createPartnerRow(num, rowData = null) {
         <div class="col-md-3">${createSelectField(`partner_ratio_${num}`, 'Conversion Ratio', ['1:1','2:1','3:1','4:1','5:1','5:2','Custom'], rowData ? rowData.ratio : '')}</div>
         <div class="col-md-3">
             <div class="form-floating">
-                <input type="text" id="partner_minTransfer_${num}" class="form-control form-control-sm" placeholder="e.g. 1000" value="${rowData ? rowData.minTransfer : ''}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 7);">
+                <input type="text" id="partner_minTransfer_${num}" class="form-control form-control-sm" placeholder="e.g. 1000" value="${escapeHtml(rowData ? rowData.minTransfer : '')}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 7);">
                 <label for="partner_minTransfer_${num}">Min Transfer (Points)</label>
             </div>
         </div>
@@ -1462,7 +1466,7 @@ function setSelectOptions(id, options, selectedValue = '') {
         inst.setChoices(choicesArr, 'value', 'label', true);
     } else {
         const el = document.getElementById(id);
-        if (el) el.innerHTML = choicesArr.map(c => `<option value="${c.value}" ${c.selected ? 'selected' : ''}>${c.label}</option>`).join('');
+        if (el) el.innerHTML = choicesArr.map(c => `<option value="${escapeHtml(c.value)}" ${c.selected ? 'selected' : ''}>${escapeHtml(c.label)}</option>`).join('');
     }
 }
 
@@ -2419,7 +2423,7 @@ function collectWizardBenefitSpec() {
 function populateDropdown(id, options) {
     const el = document.getElementById(id);
     if(!el) return;
-    el.innerHTML = '<option value=""></option>' + sortOptions(options).map(o => `<option value="${o}">${o}</option>`).join('');
+    el.innerHTML = '<option value=""></option>' + sortOptions(options).map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
 }
 
 function attachAllListeners() {
@@ -2475,7 +2479,7 @@ function openOfferTypeModal() {
         <div class="mb-2">
             <div class="fw-bold text-secondary text-uppercase mb-1" style="font-size:0.62rem; letter-spacing:0.5px;">${title}</div>
             ${types.map(t => createCheckbox('otm_' + t.replace(/\W+/g, '_'), t, false)
-                .replace('type="checkbox"', `type="radio" name="offerRewardType" value="${t}"`)).join('')}
+                .replace('type="checkbox"', `type="radio" name="offerRewardType" value="${escapeHtml(t)}"`)).join('')}
         </div>`).join('');
     el.innerHTML = `
         <div class="custom-modal-box">
@@ -2546,7 +2550,7 @@ function addOfferRow(data = null) {
             </div>
             <div class="col-md-6">
                 <div class="form-floating">
-                    <input type="text" id="offer_${index}_mcc" class="form-control form-control-sm" placeholder="e.g. 5411, 5812" value="${data ? (data.mcc || '') : ''}" onblur="validateMcc(this)">
+                    <input type="text" id="offer_${index}_mcc" class="form-control form-control-sm" placeholder="e.g. 5411, 5812" value="${escapeHtml(data ? (data.mcc || '') : '')}" onblur="validateMcc(this)">
                     <label for="offer_${index}_mcc">MCC Code(s) — optional</label>
                 </div>
             </div>
@@ -2565,17 +2569,17 @@ function addOfferRow(data = null) {
         <div class="offer-sec-h">Limits &amp; timing</div>
         <div class="row g-2">
             <div class="col-md-3"><div class="form-floating">
-                <input type="text" id="offer_${index}_minTx" class="form-control form-control-sm" placeholder="0" value="${data ? data.minTx : ''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,7);">
+                <input type="text" id="offer_${index}_minTx" class="form-control form-control-sm" placeholder="0" value="${escapeHtml(data ? data.minTx : '')}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,7);">
                 <label for="offer_${index}_minTx">Min Transaction (₹)</label></div></div>
             <div class="col-md-3"><div class="form-floating">
-                <input type="text" id="offer_${index}_maxTx" class="form-control form-control-sm" placeholder="999999" value="${data ? data.maxTx : ''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,7);">
+                <input type="text" id="offer_${index}_maxTx" class="form-control form-control-sm" placeholder="999999" value="${escapeHtml(data ? data.maxTx : '')}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,7);">
                 <label for="offer_${index}_maxTx">Max Transaction (₹)</label></div></div>
             <div class="col-md-3" id="offer_${index}_maxBenefitWrap"><div class="form-floating">
-                <input type="text" id="offer_${index}_maxBenefit" class="form-control form-control-sm" placeholder="1000" value="${data ? data.maxBenefit : ''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,7);">
+                <input type="text" id="offer_${index}_maxBenefit" class="form-control form-control-sm" placeholder="1000" value="${escapeHtml(data ? data.maxBenefit : '')}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,7);">
                 <label for="offer_${index}_maxBenefit">Max Benefit (₹)</label></div></div>
             <div class="col-md-3" id="offer_${index}_rpExpiryWrap">${createSelectField(`global_rp_expiry_${index}`, 'RP Expiry', ['No Expiry','12 Months','24 Months','36 Months','Custom'], data ? data.rpExpiry : '')}</div>
             <div class="col-md-3" id="offer_${index}_rewardCapWrap" style="display:none;"><div class="form-floating">
-                <input type="text" id="offer_${index}_rewardCap" class="form-control form-control-sm" placeholder="e.g. 5000" value="${data ? (data.rewardCap || '') : ''}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,9);">
+                <input type="text" id="offer_${index}_rewardCap" class="form-control form-control-sm" placeholder="e.g. 5000" value="${escapeHtml(data ? (data.rewardCap || '') : '')}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,9);">
                 <label for="offer_${index}_rewardCap">Reward Cap (points / units)</label></div></div>
             <div class="col-md-2">${createSelectField(`offer_${index}_frequency`, 'Frequency', ['One Time','Monthly','Quarterly','Yearly'], data ? data.frequency : '')}</div>
             <div class="col-md-2">${createSelectField(`offer_${index}_instance_period`, 'Instance Period', ['Per Transaction','Daily','Weekly','Monthly','Quarterly','Half-Yearly','Yearly'], data ? data.instancePeriod : '')}</div>
@@ -2589,21 +2593,21 @@ function addOfferRow(data = null) {
         <div class="offer-sec-h">Validity &amp; link</div>
         <div class="row g-2">
             <div class="col-md-3"><div class="form-floating">
-                <input type="date" id="offer_${index}_startDate" class="form-control form-control-sm" value="${data ? data.startDate : ''}" placeholder="Start Date">
+                <input type="date" id="offer_${index}_startDate" class="form-control form-control-sm" value="${escapeHtml(data ? data.startDate : '')}" placeholder="Start Date">
                 <label for="offer_${index}_startDate">Start Date</label></div></div>
             <div class="col-md-3"><div class="form-floating">
-                <input type="date" id="offer_${index}_endDate" class="form-control form-control-sm" value="${data ? data.endDate : ''}" placeholder="End Date">
+                <input type="date" id="offer_${index}_endDate" class="form-control form-control-sm" value="${escapeHtml(data ? data.endDate : '')}" placeholder="End Date">
                 <label for="offer_${index}_endDate">End Date</label></div></div>
             <div class="col-md-3"><div class="form-floating">
-                <input type="url" id="offer_${index}_weblink" class="form-control form-control-sm" placeholder="https://..." value="${data ? data.weblink : ''}">
+                <input type="url" id="offer_${index}_weblink" class="form-control form-control-sm" placeholder="https://..." value="${escapeHtml(data ? data.weblink : '')}">
                 <label for="offer_${index}_weblink">Web Link</label></div></div>
             <div class="col-md-3"><div class="form-floating">
-                <input type="text" id="offer_${index}_couponCode" class="form-control form-control-sm" placeholder="e.g. SUMMER20" value="${data ? data.couponCode || '' : ''}">
+                <input type="text" id="offer_${index}_couponCode" class="form-control form-control-sm" placeholder="e.g. SUMMER20" value="${escapeHtml(data ? data.couponCode || '' : '')}">
                 <label for="offer_${index}_couponCode">Coupon Code</label></div></div>
             <div class="col-md-3">${createSelectField(`offer_${index}_platform`, 'Platform', ['Zomato Gold','Smart Buy','Other'], data ? data.platform : '', `toggleCustomPlatform(${index})`)}</div>
             <div class="col-md-3" id="offer_${index}_customPlatformRow" style="${data && data.platform === 'Other' ? '' : 'display:none;'}">
                 <div class="form-floating">
-                    <input type="text" id="offer_${index}_customPlatform" class="form-control form-control-sm" placeholder="Enter platform name" value="${data && data.platform === 'Other' ? (data.customPlatform || '') : ''}">
+                    <input type="text" id="offer_${index}_customPlatform" class="form-control form-control-sm" placeholder="Enter platform name" value="${escapeHtml(data && data.platform === 'Other' ? (data.customPlatform || '') : '')}">
                     <label for="offer_${index}_customPlatform">Custom Platform</label>
                 </div>
             </div>
@@ -2779,7 +2783,7 @@ function updateScopeValue(index, selectedValues = []) {
         inst.clearStore();
         inst.setChoices(choicesArr, 'value', 'label', true);
     } else if (valSelect) {
-        valSelect.innerHTML = options.map(o => `<option value="${o}" ${selectedValues.includes(o) ? 'selected' : ''}>${o}</option>`).join('');
+        valSelect.innerHTML = options.map(o => `<option value="${escapeHtml(o)}" ${selectedValues.includes(o) ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('');
     }
     const subSel = document.getElementById(`offer_${index}_subCategory`);
     if (scope === 'Merchant') {
@@ -2846,12 +2850,12 @@ function buildMerchantOptionsHtml(category, subVal) {
     const hierarchy = CATEGORY_HIERARCHY[category];
     if (!hierarchy) return html;
     if (subVal && subVal !== 'ALL' && hierarchy.merchants[subVal]) {
-        html += sortOptions(hierarchy.merchants[subVal]).map(m => `<option value="${m}">${m}</option>`).join('');
+        html += sortOptions(hierarchy.merchants[subVal]).map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
     } else {
         sortOptions(Object.keys(hierarchy.merchants)).forEach(sub => {
             const merchants = hierarchy.merchants[sub] || [];
             if (!merchants.length) return;
-            html += `<optgroup label="${sub}">` + sortOptions(merchants).map(m => `<option value="${m}">${m}</option>`).join('') + `</optgroup>`;
+            html += `<optgroup label="${escapeHtml(sub)}">` + sortOptions(merchants).map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('') + `</optgroup>`;
         });
     }
     return html;
@@ -2862,7 +2866,7 @@ function onOfferCategoryChange(index, setValue = null, selectedMerchants = []) {
     const subSel = document.getElementById(`offer_${index}_subCategory`);
     if (category && CATEGORY_HIERARCHY[category]) {
         const subCategories = CATEGORY_HIERARCHY[category].subCategories || [];
-        subSel.innerHTML = '<option value=""></option><option value="ALL">All</option>' + sortOptions(subCategories).map(o => `<option value="${o}">${o}</option>`).join('');
+        subSel.innerHTML = '<option value=""></option><option value="ALL">All</option>' + sortOptions(subCategories).map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
         if (setValue) subSel.value = setValue;
         subSel.onchange = function() {
             setMerchantOptions(index, category, this.value);
@@ -3124,15 +3128,15 @@ function generateOfferSummary(o) {
     const platformText = o.platform === 'Other' ? (o.customPlatform || 'Other') : o.platform;
     return `
         <div class="p-2 small">
-            <p class="mb-1"><strong>Earn:</strong> ${o.rewardType || '—'} ${rewardFieldsText ? `(${rewardFieldsText})` : ''}</p>
-            <p class="mb-1"><strong>On:</strong> ${o.category || '—'} ${o.subCategory && o.subCategory !== 'ALL' ? '› ' + o.subCategory : ''} — Merchant(s): ${merchantText}</p>
-            <p class="mb-1"><strong>MCC:</strong> ${o.mcc || 'Not specified'}</p>
-            <p class="mb-1"><strong>Transaction Range:</strong> ₹${o.minTx || 0} – ₹${o.maxTx || 'No Limit'} &nbsp; | &nbsp; <strong>Max Benefit:</strong> ₹${o.maxBenefit || 0}${o.rewardCap ? ` &nbsp; | &nbsp; <strong>Reward Cap:</strong> ${o.rewardCap} pts/units` : ''}</p>
-            <p class="mb-1"><strong>Frequency:</strong> ${o.frequency || '—'} &nbsp; | &nbsp; <strong>Instance Period:</strong> ${o.instancePeriod || '—'} &nbsp; | &nbsp; <strong>Applicable Days:</strong> ${o.days || 'All Days'}</p>
-            <p class="mb-1"><strong>Applicable To:</strong> ${o.person || '—'} &nbsp; | &nbsp; <strong>RP Expiry:</strong> ${o.rpExpiry || 'No Expiry'} &nbsp; | &nbsp; <strong>Status:</strong> ${o.status || '—'}</p>
-            <p class="mb-1"><strong>Validity:</strong> ${o.startDate || 'N/A'} → ${o.endDate || 'N/A'}</p>
-            <p class="mb-1"><strong>Coupon Code:</strong> ${o.couponCode || '—'} &nbsp; | &nbsp; <strong>Platform:</strong> ${platformText || '—'}</p>
-            <p class="mb-0"><strong>Rule Applied By:</strong> ${o.paymentScopeType || '—'} ${(() => { const v = Array.isArray(o.paymentScopeValue) ? o.paymentScopeValue : (o.paymentScopeValue ? [o.paymentScopeValue] : []); return v.length ? '(' + v.join(', ') + ')' : ''; })()}</p>
+            <p class="mb-1"><strong>Earn:</strong> ${escapeHtml(o.rewardType || '—')} ${rewardFieldsText ? `(${escapeHtml(rewardFieldsText)})` : ''}</p>
+            <p class="mb-1"><strong>On:</strong> ${escapeHtml(o.category || '—')} ${o.subCategory && o.subCategory !== 'ALL' ? '› ' + escapeHtml(o.subCategory) : ''} — Merchant(s): ${escapeHtml(merchantText)}</p>
+            <p class="mb-1"><strong>MCC:</strong> ${escapeHtml(o.mcc || 'Not specified')}</p>
+            <p class="mb-1"><strong>Transaction Range:</strong> ₹${escapeHtml(o.minTx || 0)} – ₹${escapeHtml(o.maxTx || 'No Limit')} &nbsp; | &nbsp; <strong>Max Benefit:</strong> ₹${escapeHtml(o.maxBenefit || 0)}${o.rewardCap ? ` &nbsp; | &nbsp; <strong>Reward Cap:</strong> ${escapeHtml(o.rewardCap)} pts/units` : ''}</p>
+            <p class="mb-1"><strong>Frequency:</strong> ${escapeHtml(o.frequency || '—')} &nbsp; | &nbsp; <strong>Instance Period:</strong> ${escapeHtml(o.instancePeriod || '—')} &nbsp; | &nbsp; <strong>Applicable Days:</strong> ${escapeHtml(o.days || 'All Days')}</p>
+            <p class="mb-1"><strong>Applicable To:</strong> ${escapeHtml(o.person || '—')} &nbsp; | &nbsp; <strong>RP Expiry:</strong> ${escapeHtml(o.rpExpiry || 'No Expiry')} &nbsp; | &nbsp; <strong>Status:</strong> ${escapeHtml(o.status || '—')}</p>
+            <p class="mb-1"><strong>Validity:</strong> ${escapeHtml(o.startDate || 'N/A')} → ${escapeHtml(o.endDate || 'N/A')}</p>
+            <p class="mb-1"><strong>Coupon Code:</strong> ${escapeHtml(o.couponCode || '—')} &nbsp; | &nbsp; <strong>Platform:</strong> ${escapeHtml(platformText || '—')}</p>
+            <p class="mb-0"><strong>Rule Applied By:</strong> ${escapeHtml(o.paymentScopeType || '—')} ${(() => { const v = Array.isArray(o.paymentScopeValue) ? o.paymentScopeValue : (o.paymentScopeValue ? [o.paymentScopeValue] : []); return v.length ? '(' + escapeHtml(v.join(', ')) + ')' : ''; })()}</p>
         </div>`;
 }
 
@@ -3152,16 +3156,17 @@ function renderOfferTable() {
         tbody.innerHTML = offers.map((o, idx) => {
             const merchants = Array.isArray(o.merchant) ? o.merchant : (o.merchant ? [o.merchant] : []);
             const merchantBadge = merchants.length ? (merchants.includes('ALL') ? 'All' : (merchants.length > 2 ? `${merchants.slice(0,2).join(', ')} +${merchants.length - 2}` : merchants.join(', '))) : '-';
+            const safeLink = /^https?:\/\//i.test(String(o.weblink || '').trim()) ? escapeHtml(o.weblink) : '';
             const platformText = o.platform === 'Other' ? (o.customPlatform || 'Other') : o.platform;
             return `
             <tr>
                 <td>${idx + 1}</td>
-                <td><span class="badge bg-primary-subtle text-primary">${o.category}</span> / ${o.subCategory}<br><small class="text-muted">${merchantBadge}${o.mcc ? ' · MCC: ' + o.mcc : ''}</small></td>
-                <td><span class="badge bg-success-subtle text-success">${o.rewardType}</span></td>
-                <td>₹${o.minTx || 0} - ₹${o.maxTx || 999999}</td>
-                <td><strong>₹${o.maxBenefit || 0}</strong></td>
-                <td>${o.startDate || 'N/A'} → ${o.endDate || 'N/A'}</td>
-                <td><a href="${o.weblink}" target="_blank" class="text-primary small">${o.weblink ? 'Link' : '-'}</a></td>
+                <td><span class="badge bg-primary-subtle text-primary">${escapeHtml(o.category)}</span> / ${escapeHtml(o.subCategory)}<br><small class="text-muted">${escapeHtml(merchantBadge)}${o.mcc ? ' · MCC: ' + escapeHtml(o.mcc) : ''}</small></td>
+                <td><span class="badge bg-success-subtle text-success">${escapeHtml(o.rewardType)}</span></td>
+                <td>₹${escapeHtml(o.minTx || 0)} - ₹${escapeHtml(o.maxTx || 999999)}</td>
+                <td><strong>₹${escapeHtml(o.maxBenefit || 0)}</strong></td>
+                <td>${escapeHtml(o.startDate || 'N/A')} → ${escapeHtml(o.endDate || 'N/A')}</td>
+                <td><a href="${safeLink}" target="_blank" rel="noopener noreferrer" class="text-primary small">${safeLink ? 'Link' : '-'}</a></td>
                 <td>
                     <button class="btn btn-outline-secondary btn-sm" title="Review" onclick="toggleOfferReview(${idx})"><i class="fas fa-eye"></i></button>
                     <button class="btn btn-outline-info btn-sm" onclick="editOffer(${idx})"><i class="fas fa-edit"></i></button>
@@ -3470,13 +3475,13 @@ function diffSummaryHtml(list, statusVarName, colVarName, columns, renderFn, cle
             <option value="all">All</option><option value="new">New</option><option value="updated">Updated</option><option value="unchanged">Unchanged</option>${invOption}
         </select>
         <select class="form-select form-select-sm" style="width:auto;" onchange="${colVarName}=this.value; ${renderFn};">
-            <option value="all">All Columns</option>${columns.map(c => `<option value="${c}">${c}</option>`).join('')}
+            <option value="all">All Columns</option>${columns.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}
         </select>
         <button class="btn btn-sm btn-outline-danger" onclick="${clearFn}">Clear Comparison</button>
     </div>`;
 }
 function diffRowsHtml(list, columns, hasStatus, validateFn, groupFn, fixFn) {
-    const fmt = (v) => { let d = (v === undefined || v === null) ? '' : v; if (typeof d === 'string' && d.length > 50) d = d.substring(0, 50) + '...'; return d; };
+    const fmt = (v) => { let d = (v === undefined || v === null) ? '' : v; if (typeof d === 'string' && d.length > 50) d = d.substring(0, 50) + '...'; return escapeHtml(d); };
     const edgeCls = (i) => {
         if (!groupFn) return '';
         const g = groupFn(columns[i]);
@@ -3497,7 +3502,7 @@ function diffRowsHtml(list, columns, hasStatus, validateFn, groupFn, fixFn) {
             const cellCls = bad ? 'cell-invalid' : '';
             const canFix = bad && fixFn && fixFn(col);       // fixFn(col) -> true if a dropdown exists
             const attrs = canFix
-                ? ` data-fixidx="${listIdx}" data-fixcol="${col}" onclick="openDiffCellDropdown(this)"`
+                ? ` data-fixidx="${listIdx}" data-fixcol="${escapeHtml(col)}" onclick="openDiffCellDropdown(this)"`
                 : '';
             html += `<td class="${edgeCls(i)} ${cellCls} ${canFix ? 'clickable-fix' : ''}"${attrs} style="font-size:0.75rem;" title="${bad ? (canFix ? 'Invalid — click to pick a valid value' : 'Invalid value') : ''}">${fmt(genericVal(row, col))}</td>`;
         });
@@ -3682,7 +3687,7 @@ function renderOfferImportTable(data) {
         const prevGroup = i > 0 ? getOfferColumnGroup(columns[i - 1]) : null;
         const nextGroup = i < columns.length - 1 ? getOfferColumnGroup(columns[i + 1]) : null;
         const edge = (groupClass !== prevGroup ? 'grp-start ' : '') + (groupClass !== nextGroup ? 'grp-end' : '');
-        theadHtml += `<th class="text-nowrap ${groupClass} ${edge} ${isHidden ? 'col-group-hidden' : ''}" style="font-size:0.75rem; font-weight:600; color:#475569; border-top:2px solid black;" title="${offerColumnTitle(col)}">${col}</th>`;
+        theadHtml += `<th class="text-nowrap ${groupClass} ${edge} ${isHidden ? 'col-group-hidden' : ''}" style="font-size:0.75rem; font-weight:600; color:#475569; border-top:2px solid black;" title="${escapeHtml(offerColumnTitle(col))}">${escapeHtml(col)}</th>`;
     });
     theadHtml += '</tr>';
     thead.innerHTML = theadHtml;
@@ -3723,10 +3728,10 @@ function openDiffCellDropdown(td) {
     if (!row || !opts || !opts.length) return;
     const cur = String(genericVal(row, col) || '');
     td.innerHTML = `<select class="form-select form-select-sm" style="font-size:0.72rem;"
-        onclick="event.stopPropagation()" onchange="applyDiffCellFix(this, ${i}, '${col}')"
+        onclick="event.stopPropagation()" onchange="applyDiffCellFix(this, ${i}, this.closest('td').dataset.fixcol)"
         onblur="rerenderDiffTable()">
         <option value="">-- Select --</option>
-        ${sortOptions(opts).map(o => `<option value="${o}" ${o === cur ? 'selected' : ''}>${o}</option>`).join('')}
+        ${sortOptions(opts).map(o => `<option value="${escapeHtml(o)}" ${o === cur ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('')}
     </select>`;
     td.querySelector('select').focus();
 }
@@ -3809,12 +3814,12 @@ function renderOfferMappingPanel() {
         const base = catalogue.filter(c => !c.rewardType);
         let html = `<option value="">— Ignore this column —</option>`;
         html += `<optgroup label="Offer Fields">` +
-            base.map(c => `<option value="${c.key}" ${selectedKey === c.key ? 'selected' : ''}>${c.label} (${c.key})</option>`).join('') +
+            base.map(c => `<option value="${escapeHtml(c.key)}" ${selectedKey === c.key ? 'selected' : ''}>${escapeHtml(c.label)} (${escapeHtml(c.key)})</option>`).join('') +
             `</optgroup>`;
         Object.keys(REWARD_TYPE_FIELDS).forEach(rt => {
             const group = catalogue.filter(c => c.rewardType === rt);
             html += `<optgroup label="${rt}">` +
-                group.map(c => `<option value="${c.key}" ${selectedKey === c.key ? 'selected' : ''}>${c.label} (${c.key})</option>`).join('') +
+                group.map(c => `<option value="${escapeHtml(c.key)}" ${selectedKey === c.key ? 'selected' : ''}>${escapeHtml(c.label)} (${escapeHtml(c.key)})</option>`).join('') +
                 `</optgroup>`;
         });
         return html;
@@ -3843,10 +3848,10 @@ function renderOfferMappingPanel() {
         const entry = catalogue.find(c => c.key === target);
         const owner = entry && entry.rewardType ? `<div class="text-muted" style="font-size:0.68rem;">applies to ${entry.rewardType}</div>` : '';
         return `<tr class="${isDupe ? 'table-danger' : (target ? '' : 'table-warning')}">
-            <td class="fw-semibold" style="font-size:0.78rem;">${h}</td>
-            <td class="text-muted" style="font-size:0.72rem;">${sampleFor(h)}</td>
+            <td class="fw-semibold" style="font-size:0.78rem;">${escapeHtml(h)}</td>
+            <td class="text-muted" style="font-size:0.72rem;">${escapeHtml(sampleFor(h))}</td>
             <td>
-                <select class="form-select form-select-sm offer-map-select" data-header="${String(h).replace(/"/g, '&quot;')}" onchange="updateOfferColumnMapping(this)" style="font-size:0.75rem;">
+                <select class="form-select form-select-sm offer-map-select" data-header="${escapeHtml(h)}" onchange="updateOfferColumnMapping(this)" style="font-size:0.75rem;">
                     ${optionsHtml(target)}
                 </select>
                 ${owner}
@@ -3871,7 +3876,7 @@ function renderOfferMappingPanel() {
         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
             <div>
                 <h6 class="fw-bold mb-0"><i class="fas fa-diagram-project text-primary me-2"></i>Map Excel Columns to Fields</h6>
-                <small class="text-muted">${fileName} · ${rows.length} row(s) · ${headers.length} column(s)</small>
+                <small class="text-muted">${escapeHtml(fileName)} · ${rows.length} row(s) · ${headers.length} column(s)</small>
             </div>
             <div class="d-flex gap-2 align-items-center">
                 <span class="badge bg-success-subtle text-success">${counts.mapped} mapped</span>
@@ -4436,7 +4441,7 @@ function renderBenefitImportTablesStandalone(data) {
         const v = String(val).toUpperCase();
         return (v === 'TRUE' || v === 'YES' || v === '1') ? 'Yes' : 'No';
     };
-    const cid = (row) => row.cardId || row.id || '';
+    const cid = (row) => escapeHtml(row.cardId || row.id || '');
     const statusBadge = (row) => row._status ? ` <span class="badge bg-${row._status==='new'?'success':row._status==='updated'?'warning text-dark':'secondary'} ms-1" style="font-size:0.6rem;">${row._status}</span>` : '';
     const BENEFIT_VALID_OPTIONS = {
         golf_courses: ['DLF Golf','Prestige Golfshire','KGA','Oxford Golf','Jaypee Greens','All Partner Courses'],
@@ -4459,7 +4464,7 @@ function renderBenefitImportTablesStandalone(data) {
             if (oldStr === '' && newStr !== '') cls = 'diff-added';
             else if (oldStr !== '' && newStr === '') cls = 'diff-removed';
             else if (oldStr !== newStr) cls = 'diff-changed';
-            cells += `<td class="${cls}">${oldStr === '' ? '<span class=\"text-muted\">—</span>' : oldVal}</td>`;
+            cells += `<td class="${cls}">${oldStr === '' ? '<span class=\"text-muted\">—</span>' : escapeHtml(oldVal)}</td>`;
         });
         return `<tr class="diff-old-row">${cells}</tr>`;
     };
@@ -4476,15 +4481,15 @@ function renderBenefitImportTablesStandalone(data) {
                     ${loungeRows.map(main => `
                     <tr class="${rowHasInvalid(main, ['lounge_program','lounge_dom_period','lounge_int_period']) ? 'row-invalid' : ''}">
                         <td>${cid(main)}${statusBadge(main)}</td>
-                        <td class="${cellCls(main.lounge_program,'lounge_program')}">${main.lounge_program || ''}</td>
-                        <td>${main.lounge_dom_visits || ''}</td>
-                        <td class="${cellCls(main.lounge_dom_period,'lounge_dom_period')}">${main.lounge_dom_period || ''}</td>
-                        <td>${main.lounge_dom_frequency || ''}</td>
-                        <td>${main.lounge_dom_criteria || ''}</td>
-                        <td>${main.lounge_int_visits || ''}</td>
-                        <td class="${cellCls(main.lounge_int_period,'lounge_int_period')}">${main.lounge_int_period || ''}</td>
-                        <td>${main.lounge_int_frequency || ''}</td>
-                        <td>${main.lounge_int_criteria || ''}</td>
+                        <td class="${cellCls(main.lounge_program,'lounge_program')}">${escapeHtml(main.lounge_program)}</td>
+                        <td>${escapeHtml(main.lounge_dom_visits)}</td>
+                        <td class="${cellCls(main.lounge_dom_period,'lounge_dom_period')}">${escapeHtml(main.lounge_dom_period)}</td>
+                        <td>${escapeHtml(main.lounge_dom_frequency)}</td>
+                        <td>${escapeHtml(main.lounge_dom_criteria)}</td>
+                        <td>${escapeHtml(main.lounge_int_visits)}</td>
+                        <td class="${cellCls(main.lounge_int_period,'lounge_int_period')}">${escapeHtml(main.lounge_int_period)}</td>
+                        <td>${escapeHtml(main.lounge_int_frequency)}</td>
+                        <td>${escapeHtml(main.lounge_int_criteria)}</td>
                     </tr>` + oldRow(main, ['lounge_program','lounge_dom_visits','lounge_dom_period','lounge_dom_frequency','lounge_dom_criteria','lounge_int_visits','lounge_int_period','lounge_int_frequency','lounge_int_criteria'])).join('')}
                 </tbody>
             </table>
@@ -4503,9 +4508,9 @@ function renderBenefitImportTablesStandalone(data) {
                     ${insuranceRows.map(main => `
                     <tr>
                         <td>${cid(main)}${statusBadge(main)}</td>
-                        <td>${main.ins_provider || ''}</td>
-                        <td>${main.ins_coverage || ''}</td>
-                        <td>${main.ins_policyLink || ''}</td>
+                        <td>${escapeHtml(main.ins_provider)}</td>
+                        <td>${escapeHtml(main.ins_coverage)}</td>
+                        <td>${escapeHtml(main.ins_policyLink)}</td>
                     </tr>` + oldRow(main, ['ins_provider','ins_coverage','ins_policyLink'])).join('')}
                 </tbody>
             </table>
@@ -4524,10 +4529,10 @@ function renderBenefitImportTablesStandalone(data) {
                     ${golfRows.map(main => `
                     <tr class="${rowHasInvalid(main, ['golf_courses','golf_period']) ? 'row-invalid' : ''}">
                         <td>${cid(main)}${statusBadge(main)}</td>
-                        <td class="${cellCls(main.golf_courses,'golf_courses')}">${main.golf_courses || ''}</td>
-                        <td>${main.golf_rounds || ''}</td>
-                        <td class="${cellCls(main.golf_period,'golf_period')}">${main.golf_period || ''}</td>
-                        <td>${main.golf_notes || ''}</td>
+                        <td class="${cellCls(main.golf_courses,'golf_courses')}">${escapeHtml(main.golf_courses)}</td>
+                        <td>${escapeHtml(main.golf_rounds)}</td>
+                        <td class="${cellCls(main.golf_period,'golf_period')}">${escapeHtml(main.golf_period)}</td>
+                        <td>${escapeHtml(main.golf_notes)}</td>
                     </tr>` + oldRow(main, ['golf_courses','golf_rounds','golf_period','golf_notes'])).join('')}
                 </tbody>
             </table>
@@ -4546,12 +4551,12 @@ function renderBenefitImportTablesStandalone(data) {
                     ${diningRows.map(main => `
                     <tr>
                         <td>${cid(main)}${statusBadge(main)}</td>
-                        <td>${main.dining_partner || ''}</td>
-                        <td>${main.dining_discount_type || ''}</td>
-                        <td>${main.dining_max_discount || ''}</td>
-                        <td>${main.dining_frequency || ''}</td>
-                        <td>${main.dining_min_spend || ''}</td>
-                        <td>${main.dining_notes || ''}</td>
+                        <td>${escapeHtml(main.dining_partner)}</td>
+                        <td>${escapeHtml(main.dining_discount_type)}</td>
+                        <td>${escapeHtml(main.dining_max_discount)}</td>
+                        <td>${escapeHtml(main.dining_frequency)}</td>
+                        <td>${escapeHtml(main.dining_min_spend)}</td>
+                        <td>${escapeHtml(main.dining_notes)}</td>
                     </tr>` + oldRow(main, ['dining_partner','dining_discount_type','dining_max_discount','dining_frequency','dining_min_spend','dining_notes'])).join('')}
                 </tbody>
             </table>
@@ -4570,13 +4575,13 @@ function renderBenefitImportTablesStandalone(data) {
                     ${movieRows.map(main => `
                     <tr>
                         <td>${cid(main)}${statusBadge(main)}</td>
-                        <td>${main.movie_partner || ''}</td>
-                        <td>${main.movie_discount_type || ''}</td>
-                        <td>${main.movie_max_discount || ''}</td>
-                        <td>${main.movie_frequency || ''}</td>
-                        <td>${main.movie_ticket_limit || ''}</td>
-                        <td>${main.movie_days || ''}</td>
-                        <td>${main.movie_notes || ''}</td>
+                        <td>${escapeHtml(main.movie_partner)}</td>
+                        <td>${escapeHtml(main.movie_discount_type)}</td>
+                        <td>${escapeHtml(main.movie_max_discount)}</td>
+                        <td>${escapeHtml(main.movie_frequency)}</td>
+                        <td>${escapeHtml(main.movie_ticket_limit)}</td>
+                        <td>${escapeHtml(main.movie_days)}</td>
+                        <td>${escapeHtml(main.movie_notes)}</td>
                     </tr>` + oldRow(main, ['movie_partner','movie_discount_type','movie_max_discount','movie_frequency','movie_ticket_limit','movie_days','movie_notes'])).join('')}
                 </tbody>
             </table>
@@ -4595,11 +4600,11 @@ function renderBenefitImportTablesStandalone(data) {
                     ${spaRows.map(main => `
                     <tr>
                         <td>${cid(main)}${statusBadge(main)}</td>
-                        <td>${main.spa_partner || ''}</td>
-                        <td>${main.spa_discount || ''}</td>
-                        <td>${main.spa_max_discount || ''}</td>
-                        <td>${main.spa_frequency || ''}</td>
-                        <td>${main.spa_notes || ''}</td>
+                        <td>${escapeHtml(main.spa_partner)}</td>
+                        <td>${escapeHtml(main.spa_discount)}</td>
+                        <td>${escapeHtml(main.spa_max_discount)}</td>
+                        <td>${escapeHtml(main.spa_frequency)}</td>
+                        <td>${escapeHtml(main.spa_notes)}</td>
                     </tr>` + oldRow(main, ['spa_partner','spa_discount','spa_max_discount','spa_frequency','spa_notes'])).join('')}
                 </tbody>
             </table>
@@ -4615,13 +4620,13 @@ function renderBenefitImportTablesStandalone(data) {
             <tbody>
                 ${slabs.length ? slabs.map((s, idx) => `
                     <tr>
-                        <td>${s.cardId || s.id || ''}</td>
-                        <td>${s.slab_no || idx+1}</td>
-                        <td>${s.milestone_amount || ''}</td>
-                        <td>${s.milestone_period || ''}</td>
-                        <td>${s.milestone_benefit_value || ''}</td>
-                        <td>${s.milestone_benefit_type || ''}</td>
-                        <td>${s.milestone_benefit_comment || ''}</td>
+                        <td>${escapeHtml(s.cardId || s.id)}</td>
+                        <td>${escapeHtml(s.slab_no || idx+1)}</td>
+                        <td>${escapeHtml(s.milestone_amount)}</td>
+                        <td>${escapeHtml(s.milestone_period)}</td>
+                        <td>${escapeHtml(s.milestone_benefit_value)}</td>
+                        <td>${escapeHtml(s.milestone_benefit_type)}</td>
+                        <td>${escapeHtml(s.milestone_benefit_comment)}</td>
                     </tr>
                 `).join('') : `<tr><td colspan="7" class="text-muted text-center">No slabs defined</td></tr>`}
             </tbody>
@@ -4637,12 +4642,12 @@ function renderBenefitImportTablesStandalone(data) {
             <tbody>
                 ${partners.length ? partners.map((p, idx) => `
                     <tr>
-                        <td>${p.cardId || p.id || ''}</td>
-                        <td>${p.partner_no || idx+1}</td>
-                        <td>${p.partner_program || ''}</td>
-                        <td>${p.partner_ratio || ''}</td>
-                        <td>${p.partner_minTransfer || ''}</td>
-                        <td>${p.partner_transferTime || ''}</td>
+                        <td>${escapeHtml(p.cardId || p.id)}</td>
+                        <td>${escapeHtml(p.partner_no || idx+1)}</td>
+                        <td>${escapeHtml(p.partner_program)}</td>
+                        <td>${escapeHtml(p.partner_ratio)}</td>
+                        <td>${escapeHtml(p.partner_minTransfer)}</td>
+                        <td>${escapeHtml(p.partner_transferTime)}</td>
                     </tr>
                 `).join('') : `<tr><td colspan="6" class="text-muted text-center">No partner programs</td></tr>`}
             </tbody>
@@ -5019,7 +5024,7 @@ function renderMccImportTable(data) {
     theadHtml += '<tr>';
     if (hasStatus) theadHtml += `<th class="status-col-header" style="font-size:0.75rem; font-weight:600; color:#475569;">Status</th>`;
     MCC_IMPORT_COLUMNS.forEach(col => {
-        theadHtml += `<th class="text-nowrap" style="font-size:0.75rem; font-weight:600; color:#475569;">${col}</th>`;
+        theadHtml += `<th class="text-nowrap" style="font-size:0.75rem; font-weight:600; color:#475569;">${escapeHtml(col)}</th>`;
     });
     theadHtml += '</tr>';
     thead.innerHTML = theadHtml;
@@ -5157,7 +5162,7 @@ function buildExtractBenefitsPanel() {
             ${getBenefitCategories().map((label, i) =>
                 `<div class="col-md-3 col-sm-6">${
                     createCheckbox(`extractBenefit_${i}`, label, false)
-                        .replace('type="checkbox"', `type="checkbox" value="${label}"`)
+                        .replace('type="checkbox"', `type="checkbox" value="${escapeHtml(label)}"`)
                 }</div>`
             ).join('')}
         </div>
@@ -5266,15 +5271,15 @@ function allDataSources() {
 
 function allDataTableHtml(def, rows) {
     const cols = def.cols.filter(c => c !== 'id' && c !== 'imported_at');
-    const head = cols.map(c => `<th class="text-nowrap" style="font-size:.68rem;">${c}</th>`).join('');
+    const head = cols.map(c => `<th class="text-nowrap" style="font-size:.68rem;">${escapeHtml(c)}</th>`).join('');
     const body = rows.map(r =>
-        `<tr>${cols.map(c => `<td style="font-size:.68rem;">${String(r[c] ?? '')}</td>`).join('')}</tr>`
+        `<tr>${cols.map(c => `<td style="font-size:.68rem;">${escapeHtml(r[c])}</td>`).join('')}</tr>`
     ).join('');
     return `
     <div class="mb-4">
-        <h6 class="fw-bold text-primary mb-1">${def.label}
+        <h6 class="fw-bold text-primary mb-1">${escapeHtml(def.label)}
             <span class="badge bg-primary">${rows.length}</span>
-            <span class="text-muted small">${def.table}</span></h6>
+            <span class="text-muted small">${escapeHtml(def.table)}</span></h6>
         <div class="table-responsive" style="max-height:340px; overflow:auto; border:1px solid #e2e8f0; border-radius:8px;">
             <table class="table table-bordered table-sm table-striped mb-0">
                 <thead class="sticky-top bg-white"><tr>${head}</tr></thead>
@@ -5303,7 +5308,7 @@ async function runAllDataSearch() {
     let cardIds = [], label;
     if (id) {
         cardIds = [id];
-        label = `Card <strong>${id}</strong>`;
+        label = `Card <strong>${escapeHtml(id)}</strong>`;
     } else {
         const f = { ...filters };
         if (f.sub_network) f.sub_network = '%' + f.sub_network + '%';   // stored value may keep the network word
@@ -5315,7 +5320,7 @@ async function runAllDataSearch() {
         cardIds = [...new Set([
             ...wbHits.map(r => r.card_id), ...cardsHits.map(r => r.card_id),
         ].filter(Boolean).map(String))];
-        const parts = Object.entries(filters).filter(([, v]) => v).map(([k, v]) => `${k}=${v}`);
+        const parts = Object.entries(filters).filter(([, v]) => v).map(([k, v]) => escapeHtml(`${k}=${v}`));
         label = `${parts.join(' · ')} → ${cardIds.length} card(s)`;
         if (!cardIds.length) { out.innerHTML = `<p class="text-muted">No cards match ${parts.join(' · ')}.</p>`; return; }
     }
@@ -5364,7 +5369,7 @@ function benefitFieldControl(spec) {
     const type = kind || benefitFieldType(id);
     let control;
     if (type === 'select' || type === 'multi') {
-        const opts = sortOptions(window.BENEFIT_VOCAB[vocabKey] || []).map(o => `<option value="${o}">${o}</option>`).join('');
+        const opts = sortOptions(window.BENEFIT_VOCAB[vocabKey] || []).map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('');
         control = `<select class="form-select form-select-sm" data-bfield="${id}" ${type === 'multi' ? 'multiple' : ''}>
             ${type === 'multi' ? '' : '<option value=""></option>'}${opts}</select>`;
     } else if (type === 'bool') {
@@ -5449,9 +5454,9 @@ function openCellDropdown(td) {
     if (options.length === 0) return;
     const current = String(getColVal(row, key) || '');
     td.innerHTML = `<select class="form-select form-select-sm" style="font-size:0.72rem;"
-        onclick="event.stopPropagation()" onchange="applyCellFix(this, ${idx}, '${key}')" onblur="renderImportTable(importedData)">
+        onclick="event.stopPropagation()" onchange="applyCellFix(this, ${idx}, this.closest('td').dataset.colKey)" onblur="renderImportTable(importedData)">
         <option value="">-- Select --</option>
-        ${sortOptions(options).map(o => `<option value="${o}" ${o === current ? 'selected' : ''}>${o}</option>`).join('')}
+        ${sortOptions(options).map(o => `<option value="${escapeHtml(o)}" ${o === current ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('')}
     </select>`;
     td.querySelector('select').focus();
 }
@@ -6210,7 +6215,7 @@ function renderImportTable(data) {
     const fmt = (val) => {
         let display = (val === undefined || val === null) ? '' : val;
         if (typeof display === 'string' && display.length > 50) display = display.substring(0, 50) + '...';
-        return display;
+        return escapeHtml(display);
     };
     const boolLabel = (val) => {
         const b = (val === true || val === 'TRUE' || val === 'true' || val === '1' || val === 1 || String(val).toLowerCase() === 'yes');
@@ -6240,7 +6245,7 @@ function renderImportTable(data) {
             let val = getColVal(row, col.key);
             if (col.key.startsWith('benefit_')) val = boolLabel(val);
             const cellInvalid = invalidFields.has(col.key) ? 'cell-invalid' : '';
-            const clickAttrs = cellInvalid ? `data-row-idx="${rowIdx}" data-col-key="${col.key}" onclick="openCellDropdown(this)" style="font-size:0.75rem; cursor:pointer;"` : `style="font-size:0.75rem;"`;
+            const clickAttrs = cellInvalid ? `data-row-idx="${rowIdx}" data-col-key="${escapeHtml(col.key)}" onclick="openCellDropdown(this)" style="font-size:0.75rem; cursor:pointer;"` : `style="font-size:0.75rem;"`;
             tbodyHtml += `<td class="${groupClass} ${edge} ${isHidden ? 'col-group-hidden' : ''} ${cellInvalid}" ${clickAttrs} title="${cellInvalid ? 'Click to fix — pick a valid value' : ''}">${fmt(val)}</td>`;
         });
         tbodyHtml += '</tr>';
@@ -6560,7 +6565,7 @@ function renderSheetImportPreview(pageId) {
         })();
 
         const head = `<th style="font-size:.68rem">#</th>${s.compared ? '<th style="font-size:.68rem">Status</th>' : ''}` +
-            cols.map(c => `<th class="text-nowrap" style="font-size:.68rem">${c}</th>`).join('');
+            cols.map(c => `<th class="text-nowrap" style="font-size:.68rem">${escapeHtml(c)}</th>`).join('');
 
         const body = s.rows.map((row, ri) => {
             const inv = sheetRowInvalid(s.def, row);
@@ -6575,14 +6580,14 @@ function renderSheetImportPreview(pageId) {
                 return '';
             };
             return `<tr><td style="font-size:.68rem">${ri + 1}</td>${s.compared ? `<td>${siStatusBadge(row._status)}</td>` : ''}` +
-                cols.map(c => `<td class="${cellCls(c)}" style="font-size:.68rem">${String(row[c] ?? '').slice(0, 80)}</td>`).join('') + '</tr>';
+                cols.map(c => `<td class="${cellCls(c)}" style="font-size:.68rem">${escapeHtml(String(row[c] ?? '').slice(0, 80))}</td>`).join('') + '</tr>';
         }).join('');
 
         return `
         <div class="mb-3">
-            <h6 class="fw-bold text-primary mb-1">${s.def.label}
+            <h6 class="fw-bold text-primary mb-1">${escapeHtml(s.def.label)}
                 <span class="badge bg-primary">${s.rows.length} rows</span>
-                <span class="text-muted small">→ ${s.def.table}</span>${counts}</h6>
+                <span class="text-muted small">→ ${escapeHtml(s.def.table)}</span>${counts}</h6>
             <div class="table-responsive" style="max-height:360px; overflow:auto; border:1px solid #e2e8f0; border-radius:8px;">
                 <table class="table table-bordered table-sm table-hover mb-0">
                     <thead class="sticky-top bg-white"><tr>${head}</tr></thead>
