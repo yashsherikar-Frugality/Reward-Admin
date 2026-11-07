@@ -279,9 +279,13 @@ create index if not exists benefit_partner_programs_card_id_idx on benefit_partn
 
 -- ------------------------------------------------------------------
 -- Row Level Security
--- Deployed publicly on Vercel with the anon key, so anon needs full access.
--- ponytail: open policy — lock down to authenticated / per-role when auth is added.
+-- Only signed-in users listed in admin_users get access; anon gets nothing.
 -- ------------------------------------------------------------------
+create table if not exists admin_users (email text primary key);
+alter table admin_users enable row level security;
+create or replace function is_admin() returns boolean language sql stable security definer set search_path = public as $$
+    select exists (select 1 from admin_users where lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')))
+$$;
 alter table cards                    enable row level security;
 alter table offers                   enable row level security;
 alter table mcc_rules                enable row level security;
@@ -295,8 +299,9 @@ begin
     foreach t in array array['cards','offers','mcc_rules','card_benefits','benefit_milestones','benefit_partner_programs']
     loop
         execute format('drop policy if exists %I_anon_all on %I', t, t);
+        execute format('drop policy if exists %I_admin_all on %I', t, t);
         execute format(
-            'create policy %I_anon_all on %I for all to anon, authenticated using (true) with check (true)',
+            'create policy %I_admin_all on %I for all to authenticated using (is_admin()) with check (is_admin())',
             t, t
         );
     end loop;
@@ -1049,7 +1054,8 @@ begin
     loop
         execute format('alter table %I enable row level security', t);
         execute format('drop policy if exists %I_anon_all on %I', t, t);
-        execute format('create policy %I_anon_all on %I for all to anon, authenticated using (true) with check (true)', t, t);
+        execute format('drop policy if exists %I_admin_all on %I', t, t);
+        execute format('create policy %I_admin_all on %I for all to authenticated using (is_admin()) with check (is_admin())', t, t);
     end loop;
 end $$;
 

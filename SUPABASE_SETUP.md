@@ -15,8 +15,8 @@ Supabase dashboard → **SQL Editor**, run **both** files (order matters):
    changes:
    `npm i --no-save xlsx@0.18.5 && node scripts/gen_workbook_schema.js [path/to/workbook.xlsx]`
 
-RLS is **on** with an open policy for `anon` + `authenticated` on every table
-(the site is public on Vercel). Tighten it once you add auth.
+RLS is **on** for every table: only signed-in users listed in `admin_users` can read/write,
+`anon` gets nothing. The app shows a login screen (`js/auth.js`).
 
 ## 2. Add your keys
 
@@ -61,5 +61,4 @@ replace-the-table (workbook = source of truth). `0001` `offers` / `mcc_rules` /
   `wb_*` tables (raw workbook mirror). `docs/erd` only draws the `0001` six.
 - `offers` and `mcc_rules` (0001) use plain `insert` — re-importing dupes rows.
   Add a unique key + `upsert` when you have a stable business key.
-- Open RLS policy = anyone with the anon key can read/write. Fine for an internal
-  tool; lock down before it holds anything sensitive.
+- RLS is locked to signed-in users listed in `admin_users` (run `supabase/lock_down_rls.sql` on an existing DB after deploying the login screen; disable public sign-ups).

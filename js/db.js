@@ -301,6 +301,7 @@
 
     window.RGDB = {
         get configured() { return !!sb; },
+        client: sb,
         fetchCards, saveCards,
         fetchOffers, saveOffers,
         fetchMcc, saveMcc,

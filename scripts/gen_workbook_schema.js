@@ -236,7 +236,8 @@ sqlParts.push(`    foreach t in array array[${Object.values(schema).map((s) => `
 sqlParts.push('    loop');
 sqlParts.push("        execute format('alter table %I enable row level security', t);");
 sqlParts.push("        execute format('drop policy if exists %I_anon_all on %I', t, t);");
-sqlParts.push("        execute format('create policy %I_anon_all on %I for all to anon, authenticated using (true) with check (true)', t, t);");
+sqlParts.push("        execute format('drop policy if exists %I_admin_all on %I', t, t);");
+sqlParts.push("        execute format('create policy %I_admin_all on %I for all to authenticated using (is_admin()) with check (is_admin())', t, t);");
 sqlParts.push('    end loop;');
 sqlParts.push('end $$;');
 sqlParts.push('');
