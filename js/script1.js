@@ -3441,6 +3441,8 @@ function validateMccRow(row) {
     const invalid = new Set();
     const mcc = String(genericVal(row, 'MCC') || '').trim();
     if (mcc && !/^\d{4}$/.test(mcc)) invalid.add('MCC');
+    const card = String(genericVal(row, 'Card') || '').trim();
+    if (card && !GENERATED_CARD_ID_RE.test(card)) invalid.add('Card');
     return invalid;
 }
 
@@ -5037,11 +5039,37 @@ function renderMccImportTable(data) {
     tbody.innerHTML = diffRowsHtml(filtered, MCC_IMPORT_COLUMNS, hasStatus, validateMccRow);
 }
 
+// Research-style MCC sheet (Card Variant / Rule Type / Category / MCC Code / Treatment, several
+// codes per cell like "5462; 5812"). Explodes to one row per 4-digit code, like mcc_rules stores
+// them. Rows with no numeric code ("Not published…") are skipped. Card Variant is resolved to a
+// Card ID via cards.product; unmatched names are kept as typed and flagged invalid.
+async function mccRowsFromResearchSheet(json, headers) {
+    const h = name => headers.find(x => x.trim().toLowerCase() === name);
+    const key = { card: h('card variant') || h('card'), rule: h('rule type'), cat: h('category / merchant type'),
+                  code: h('mcc code'), treat: h('treatment'), cond: h('condition / rule') };
+    const norm = s => String(s || '').toLowerCase().replace(/credit card|card/g, '').replace(/[^a-z0-9]/g, '');
+    const cards = await RGDB.fetchCards();
+    const idFor = name => { const n = norm(name); const c = n && cards.find(c => norm(c.product) === n); return c ? c.card_id : String(name || '').trim(); };
+    const out = [];
+    json.forEach(r => {
+        const codes = String(r[key.code] || '').match(/\b\d{4}\b/g) || [];
+        const variant = r[key.card], rule = String(r[key.rule] || '').toLowerCase();
+        const exc = rule.includes('exclusion');
+        const text = [r[key.cat], r[key.treat]].filter(Boolean).join(': ');
+        const slug = String(variant || '').toUpperCase().replace(/[^A-Z0-9]+/g, '_').replace(/^_|_$/g, '');
+        [...new Set(codes)].forEach(code => out.push({
+            'Card': idFor(variant), 'Offer ID': `${slug}-MCC-${code}-${exc ? 'EXC' : 'INC'}`, 'MCC': code,
+            'Inclusion': exc ? 'N/A' : text, 'Exclusion': exc ? text : 'N/A'
+        }));
+    });
+    return out;
+}
+
 function handleMccExcelImportTable(event) {
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
@@ -5051,7 +5079,10 @@ function handleMccExcelImportTable(event) {
                 return;
             }
             const headers = Object.keys(json[0]);
-            const mappedData = json.map(row => {
+            let mappedData;
+            if (headers.some(h => h.trim().toLowerCase() === 'mcc code')) {
+                mappedData = await mccRowsFromResearchSheet(json, headers);
+            } else mappedData = json.map(row => {
                 const newRow = {};
                 MCC_IMPORT_COLUMNS.forEach(col => {
                     const matchedKey = headers.find(h => h.toLowerCase() === col.toLowerCase());
