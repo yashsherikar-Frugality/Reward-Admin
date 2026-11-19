@@ -412,6 +412,13 @@
         } catch (e) { fail('replace ' + table, e); return -1; }
     }
 
+    async function deleteWhere(table, col, val) {
+        if (!sb) { notConfigured(); return false; }
+        const { error } = await sb.from(table).delete().eq(col, val);
+        if (error) { fail('delete ' + table, error); return false; }
+        return true;
+    }
+
     window.RGDB = {
         get configured() { return !!sb; },
         client: sb,
@@ -419,6 +426,6 @@
         fetchOffers, saveOffers,
         fetchMcc, saveMcc,
         fetchBenefits, saveBenefits,
-        fetchTable, fetchWhere, fetchWhereIn, fetchByFilter, insertRows, checkValue
+        fetchTable, fetchWhere, fetchWhereIn, fetchByFilter, insertRows, deleteWhere, checkValue
     };
 })();

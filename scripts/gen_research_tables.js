@@ -36,7 +36,8 @@ for (const sheet of wb.SheetNames) {
     const table = 'rs_' + snake(sheet);
     schema[sheet] = { table, label: sheet.trim(), cardIdCol: null, headers, cols, types, required: [] /* layout is validated, not the content */, flags: sheet === FLAG_SHEET ? cols.slice(FLAG_FROM) : [] };;
     sql.push(`drop table if exists ${table};`);
-    sql.push(`create table ${table} (\n  id uuid primary key default gen_random_uuid(),\n${cols.map((c, i) => `  ${c} ${types[i]}`).join(',\n')},\n  imported_at timestamptz default now()\n);`);
+    sql.push(`create table ${table} (\n  id uuid primary key default gen_random_uuid(),\n${cols.map((c, i) => `  ${c} ${types[i]}`).join(',\n')},\n  bank text,\n  source_file text,\n  imported_at timestamptz default now()\n);`);
+    sql.push(`create index ${table}_bank_idx on ${table} (bank);`);
     schema[sheet].flags.forEach((c) => sql.push(`alter table ${table} add constraint ${table}_${c.slice(0, 30)}_chk check (${c} is null or ${c} in ('Y','N','NA'));`));
     sql.push(`alter table ${table} enable row level security;`);
     sql.push(`create policy ${table}_admin_all on ${table} for all to authenticated using (is_admin()) with check (is_admin());`);

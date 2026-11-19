@@ -14,8 +14,11 @@ create table rs_card_fee (
   maximum_annual_fuel_surcharge_waiver_rs numeric(12,2),
   notes text,
   source text,
+  bank text,
+  source_file text,
   imported_at timestamptz default now()
 );
+create index rs_card_fee_bank_idx on rs_card_fee (bank);
 alter table rs_card_fee enable row level security;
 create policy rs_card_fee_admin_all on rs_card_fee for all to authenticated using (is_admin()) with check (is_admin());
 drop table if exists rs_clarifi_data;
@@ -54,8 +57,11 @@ create table rs_clarifi_data (
   transit_and_transportation varchar(3),
   utilities varchar(3),
   wallets_and_quasi_cash varchar(3),
+  bank text,
+  source_file text,
   imported_at timestamptz default now()
 );
+create index rs_clarifi_data_bank_idx on rs_clarifi_data (bank);
 alter table rs_clarifi_data add constraint rs_clarifi_data_agriculture_and_veterinary_chk check (agriculture_and_veterinary is null or agriculture_and_veterinary in ('Y','N','NA'));
 alter table rs_clarifi_data add constraint rs_clarifi_data_alcohol_and_liquor_purchase_chk check (alcohol_and_liquor_purchase is null or alcohol_and_liquor_purchase in ('Y','N','NA'));
 alter table rs_clarifi_data add constraint rs_clarifi_data_atm_cash_withdrawals_chk check (atm_cash_withdrawals is null or atm_cash_withdrawals in ('Y','N','NA'));
@@ -98,8 +104,11 @@ create table rs_card_details (
   other_verified_benefits text,
   official_product_link text,
   source_section text,
+  bank text,
+  source_file text,
   imported_at timestamptz default now()
 );
+create index rs_card_details_bank_idx on rs_card_details (bank);
 alter table rs_card_details enable row level security;
 create policy rs_card_details_admin_all on rs_card_details for all to authenticated using (is_admin()) with check (is_admin());
 drop table if exists rs_categorycondition;
@@ -107,8 +116,11 @@ create table rs_categorycondition (
   id uuid primary key default gen_random_uuid(),
   category text,
   condition text,
+  bank text,
+  source_file text,
   imported_at timestamptz default now()
 );
+create index rs_categorycondition_bank_idx on rs_categorycondition (bank);
 alter table rs_categorycondition enable row level security;
 create policy rs_categorycondition_admin_all on rs_categorycondition for all to authenticated using (is_admin()) with check (is_admin());
 drop table if exists rs_rewards_and_benefits;
@@ -125,8 +137,11 @@ create table rs_rewards_and_benefits (
   forex_fuel_conditions text,
   insurance_golf_spa text,
   source text,
+  bank text,
+  source_file text,
   imported_at timestamptz default now()
 );
+create index rs_rewards_and_benefits_bank_idx on rs_rewards_and_benefits (bank);
 alter table rs_rewards_and_benefits enable row level security;
 create policy rs_rewards_and_benefits_admin_all on rs_rewards_and_benefits for all to authenticated using (is_admin()) with check (is_admin());
 drop table if exists rs_mcc;
@@ -140,8 +155,11 @@ create table rs_mcc (
   condition_rule text,
   source_section_clause text,
   notes text,
+  bank text,
+  source_file text,
   imported_at timestamptz default now()
 );
+create index rs_mcc_bank_idx on rs_mcc (bank);
 alter table rs_mcc enable row level security;
 create policy rs_mcc_admin_all on rs_mcc for all to authenticated using (is_admin()) with check (is_admin());
 drop table if exists rs_sources;
@@ -152,8 +170,11 @@ create table rs_sources (
   source_type text,
   cards_covered text,
   use_verification_notes text,
+  bank text,
+  source_file text,
   imported_at timestamptz default now()
 );
+create index rs_sources_bank_idx on rs_sources (bank);
 alter table rs_sources enable row level security;
 create policy rs_sources_admin_all on rs_sources for all to authenticated using (is_admin()) with check (is_admin());
 drop table if exists rs_read_me;
@@ -161,8 +182,11 @@ create table rs_read_me (
   id uuid primary key default gen_random_uuid(),
   topic text,
   research_notes text,
+  bank text,
+  source_file text,
   imported_at timestamptz default now()
 );
+create index rs_read_me_bank_idx on rs_read_me (bank);
 alter table rs_read_me enable row level security;
 create policy rs_read_me_admin_all on rs_read_me for all to authenticated using (is_admin()) with check (is_admin());
 drop table if exists rs_reward_calculations;
@@ -177,8 +201,11 @@ create table rs_reward_calculations (
   redemption_fee_minimum text,
   expiry_forfeiture text,
   source_issue text,
+  bank text,
+  source_file text,
   imported_at timestamptz default now()
 );
+create index rs_reward_calculations_bank_idx on rs_reward_calculations (bank);
 alter table rs_reward_calculations enable row level security;
 create policy rs_reward_calculations_admin_all on rs_reward_calculations for all to authenticated using (is_admin()) with check (is_admin());
 commit;

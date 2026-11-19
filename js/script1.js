@@ -4998,6 +4998,15 @@ function buildImportMccPanel() {
                 </div>
             </div>
         </div>
+        <div id="mccResearchBox" hidden>
+            ${researchBankInput()}
+            <div class="d-flex gap-2 mb-2">
+                <button class="btn btn-success btn-sm" onclick="saveSheetImport('importMcc')"><i class="fas fa-database me-1"></i> Save to rs_mcc</button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="sheetImportState['importMcc']=[];document.getElementById('mccResearchBox').hidden=true;document.getElementById('mccImportTableContainer').hidden=false">Close</button>
+            </div>
+            <div id="si_preview_importMcc"></div>
+        </div>
+        <div class="mb-2"><button class="btn btn-outline-primary btn-sm" onclick="viewSavedMccResearch()"><i class="fas fa-table me-1"></i> View saved research MCC (rs_mcc)</button></div>
         <div id="mccImportTableContainer">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="fw-bold">Imported MCC Data <span id="mccRecordCount" class="badge bg-primary">0 records</span></h6>
@@ -5079,6 +5088,21 @@ async function mccRowsFromResearchSheet(json, headers) {
     return out;
 }
 
+function showMccResearch() {
+    document.getElementById('mccResearchBox').hidden = false;
+    document.getElementById('mccImportTableContainer').hidden = true;
+    renderSheetImportPreview('importMcc');
+}
+
+// Saved research MCC rows (rs_mcc), shown in the same preview
+async function viewSavedMccResearch() {
+    const def = window.RESEARCH_SCHEMA['MCC'];
+    const rows = await RGDB.fetchTable(def.table);
+    sheetImportState['importMcc'] = [{ def, sheetName: 'MCC', rows: rows.map(r => Object.fromEntries(def.cols.map(c => [c, r[c] ?? '']))), compared: false }];
+    showMccResearch();
+    if (!rows.length) alert('rs_mcc is empty: nothing saved yet.');
+}
+
 function handleMccExcelImportTable(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -5095,8 +5119,19 @@ function handleMccExcelImportTable(event) {
             const headers = Object.keys(json[0]);
             let mappedData;
             if (headers.some(h => h.trim().toLowerCase() === 'mcc code')) {
-                mappedData = await mccRowsFromResearchSheet(json, headers);
-            } else mappedData = json.map(row => {
+                // research-format MCC sheet: store as-is in rs_mcc (separate from mcc_rules)
+                const def = window.RESEARCH_SCHEMA['MCC'];
+                researchMeta.file = file.name; setResearchBank(bankFromFile(file.name));
+                const rows =extractSheetRowsForDef(workbook, workbook.SheetNames.find(n => n.trim().toLowerCase() === 'mcc'), def);
+                sheetImportState['importMcc'] = [{ def, sheetName: 'MCC', rows, compared: false }];
+                importedMccData = [];
+                document.getElementById('mccExcelImportInput').value = '';
+                showMccResearch();
+                return;
+            }
+            sheetImportState['importMcc'] = [];
+            if (document.getElementById('mccResearchBox')) document.getElementById('mccResearchBox').hidden = true;
+            mappedData = json.map(row => {
                 const newRow = {};
                 MCC_IMPORT_COLUMNS.forEach(col => {
                     const matchedKey = headers.find(h => h.toLowerCase() === col.toLowerCase());
@@ -6530,10 +6565,22 @@ function buildSheetImportPanel(pageId, title, blurb) {
 // header NAME (column order in the file doesn't matter; falls back to position).
 // Shared by onSheetImportFile (per-page uploader) and handleMultiSheetExcelImport
 // (the "Import From Excel" one-file-does-everything uploader).
+const normSheet = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+// workbook sheet that matches a schema sheet name ignoring case, spaces and punctuation
+const findSheet = (wb, name) => wb.SheetNames.find(n => normSheet(n) === normSheet(name));
+
+// Research workbook meta: every bank uses the same sheets, so rows are tagged with the bank + file.
+const researchMeta = { bank: '', file: '' };
+const bankFromFile = (f) => String(f).replace(/\.[^.]+$/, '').replace(/\(\d+\)/g, '').replace(/[_\s]+/g, ' ')
+    .replace(/\s*(credit\s*cards?|cards?)\s*$/i, '').trim();
+function setResearchBank(v) { researchMeta.bank = v.trim(); document.querySelectorAll('.rsBankInput').forEach(i => { if (i.value !== v) i.value = v; }); }
+const researchBankInput = () => `<div class="input-group input-group-sm mb-2" style="max-width:460px;"><span class="input-group-text">Bank</span>` +
+    `<input class="form-control rsBankInput" placeholder="Bank name (filled from file name)" value="${escapeHtml(researchMeta.bank)}" oninput="setResearchBank(this.value)"></div>`;
+
 function extractSheetRowsForDef(wb, sheetName, def) {
-    const ws = wb.Sheets[sheetName];
+    const ws = wb.Sheets[findSheet(wb, sheetName)];
     if (!ws) return [];
-    const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+    const norm = normSheet;
     const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
     const hdrIdx = {};
     (grid[0] || []).forEach((h, i) => { hdrIdx[norm(h)] = i; });
@@ -6563,6 +6610,7 @@ async function onSheetImportFile(pageId, event) {
     try { wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: 'array' }); }
     catch (e) { alert('Could not read the file: ' + e.message); return; }
 
+    if (pageId === 'importResearch') { researchMeta.file = file.name; setResearchBank(bankFromFile(file.name)); }
     const state = [];
     for (const { sheetName, def } of defs) {
         const rows = extractSheetRowsForDef(wb, sheetName, def);
@@ -6577,8 +6625,8 @@ async function onSheetImportFile(pageId, event) {
         const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
         const notes = [];
         defs.forEach(({ sheetName, def }) => {
-            if (!wb.Sheets[sheetName]) { notes.push('Missing sheet: ' + sheetName.trim()); return; }
-            const have = new Set((XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: '' })[0] || []).map(norm));
+            if (!findSheet(wb, sheetName)) { notes.push('Missing sheet: ' + sheetName.trim()); return; }
+            const have = new Set((XLSX.utils.sheet_to_json(wb.Sheets[findSheet(wb, sheetName)], { header: 1, defval: '' })[0] || []).map(norm));
             const miss = def.headers.filter((h, j) => def.cols[j] && !have.has(norm(h)) && !/^(notes|source)$/.test(def.cols[j]));
             if (miss.length) notes.push(sheetName.trim() + ': missing column(s) ' + miss.join(', '));
         });
@@ -6708,14 +6756,18 @@ async function saveSheetImport(pageId) {
     if (!confirmGeneratedCardIds(badIds)) return;
     const nBad = state.reduce((n, s) => n + s.rows.filter(r => sheetRowInvalid(s.def, r).size).length, 0);
     if (nBad) { alert(nBad + ' row(s) have values that do not match the PM column types / dropdown lists (marked red). Fix them in the file and re-import.'); return; }
-    if (!confirm(`Save ${state.map(s => s.def.table).join(', ')} now?`)) return;
+    const research = state.some(s => s.def.headers);
+    if (research && !researchMeta.bank) { alert('Enter the Bank name first (top of the page).'); return; }
+    if (!confirm(`Save ${state.map(s => s.def.table).join(', ')}` + (research ? ` for "${researchMeta.bank}"? Existing rows of this bank in these tables are replaced.` : ' now?'))) return;
     let total = 0, failed = 0;
     for (const s of state) {
         const recs = s.rows.map(r => {
             const rec = {};
             s.def.cols.forEach(c => { rec[c] = (r[c] === '' || r[c] == null) ? null : r[c]; });
+            if (s.def.headers) { rec.bank = researchMeta.bank; rec.source_file = researchMeta.file || null; }
             return rec;
         });
+        if (s.def.headers && !(await RGDB.deleteWhere(s.def.table, 'bank', researchMeta.bank))) { failed++; continue; }
         const n = await RGDB.insertRows(s.def.table, recs);
         if (n < 0) failed++; else total += n;
     }
@@ -6992,11 +7044,12 @@ function showPage(pageId) {
         document.getElementById('importMccContainer').innerHTML = buildImportMccPanel();
         renderMccImportTable(importedMccData);
         document.getElementById('mccRecordCount').textContent = `${importedMccData.length} records`;
+        if ((sheetImportState['importMcc'] || []).length) showMccResearch();
     } else if (pageId === 'importResearch') {
         document.getElementById('importResearchContainer').innerHTML = buildSheetImportPanel(
             'importResearch', 'Import Research Sheets',
             'Research workbook (Card Fee, Clarifi Data, Card Details, categoryCondition, Rewards &amp; Benefits, MCC, Sources, Read Me, Reward Calculations). Sheet names and column headers are checked; each sheet saves to its own table.'
-        ) + '<div class="text-end mt-2"><button class="btn btn-success btn-sm" onclick="saveSheetImport(&quot;importResearch&quot;)"><i class="fas fa-database me-1"></i> Save Research Sheets</button></div>';
+        ).replace('<div class="d-flex gap-2 align-items-center mb-3" id="si_actions_importResearch"', researchBankInput() + '$&') + '<div class="text-end mt-2"><button class="btn btn-success btn-sm" onclick="saveSheetImport(&quot;importResearch&quot;)"><i class="fas fa-database me-1"></i> Save Research Sheets</button></div>';
         if ((sheetImportState['importResearch'] || []).length) {
             document.getElementById('si_actions_importResearch').hidden = false;
             renderSheetImportPreview('importResearch');
