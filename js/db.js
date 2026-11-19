@@ -61,6 +61,40 @@
         m = t.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/); if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
         return null;
     }
+    // PM dropdown lists: case-insensitive match returns the canonical list value; the UI says "Amex", the PM list says "American Express".
+    const listFor = (table, col) => { const l = ((window.SCHEMA_CATALOG || {}).lists || []).find(x => x.t === table && x.col === col); return l ? l.items : null; };
+    const NETWORK_ALIAS = { amex: 'American Express' };
+    const canon = (table, col, v) => {
+        if (table === 'cards' && col === 'network' && NETWORK_ALIAS[String(v).trim().toLowerCase()]) return NETWORK_ALIAS[String(v).trim().toLowerCase()];
+        const items = listFor(table, col);
+        const hit = items && items.find(x => String(x).toLowerCase() === String(v).trim().toLowerCase());
+        return hit !== undefined && hit !== null ? hit : v;
+    };
+    // null when the value fits the PM column (type, length, dropdown list), otherwise a short reason.
+    function checkValue(table, key, v) {
+        const k = table === 'cards' ? cardCol(key) : key;
+        const col = toNew(table)[k] || k, c = catCols(table)[col];
+        if (!c || isEmpty(v) || PLACEHOLDER.test(String(v).trim())) return null;
+        const type = String(c.type), t = String(v).trim();
+        const items = listFor(table, col);
+        if (items && !/^(boolean|numeric|integer|bigint)/i.test(type)) {
+            const cv = canon(table, col, t);
+            return items.some(x => String(x).toLowerCase() === String(cv).toLowerCase()) ? null : 'not in the PM dropdown list';
+        }
+        if (/^boolean/i.test(type)) return parseBool(t) === null ? 'must be Yes/No' : null;
+        if (/^date/i.test(type)) return parseDate(t) === null ? 'must be a date' : null;
+        if (/^(numeric|integer|bigint)/i.test(type)) {
+            const p = parseNum(t);
+            if (p === null) return 'must be a number';
+            const m = type.match(/numeric\((\d+),(\d+)\)/i);
+            if (m && Math.abs(p) >= Math.pow(10, Number(m[1]) - Number(m[2]))) return 'number too large';
+            if (items && !items.some(x => Number(x) === p)) return 'not in the PM dropdown list';
+            return null;
+        }
+        const n = type.match(/varchar\((\d+)\)/i);
+        if (n && t.length > Number(n[1])) return 'too long (max ' + n[1] + ')';
+        return null;
+    }
     // Rename legacy keys to the catalog's column names, convert typed columns; anything that does
     // not parse is stored in <col>_raw (when the table has one) instead of being lost.
     function toDbRecord(table, rec) {
@@ -71,14 +105,14 @@
             let v = rec[k];
             const type = c ? String(c.type) : '';
             const typed = /^(numeric|integer|bigint|boolean|date)/i.test(type);
-            if (!typed) { out[col] = v; return; }
+            if (!typed) { out[col] = (typeof v === 'string' && !isEmpty(v)) ? canon(table, col, v) : v; return; }
             if (isEmpty(v)) { out[col] = null; return; }
             let p = null;
             if (/^boolean/i.test(type)) p = parseBool(v);
             else if (/^date/i.test(type)) p = parseDate(v);
             else { p = parseNum(v); if (p != null && /^(integer|bigint)/i.test(type)) p = Math.round(p); }
-            out[col] = p;
-            if (p == null && !PLACEHOLDER.test(String(v).trim()) && cols[col + '_raw']) out[col + '_raw'] = String(v);
+            // Strict columns: a value that does not parse is sent as-is so the database rejects it loudly (never silently lost).
+            out[col] = (p == null && !PLACEHOLDER.test(String(v).trim())) ? v : p;
         });
         return out;
     }
@@ -92,6 +126,7 @@
             if (v == null && row[col + '_raw'] != null) v = row[col + '_raw'];
             else if (v != null && /^(boolean|numeric|integer|bigint|date)/i.test(type)) v = String(v);
             out[col] = v;
+            if (table === 'cards' && col === 'network' && v === 'American Express') { v = 'Amex'; out[col] = v; }
             if (oo[col]) out[oo[col]] = v;
         });
         return out;
@@ -112,9 +147,12 @@
         const out = {};
         Object.keys(rec).forEach(k => {
             const c = cols[nn[k] || k], typed = c && /^(numeric|integer|bigint|boolean|date)/i.test(String(c.type));
+            if (CAT()[table] && isEmpty(rec[k])) { out[k] = null; return; }   // catalog tables: blank = NULL (CHECK lists / typed columns reject placeholders)
             out[k] = (typed || k === 'updated_at' || (rec[k] !== null && typeof rec[k] === 'object')) ? rec[k] : fill(rec[k], k);
         });
-        return toDbRecord(table, out);
+        const rec2 = toDbRecord(table, out);
+        ['id', 'imported_at', 'created_at'].forEach(k => { if (rec2[k] == null) delete rec2[k]; });   // let the column defaults apply
+        return rec2;
     }
 
     // ---- cards -----------------------------------------------------
@@ -381,6 +419,6 @@
         fetchOffers, saveOffers,
         fetchMcc, saveMcc,
         fetchBenefits, saveBenefits,
-        fetchTable, fetchWhere, fetchWhereIn, fetchByFilter, insertRows
+        fetchTable, fetchWhere, fetchWhereIn, fetchByFilter, insertRows, checkValue
     };
 })();

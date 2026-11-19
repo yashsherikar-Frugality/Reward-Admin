@@ -667,19 +667,6 @@ window.WORKBOOK_SCHEMA = {
       "notes"
     ]
   },
-  "Contactless": {
-    "table": "wb_contactless",
-    "label": "Contactless",
-    "cardIdCol": "card_id",
-    "cols": [
-      "card_id",
-      "available",
-      "network",
-      "per_txn_limit",
-      "notes",
-      "source_id"
-    ]
-  },
   "Token Enabled": {
     "table": "wb_token_enabled",
     "label": "Token Enabled",

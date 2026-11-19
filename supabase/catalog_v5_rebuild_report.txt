@@ -1,0 +1,6 @@
+cards.fee_joining_type: catalog type NUMERIC(12,2) conflicts with its dropdown list; built as VARCHAR(255) with the list as CHECK
+cards.fee_waiver_period: catalog type NUMERIC(12,2) conflicts with its dropdown list; built as VARCHAR(255) with the list as CHECK
+wb_fee_waiver.fee_type: catalog type NUMERIC(12,2) conflicts with its dropdown list; built as VARCHAR(255) with the list as CHECK
+wb_fees.fee_type: catalog type NUMERIC(12,2) conflicts with its dropdown list; built as VARCHAR(255) with the list as CHECK
+wb_fees.fee_waiver_period: catalog type NUMERIC(12,2) conflicts with its dropdown list; built as VARCHAR(255) with the list as CHECK
+wb_lounge.spend_lookback_period: catalog type NUMERIC(12,2) conflicts with its dropdown list; built as VARCHAR(255) with the list as CHECK

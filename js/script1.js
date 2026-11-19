@@ -619,7 +619,7 @@ function buildFormPanel(cardData, offersData, importMode = false) {
                 <div class="row g-2 mt-2">
                     <div class="col-md-4">${createSelectField('issuerCountry', 'Issuer Country', COUNTRIES, data.issuerCountry || 'India')}</div>
                     <div class="col-md-4">${createSelectField('cardStatus', 'Card Status', ['Active','Functional','Discontinued','Upcoming','ToBeDiscontinued'], data.cardStatus || '')}</div>
-                    <div class="col-md-4" id="cardStatusDateWrapper" style="${(data.cardStatus === 'Upcoming' || data.cardStatus === 'ToBeDiscontinued' || data.cardStatus === 'Discontinued') ? '' : 'display:none;'}">
+                    <div class="col-md-4" id="cardStatusDateWrapper" style="${(data.cardStatus === 'Coming Soon' || data.cardStatus === 'Expired' || data.cardStatus === 'Discontinued') ? '' : 'display:none;'}">
                         <div class="form-floating">
                             <input type="date" id="cardStatusDate" class="form-control form-control-sm" value="${escapeHtml(data.cardStatusDate || '')}" placeholder="Effective Date">
                             <label for="cardStatusDate">Effective Date</label>
@@ -702,13 +702,13 @@ function buildFormPanel(cardData, offersData, importMode = false) {
             <div class="section-box">
                 <h6><i class="fas fa-check-circle me-2"></i> Eligibility</h6>
                 <div class="row g-2 mb-2">
-                    <div class="col-md-4">${createSelectField('ageMin', 'Age Min', ['All', '13+', '18+', '21+', '30+'], elig.ageMin)}</div>
-                    <div class="col-md-4">${createSelectField('ageMax', 'Age Max', ['All', '<40', '<45', '<50', '<55', '<60', '<65', '<70', '<75', '<80'], elig.ageMax)}</div>
-                    <div class="col-md-4">${createSelectField('creditScore', 'Credit Score', ['Any','<600','<650','<700','<750','<800','600+','650+','700+','750+','800+','850+'], elig.creditScore)}</div>
+                    <div class="col-md-4">${createSelectField('ageMin', 'Age Min', ['13', '18', '21', '30'], elig.ageMin)}</div>
+                    <div class="col-md-4">${createSelectField('ageMax', 'Age Max', ['40', '45', '50', '55', '60', '65', '70', '75', '80'], elig.ageMax)}</div>
+                    <div class="col-md-4">${createSelectField('creditScore', 'Credit Score', ['600', '650', '700', '750', '800', '850'], elig.creditScore)}</div>
                 </div>
                 <div class="row g-2 mb-2">
                     <div class="col-md-4">${createSelectField('empType', 'Employment Type', ['Salaried','Business','Self Employed','All'], elig.empType)}</div>
-                    <div class="col-md-4">${createSelectField('salary', 'Salary', ['NA','1.8L+','2.4L+','3L+','3.6L+','6L+','10L+','12L+','18L+','24L+','30L+'], elig.salary)}</div>
+                    <div class="col-md-4">${createSelectField('salary', 'Salary', ['180000', '240000', '300000', '360000', '600000', '1000000', '1200000', '1800000', '2400000', '3000000'], elig.salary)}</div>
                     <div class="col-md-4">${createSelectField('productType', 'Product Type', ['General','Retail','Consumer','Business','Commercial','Corporate','FD backed','Invite Only','Others'], elig.productType)}</div>
                 </div>
                 <div class="row g-2">
@@ -1184,7 +1184,18 @@ function sortOptions(options) {
     return [...options].sort((a, b) => bucket(a) - bucket(b) || cmpAlpha(a, b));
 }
 
+// PM catalog lists (js/schema_catalog.js) are the source of truth for dropdown options.
+const CAT_SELECT_IDS = { instrument_type: 'instrument_type', issuerCountry: 'issuer_country', cardStatus: 'card_status', empType: 'employment_type', productType: 'product_type' };
+function catSelectOptions(id, options) {
+    const L = (window.SCHEMA_CATALOG || {}).lists || [];
+    let t = 'cards', col = CAT_SELECT_IDS[id];
+    const m = String(id).match(/^offer_\d+_(frequency|status)$/);
+    if (m) { t = 'offers'; col = m[1]; }
+    const l = col && L.find(x => x.t === t && x.col === col);
+    return l ? l.items : options;
+}
 function createSelectField(id, label, options, value = '', onChange = '') {
+    options = catSelectOptions(id, options);
     let opts = sortOptions(options).map(o => `<option value="${escapeHtml(o)}" ${value === o ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('');
     let placeholderOpt = `<option value="" ${!value ? 'selected' : ''}></option>`;
     const changeAttr = onChange ? ` onchange="${onChange}"` : '';
@@ -1493,6 +1504,8 @@ function stripNetworkWord(sub, net) {
     return out || sub;
 }
 function subNetOptions(net) {
+    const pm = ((window.SCHEMA_CATALOG || {}).lists || []).find(x => x.t === 'cards' && x.col === 'sub_network');
+    if (pm) return pm.items;
     return (NETWORKS[net] || []).map(v => stripNetworkWord(v, net));
 }
 
@@ -2168,8 +2181,9 @@ function updateCardStatusBadge() {
     const map = {
         Active:           ['bg-success', 'ACTIVE'],
         Functional:       ['bg-success', 'FUNCTIONAL'],
-        Upcoming:         ['bg-primary', 'UPCOMING'],
-        ToBeDiscontinued: ['bg-warning text-dark', 'TO BE DISCONTINUED'],
+        'Coming Soon':    ['bg-primary', 'COMING SOON'],
+        Expired:          ['bg-warning text-dark', 'EXPIRED'],
+        Draft:            ['bg-secondary', 'DRAFT'],
         Discontinued:     ['bg-secondary', 'DISCONTINUED'],
     };
     const [cls, txt] = map[s] || ['bg-light text-dark border', 'No status'];
@@ -2181,7 +2195,7 @@ function updateCardStatusBadge() {
 function toggleCardStatusDate() {
     const status = document.getElementById('cardStatus').value;
     const dateWrapper = document.getElementById('cardStatusDateWrapper');
-    if (status === 'Upcoming' || status === 'ToBeDiscontinued' || status === 'Discontinued') {
+    if (status === 'Coming Soon' || status === 'Expired' || status === 'Discontinued') {
         dateWrapper.style.display = '';
     } else {
         dateWrapper.style.display = 'none';
@@ -5292,7 +5306,7 @@ function allDataSources() {
     const order = ['Card Details', 'Lounge Details', 'Golf Benefits', 'Dining Discounts', 'Movie BOGO',
         'Spa-Wellness Privileges', 'Concierge Service', 'Insurance Benefits', 'Fee Waiver',
         'Fuel Surcharge Waiver', 'Welcome Benefits-Bonus', 'Milestone Details', 'Partner Program Details',
-        'Reward Structure', 'Token Enabled', 'UPI Supported', 'contactless', 'offers', 'mcc'];
+        'Reward Structure', 'Token Enabled', 'UPI Supported', 'offers', 'mcc'];
     const byLabel = {};
     Object.values(S).forEach(d => { byLabel[d.label] = d; });
     order.forEach(lbl => { if (byLabel[lbl]) list.push(byLabel[lbl]); });
@@ -6182,9 +6196,10 @@ const IMPORT_VALID_OPTIONS = {
 // legacy values stay valid until the data is normalised to the catalog lists.
 (function mergeCatalogLists() {
     const ui = { card_status: 'cardStatus', employment_type: 'empType', product_type: 'productType', instrument_type: 'instrument_type', fee_joining_type: 'fee_joining_type', fee_waiver_period: 'fee_waiver_period' };
+    ['creditScore', 'ageMin', 'ageMax', 'salary', 'card_bill_cycle_duration', 'nationality'].forEach(k => { delete IMPORT_VALID_OPTIONS[k]; });   // typed / free-text in the PM catalog
     ((window.SCHEMA_CATALOG || {}).lists || []).forEach(l => {
         const key = l.t === 'cards' && ui[l.col];
-        if (key && IMPORT_VALID_OPTIONS[key]) l.items.forEach(v => { if (!IMPORT_VALID_OPTIONS[key].includes(v)) IMPORT_VALID_OPTIONS[key].push(v); });
+        if (key && IMPORT_VALID_OPTIONS[key]) IMPORT_VALID_OPTIONS[key] = l.items.slice();
     });
 })();
 function validateImportedRow(row) {
@@ -6201,6 +6216,8 @@ function validateImportedRow(row) {
             if (v && !['Yes','No','TRUE','FALSE','true','false','1','0'].includes(v)) invalid.add(col.key);
         }
     });
+
+    FIXED_COLUMNS.forEach(col => { if (window.RGDB && RGDB.checkValue('cards', col.key, val(col.key))) invalid.add(col.key); });   // PM types + lists
 
     const issuer = val('issuer'), product = val('product');
     if (issuer && !ISSUER_PRODUCTS[issuer]) invalid.add('issuer');
@@ -6473,7 +6490,7 @@ const PAGE_SHEET_LABELS = {
         'Partner & Transfer', 'Fuel', 'Dining', 'Golf', 'Movie', 'SPA - Wellness', 'Concierge',
         'Shopping', 'OTT - Subscription', 'Insurance - Protection', 'Travel Insurance',
         'Purchase Protection', 'Personal Accident', 'Roadside Assistance', 'LTF (Lifetime Free)',
-        'Status Benefits', 'UPI', 'Contactless', 'Token Enabled', 'Fees'
+        'Status Benefits', 'UPI', 'Token Enabled', 'Fees'
     ]
 };
 
@@ -6584,6 +6601,7 @@ function sheetRowInvalid(def, row) {
     const bad = new Set();
     const val = (c) => String(row[c] ?? '').trim();
     if (def.cardIdCol && !val(def.cardIdCol)) bad.add(def.cardIdCol);      // card id required
+    if (window.RGDB && def.table && !def.headers) def.cols.forEach(c => { if (RGDB.checkValue(def.table, c, val(c))) bad.add(c); });   // PM types + lists
     (def.required || []).forEach(c => { if (!val(c)) bad.add(c); });         // research sheets: name column required
     (def.flags || []).forEach(c => { if (val(c) && !/^(y|n|na)$/i.test(val(c))) bad.add(c); });   // Y / N / NA only
     (def.types || []).forEach((t, j) => { const v = val(def.cols[j]); if (v && /^numeric/.test(t) && isNaN(Number(v.replace(/,/g, '')))) bad.add(def.cols[j]); });
@@ -6688,6 +6706,8 @@ async function saveSheetImport(pageId) {
     if (!state.length) { alert('Load a file first.'); return; }
     const badIds = [...new Set(state.flatMap(s => findUngeneratedCardIds(s.rows, s.def.cardIdCol)))];
     if (!confirmGeneratedCardIds(badIds)) return;
+    const nBad = state.reduce((n, s) => n + s.rows.filter(r => sheetRowInvalid(s.def, r).size).length, 0);
+    if (nBad) { alert(nBad + ' row(s) have values that do not match the PM column types / dropdown lists (marked red). Fix them in the file and re-import.'); return; }
     if (!confirm(`Save ${state.map(s => s.def.table).join(', ')} now?`)) return;
     let total = 0, failed = 0;
     for (const s of state) {

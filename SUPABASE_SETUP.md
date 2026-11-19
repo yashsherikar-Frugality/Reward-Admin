@@ -72,3 +72,6 @@ The Excel template is built with `node scripts/make_catalog_template.js`.
 
 ## Research sheets (Equitas format)
 `supabase/research_tables.sql` creates one `rs_*` table per research sheet (Card Fee, Clarifi Data, Card Details, categoryCondition, Rewards & Benefits, MCC, Sources, Read Me, Reward Calculations). Regenerate with `node scripts/gen_research_tables.js`. App page: Import Research Sheets. Template: `import_template_research.xlsx`.
+
+## Strict rebuild (PM catalog)
+`supabase/catalog_v5_rebuild.sql` drops and recreates cards, offers, mcc_rules and the wb_* tables exactly per consolidated_fields_catalog-v5 (column names, types, PRIMARY/FOREIGN KEYs, dropdown lists as CHECK constraints). Regenerate with `node scripts/gen_catalog_rebuild.js <catalog.json>`. Load `cards` before any child table (card_id foreign key). wb_contactless was removed per PM. Run the stats-trigger block of `benefit_numeric_stats.sql` again after a rebuild.
