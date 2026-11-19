@@ -4,7 +4,7 @@
     const sb = window.RGDB && RGDB.client;
     const loadApp = () => {
         const s = document.createElement('script');
-        s.src = 'js/script1.js?v=81';
+        s.src = 'js/script1.js?v=82';
         document.body.appendChild(s);
     };
     if (!sb) { alert('Supabase is not configured — set js/config.js'); return; }

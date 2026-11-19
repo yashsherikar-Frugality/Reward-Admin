@@ -6693,7 +6693,7 @@ function renderSheetImportPreview(pageId) {
         })();
 
         const head = `<th style="font-size:.68rem">#</th>${s.compared ? '<th style="font-size:.68rem">Status</th>' : ''}` +
-            cols.map(c => `<th class="text-nowrap" style="font-size:.68rem">${escapeHtml(c)}</th>`).join('');
+            cols.map((c, j) => `<th class="text-nowrap" style="font-size:.68rem">${escapeHtml(s.def.headers ? s.def.headers[j] : c)}</th>`).join('');
 
         const body = s.rows.map((row, ri) => {
             const inv = sheetRowInvalid(s.def, row);
