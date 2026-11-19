@@ -5111,14 +5111,18 @@ function handleMccExcelImportTable(event) {
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            const json = smartSheetToJson(pickSheet(workbook, 'MCC'));
+            // research layout is detected on the raw first row: smartSheetToJson would skip 2 rows
+            // (template banner) when it does not recognise the header and drop real data.
+            const rawHdr = (XLSX.utils.sheet_to_json(pickSheet(workbook, 'MCC'), { header: 1, defval: '' })[0] || []).map(h => String(h).trim().toLowerCase());
+            const isResearch = rawHdr.includes('mcc code');
+            const json = isResearch ? [{}] : smartSheetToJson(pickSheet(workbook, 'MCC'));
             if (json.length === 0) {
                 alert('The Excel file is empty.');
                 return;
             }
             const headers = Object.keys(json[0]);
             let mappedData;
-            if (headers.some(h => h.trim().toLowerCase() === 'mcc code')) {
+            if (isResearch) {
                 // research-format MCC sheet: store as-is in rs_mcc (separate from mcc_rules)
                 const def = window.RESEARCH_SCHEMA['MCC'];
                 researchMeta.file = file.name; setResearchBank(bankFromFile(file.name));
