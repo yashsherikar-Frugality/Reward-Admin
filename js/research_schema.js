@@ -43,9 +43,7 @@ window.RESEARCH_SCHEMA = {
    "text",
    "text"
   ],
-  "required": [
-   "card_variant"
-  ],
+  "required": [],
   "flags": []
  },
  "Clarifi Data": {
@@ -157,9 +155,7 @@ window.RESEARCH_SCHEMA = {
    "varchar(3)",
    "varchar(3)"
   ],
-  "required": [
-   "name"
-  ],
+  "required": [],
   "flags": [
    "agriculture_and_veterinary",
    "alcohol_and_liquor_purchase",
@@ -232,9 +228,7 @@ window.RESEARCH_SCHEMA = {
    "text",
    "text"
   ],
-  "required": [
-   "card_variant"
-  ],
+  "required": [],
   "flags": []
  },
  "categoryCondition": {
@@ -253,9 +247,7 @@ window.RESEARCH_SCHEMA = {
    "text",
    "text"
   ],
-  "required": [
-   "category"
-  ],
+  "required": [],
   "flags": []
  },
  "Rewards & Benefits": {
@@ -301,9 +293,7 @@ window.RESEARCH_SCHEMA = {
    "text",
    "text"
   ],
-  "required": [
-   "card_variant"
-  ],
+  "required": [],
   "flags": []
  },
  "MCC": {
@@ -340,9 +330,7 @@ window.RESEARCH_SCHEMA = {
    "text",
    "text"
   ],
-  "required": [
-   "card_variant"
-  ],
+  "required": [],
   "flags": []
  },
  "Sources": {
@@ -370,9 +358,7 @@ window.RESEARCH_SCHEMA = {
    "text",
    "text"
   ],
-  "required": [
-   "source_name"
-  ],
+  "required": [],
   "flags": []
  },
  "Read Me": {
@@ -391,9 +377,7 @@ window.RESEARCH_SCHEMA = {
    "text",
    "text"
   ],
-  "required": [
-   "topic"
-  ],
+  "required": [],
   "flags": []
  },
  "Reward Calculations": {
@@ -433,9 +417,7 @@ window.RESEARCH_SCHEMA = {
    "text",
    "text"
   ],
-  "required": [
-   "card_variant"
-  ],
+  "required": [],
   "flags": []
  }
 };

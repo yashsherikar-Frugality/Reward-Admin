@@ -34,7 +34,7 @@ for (const sheet of wb.SheetNames) {
         types.push(NUMERIC.includes(c) ? 'numeric(12,2)' : isFlag ? 'varchar(3)' : 'text');
     });
     const table = 'rs_' + snake(sheet);
-    schema[sheet] = { table, label: sheet.trim(), cardIdCol: null, headers, cols, types, required: cols.filter((c) => /^(card_variant|name|source_name|topic|category)$/.test(c)), flags: sheet === FLAG_SHEET ? cols.slice(FLAG_FROM) : [] };
+    schema[sheet] = { table, label: sheet.trim(), cardIdCol: null, headers, cols, types, required: [] /* layout is validated, not the content */, flags: sheet === FLAG_SHEET ? cols.slice(FLAG_FROM) : [] };;
     sql.push(`drop table if exists ${table};`);
     sql.push(`create table ${table} (\n  id uuid primary key default gen_random_uuid(),\n${cols.map((c, i) => `  ${c} ${types[i]}`).join(',\n')},\n  imported_at timestamptz default now()\n);`);
     schema[sheet].flags.forEach((c) => sql.push(`alter table ${table} add constraint ${table}_${c.slice(0, 30)}_chk check (${c} is null or ${c} in ('Y','N','NA'));`));

@@ -6607,7 +6607,7 @@ function sheetRowInvalid(def, row) {
     (def.types || []).forEach((t, j) => { const v = val(def.cols[j]); if (v && /^numeric/.test(t) && isNaN(Number(v.replace(/,/g, '')))) bad.add(def.cols[j]); });
     def.cols.forEach(c => {
         const v = val(c);
-        if (!v) return;
+        if (!v || def.headers) return;   // research sheets (def.headers) are free-text: only layout, Y/N/NA flags and numbers are checked
         if (/(^|_)mcc(_|$)/i.test(c) && !/^\d{4}(\s*[,;]\s*\d{4})*$/.test(v)) bad.add(c);  // MCC = 4 digits
         if (/_url$/i.test(c) && !/^https?:\/\/.+/i.test(v)) bad.add(c);                    // URL shape
         if (/(_y_n|_yn|_available|_enabled|_supported)$/i.test(c) && !/^(y|n|yes|no|true|false|1|0|conditional|n\/a)$/i.test(v)) bad.add(c);
