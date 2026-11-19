@@ -1,3 +1,6 @@
+-- NOTE (catalog v5): this file creates the ORIGINAL column names/types. After running it (and benefit_numeric_stats.sql,
+-- lock_down_rls.sql) run supabase/catalog_v5_migration.sql to get the PM's renamed/typed columns, then re-run
+-- supabase/benefit_numeric_stats.sql. js/schema_catalog.js describes the final shape.
 -- ============================================================
 -- RewardGenius — FULL RESET + REBUILD
 -- Drops every table from any prior schema version, then creates

@@ -13,7 +13,7 @@ create table if not exists benefit_numeric_stats (
     mode           numeric,
     min            numeric,
     max            numeric,
-    non_null_rows  bigint,
+    non_null_count  bigint,
     computed_at    timestamptz default now(),
     primary key (source_table, column_name)
 );
@@ -101,7 +101,7 @@ begin
             clean_percent(fuel_reward_rate) as fuel_reward_rate_n
         from wb_fuel
     )
-    insert into benefit_numeric_stats (source_table, column_name, mean, median, mode, min, max, non_null_rows)
+    insert into benefit_numeric_stats (source_table, column_name, mean, median, mode, min, max, non_null_count)
     select 'wb_fuel', 'fuel_surcharge_rate', round(avg(fuel_surcharge_rate_n), 2),
            percentile_cont(0.5) within group (order by fuel_surcharge_rate_n),
            mode() within group (order by fuel_surcharge_rate_n),
@@ -155,9 +155,9 @@ begin
     with cleaned as (
         select distinct on (card_id, coverage_currency, coverage_amount, minimum_ticket_spend, deductible)
             coalesce(coverage_currency, 'unknown') as cur,
-            clean_amount_units(coverage_amount) as coverage_amount_n,
-            clean_amount_units(minimum_ticket_spend) as minimum_ticket_spend_n,
-            clean_amount_units(deductible) as deductible_n
+            clean_amount_units(coverage_amount::text) as coverage_amount_n,
+            clean_amount_units(minimum_ticket_spend::text) as minimum_ticket_spend_n,
+            clean_amount_units(deductible::text) as deductible_n
         from wb_travel_insurance
     ),
     long as (
@@ -165,7 +165,7 @@ begin
         union all select cur, 'minimum_ticket_spend', minimum_ticket_spend_n from cleaned
         union all select cur, 'deductible', deductible_n from cleaned
     )
-    insert into benefit_numeric_stats (source_table, column_name, mean, median, mode, min, max, non_null_rows)
+    insert into benefit_numeric_stats (source_table, column_name, mean, median, mode, min, max, non_null_count)
     select 'wb_travel_insurance', col || ' (' || cur || ')', round(avg(v), 2),
            percentile_cont(0.5) within group (order by v),
            mode() within group (order by v),
@@ -192,7 +192,7 @@ begin
           and column_name not in ('product','mcc','merchant','milestone_tier')
     loop
         execute format($f$
-            insert into benefit_numeric_stats (source_table, column_name, mean, median, mode, min, max, non_null_rows)
+            insert into benefit_numeric_stats (source_table, column_name, mean, median, mode, min, max, non_null_count)
             select %L, %L, round(avg(v), 2),
                    percentile_cont(0.5) within group (order by v),
                    mode() within group (order by v),

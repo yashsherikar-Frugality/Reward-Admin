@@ -26,6 +26,7 @@
         <a href="#" class="nav-link" id="nav-importOffers" onclick="showPage('importOffers')"><i class="fas fa-tags"></i> Import Offers</a>
         <a href="#" class="nav-link" id="nav-importBenefits" onclick="showPage('importBenefits')"><i class="fas fa-gift"></i> Import Preferred Benefits</a>
         <a href="#" class="nav-link" id="nav-importMcc" onclick="showPage('importMcc')"><i class="fas fa-list"></i> MCC Imports</a>
+        <a href="#" class="nav-link" id="nav-importResearch" onclick="showPage('importResearch')"><i class="fas fa-book-open"></i> Import Research Sheets</a>
         <a href="#" class="nav-link" id="nav-extractBenefits" onclick="showPage('extractBenefits')"><i class="fas fa-file-export"></i> Extract Benefits</a>
         <a href="#" class="nav-link" id="nav-allData" onclick="showPage('allData')"><i class="fas fa-magnifying-glass"></i> All Data Check</a>
     </nav>
@@ -69,6 +70,11 @@
                     <div id="importMccContainer"></div>
                 </div>
             </div>
+            <div id="view-importResearch" class="page-view">
+                <div class="card-modern">
+                    <div id="importResearchContainer"></div>
+                </div>
+            </div>
             <div id="view-extractBenefits" class="page-view">
                 <div class="card-modern">
                     <div id="extractBenefitsContainer"></div>
@@ -100,7 +106,9 @@
     <script src="js/config.js?v=74"></script>
     <script src="js/workbook_schema.js?v=74"></script>
     <script src="js/benefit_spec.js?v=74"></script>
-    <script src="js/db.js?v=74"></script>
+    <script src="js/schema_catalog.js?v=76"></script>
+    <script src="js/research_schema.js?v=76"></script>
+    <script src="js/db.js?v=76"></script>
     <script src="js/auth.js?v=74"></script>
 </body>
 </html>

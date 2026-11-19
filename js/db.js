@@ -31,6 +31,72 @@
     const looksNumericField = (k) => /(_rate|_percent|_amount|_value|_fee|_cap|_count|_visits|_rounds|_sessions|_tickets|_limit|_spend|_bill|_points|_score|_min|_max|_transaction|_markup|_ratio|_duration|_days|per_rupee)$/i.test(k || '') || /^(min|max)_/i.test(k || '');
     const fill = (v, key) => isEmpty(v) ? (looksNumericField(key) ? MISSING_NUM : MISSING_TEXT) : v;
 
+    // ---- schema catalog (js/schema_catalog.js): renamed columns + typed columns ----
+    const CAT = () => (window.SCHEMA_CATALOG && window.SCHEMA_CATALOG.tables) || {};
+    const catCols = (table) => (CAT()[table] || {}).columns || {};
+    const toNew = (table) => { const m = {}; Object.entries(catCols(table)).forEach(([n, c]) => { if (c.from && c.from !== n) m[c.from] = n; }); return m; };   // old -> new
+    const toOld = (table) => { const m = {}; Object.entries(toNew(table)).forEach(([o, n]) => { m[n] = o; }); return m; };                                 // new -> old
+    const PLACEHOLDER = /^(|n\/a|na|nan|null|none|-|0\.0)$/i;
+    function parseNum(v) {
+        let t = String(v).trim();
+        if (PLACEHOLDER.test(t)) return null;
+        if (/^nil$/i.test(t)) return 0;
+        t = t.replace(/\s*\+$/, '').replace(/\s*(years?|yrs?)$/i, '').replace(/^(₹|rs\.?|inr)\s*/i, '').replace(/,/g, '').trim();
+        const m = t.match(/^([0-9]+(?:\.[0-9]+)?)\s*(lakhs?|lacs?|crores?|cr|l|k|m|%)?$/i);
+        if (!m) return null;
+        const mult = { lakh: 1e5, lakhs: 1e5, lac: 1e5, lacs: 1e5, l: 1e5, crore: 1e7, crores: 1e7, cr: 1e7, k: 1e3, m: 1e6 }[(m[2] || '').toLowerCase()] || 1;
+        return Number(m[1]) * mult;
+    }
+    function parseBool(v) {
+        if (typeof v === 'boolean') return v;
+        const t = String(v).trim().toLowerCase();
+        if (PLACEHOLDER.test(t)) return null;
+        if (['true', 't', 'yes', 'y', '1'].includes(t) || /^(yes|automatic|included)\b/.test(t)) return true;
+        if (['false', 'f', 'no', 'n', '0'].includes(t) || /^no\b/.test(t)) return false;
+        return null;
+    }
+    function parseDate(v) {
+        const t = String(v).trim();
+        let m = t.match(/^(\d{4})-(\d{2})-(\d{2})/); if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+        m = t.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/); if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+        return null;
+    }
+    // Rename legacy keys to the catalog's column names, convert typed columns; anything that does
+    // not parse is stored in <col>_raw (when the table has one) instead of being lost.
+    function toDbRecord(table, rec) {
+        const nn = toNew(table), cols = catCols(table), dropped = (CAT()[table] || {}).dropped || [], out = {};
+        Object.keys(rec).forEach(k => {
+            if (dropped.includes(k)) return;   // column removed by the catalog migration (value lives in reward_fields)
+            const col = nn[k] || k, c = cols[col];
+            let v = rec[k];
+            const type = c ? String(c.type) : '';
+            const typed = /^(numeric|integer|bigint|boolean|date)/i.test(type);
+            if (!typed) { out[col] = v; return; }
+            if (isEmpty(v)) { out[col] = null; return; }
+            let p = null;
+            if (/^boolean/i.test(type)) p = parseBool(v);
+            else if (/^date/i.test(type)) p = parseDate(v);
+            else { p = parseNum(v); if (p != null && /^(integer|bigint)/i.test(type)) p = Math.round(p); }
+            out[col] = p;
+            if (p == null && !PLACEHOLDER.test(String(v).trim()) && cols[col + '_raw']) out[col + '_raw'] = String(v);
+        });
+        return out;
+    }
+    // DB row -> row keyed by the legacy names the UI/compare code uses; typed values as strings, <col>_raw fills gaps.
+    function fromDbRow(table, row) {
+        const oo = toOld(table), cols = catCols(table), out = { ...row };
+        Object.keys(cols).forEach(col => {
+            if (!(col in row)) return;
+            let v = row[col];
+            const type = String((cols[col] || {}).type || '');
+            if (v == null && row[col + '_raw'] != null) v = row[col + '_raw'];
+            else if (v != null && /^(boolean|numeric|integer|bigint|date)/i.test(type)) v = String(v);
+            out[col] = v;
+            if (oo[col]) out[oo[col]] = v;
+        });
+        return out;
+    }
+
     const toBool = (v) => v === true || ['true', 'yes', '1', 'y'].includes(String(v == null ? '' : v).trim().toLowerCase());
     const toArrText = (v) => Array.isArray(v) ? v.join(',') : (v == null ? '' : String(v));
     const blank = (v) => fill(v);
@@ -39,6 +105,17 @@
     const fixedCols = () => (typeof FIXED_COLUMNS !== 'undefined' ? FIXED_COLUMNS : []);
     const offerCols = () => (typeof OFFER_IMPORT_COLUMNS !== 'undefined' ? OFFER_IMPORT_COLUMNS : []);
     const rewardSubIds = () => (typeof REWARD_SUB_FIELD_IDS !== 'undefined' ? [...REWARD_SUB_FIELD_IDS] : []);
+
+    // toDbRecord for typed columns, placeholder fill for plain text columns.
+    function typedFill(table, rec) {
+        const cols = catCols(table), nn = toNew(table);
+        const out = {};
+        Object.keys(rec).forEach(k => {
+            const c = cols[nn[k] || k], typed = c && /^(numeric|integer|bigint|boolean|date)/i.test(String(c.type));
+            out[k] = (typed || k === 'updated_at' || (rec[k] !== null && typeof rec[k] === 'object')) ? rec[k] : fill(rec[k], k);
+        });
+        return toDbRecord(table, out);
+    }
 
     // ---- cards -----------------------------------------------------
     const CARD_COL = {
@@ -60,10 +137,10 @@
         const rec = {};
         fixedCols().forEach(({ key }) => {
             const v = colVal(row, key);
-            rec[cardCol(key)] = key.startsWith('benefit_') ? String(toBool(v)) : blank(v);
+            rec[cardCol(key)] = key.startsWith('benefit_') ? toBool(v) : v;
         });
         rec.updated_at = new Date().toISOString();
-        return rec;
+        return typedFill('cards', rec);
     }
 
     async function fetchCards() {
@@ -71,7 +148,7 @@
         try {
             const { data, error } = await sb.from('cards').select('*');
             if (error) throw error;
-            return data || [];
+            return (data || []).map(r => fromDbRow('cards', r));
         } catch (e) { fail('fetch cards', e); return []; }
     }
     async function saveCards(rows) {
@@ -109,15 +186,17 @@
             const v = genVal(row, k);
             if (v !== '' && v != null) rec.reward_fields[k] = v;
         });
-        // Also write flat columns (rp_pointtype, cb_type, ...) alongside the jsonb
-        // blob, for direct SQL/BI access — Postgres column names are lowercase.
-        Object.keys(rec.reward_fields).forEach(k => { rec[k.toLowerCase()] = rec.reward_fields[k]; });
+        // Also write flat columns alongside the jsonb blob for direct SQL/BI access, but only the
+        // ones the table still has (the catalog dropped the flattened cb_/id_/vd_/v_/am_/hp_/c_ copies).
+        const offerCatCols = catCols('offers');
+        Object.keys(rec.reward_fields).forEach(k => { if (offerCatCols[k.toLowerCase()]) rec[k.toLowerCase()] = rec.reward_fields[k]; });
         rec.updated_at = new Date().toISOString();
-        return rec;
+        return typedFill('offers', rec);
     }
     function offerRecordToRow(rec) {
         const row = {};
-        Object.keys(rec).forEach(c => { row[OFFER_COL_REV[c] || c] = rec[c]; });
+        const old = fromDbRow('offers', rec);
+        Object.keys(old).forEach(c => { row[OFFER_COL_REV[c] || c] = old[c]; });
         Object.assign(row, rec.reward_fields || {});
         return row;
     }
@@ -147,7 +226,7 @@
         try {
             const { data, error } = await sb.from('mcc_rules').select('*');
             if (error) throw error;
-            return (data || []).map(r => ({
+            return (data || []).map(r => fromDbRow('mcc_rules', r)).map(r => ({
                 'Card': r.card_id, 'Offer ID': r.offer_id, 'MCC': r.mcc,
                 'Inclusion': r.inclusion, 'Exclusion': r.exclusion
             }));
@@ -156,9 +235,9 @@
     async function saveMcc(rows) {
         if (!sb) { notConfigured(); return false; }
         try {
-            const recs = (rows || []).map(r => ({
-                card_id: blank(genVal(r, 'Card')), offer_id: blank(genVal(r, 'Offer ID')), mcc: blank(genVal(r, 'MCC')),
-                inclusion: blank(genVal(r, 'Inclusion')), exclusion: blank(genVal(r, 'Exclusion'))
+            const recs = (rows || []).map(r => typedFill('mcc_rules', {
+                card_id: genVal(r, 'Card'), offer_id: genVal(r, 'Offer ID'), mcc: genVal(r, 'MCC'),
+                inclusion: genVal(r, 'Inclusion'), exclusion: genVal(r, 'Exclusion')
             }));
             if (!recs.length) { alert('No MCC rows to save.'); return false; }
             const { error } = await sb.from('mcc_rules').insert(recs);
@@ -237,7 +316,7 @@
         try {
             const { data, error } = await sb.from(name).select('*');
             if (error) throw error;
-            return data || [];
+            return (data || []).map(r => fromDbRow(name, r));
         } catch (e) { fail('fetch ' + name, e); return []; }
     }
 
@@ -246,9 +325,9 @@
         if (!sb) { notConfigured(); return []; }
         if (!col) return [];
         try {
-            const { data, error } = await sb.from(table).select('*').ilike(col, String(val).trim());
+            const { data, error } = await sb.from(table).select('*').ilike(toNew(table)[col] || col, String(val).trim());
             if (error) throw error;
-            return data || [];
+            return (data || []).map(r => fromDbRow(table, r));
         } catch (e) { fail('fetch ' + table + ' where ' + col, e); return []; }
     }
 
@@ -257,9 +336,9 @@
         if (!sb) { notConfigured(); return []; }
         if (!col || !values || !values.length) return [];
         try {
-            const { data, error } = await sb.from(table).select('*').in(col, values);
+            const { data, error } = await sb.from(table).select('*').in(toNew(table)[col] || col, values);
             if (error) throw error;
-            return data || [];
+            return (data || []).map(r => fromDbRow(table, r));
         } catch (e) { fail('fetch ' + table + ' in ' + col, e); return []; }
     }
 
@@ -268,10 +347,10 @@
         if (!sb) { notConfigured(); return []; }
         try {
             let q = sb.from(table).select('*');
-            Object.entries(filter).forEach(([k, v]) => { if (v) q = q.ilike(k, String(v).trim()); });
+            Object.entries(filter).forEach(([k, v]) => { if (v) q = q.ilike(toNew(table)[k] || k, String(v).trim()); });
             const { data, error } = await q;
             if (error) throw error;
-            return data || [];
+            return (data || []).map(r => fromDbRow(table, r));
         } catch (e) { fail('fetch ' + table + ' by filter', e); return []; }
     }
 
@@ -283,11 +362,7 @@
         if (!sb) { notConfigured(); return 0; }
         try {
             // Replace empty cells with the missing-value placeholder.
-            const filled = rows.map(r => {
-                const o = {};
-                for (const k of Object.keys(r)) o[k] = fill(r[k], k);
-                return o;
-            });
+            const filled = rows.map(r => table.startsWith('rs_') ? r : typedFill(table, r));   // research sheets keep real blanks
             let done = 0;
             for (let i = 0; i < filled.length; i += 500) {
                 const chunk = filled.slice(i, i + 500);

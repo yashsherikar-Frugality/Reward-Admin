@@ -62,3 +62,13 @@ replace-the-table (workbook = source of truth). `0001` `offers` / `mcc_rules` /
 - `offers` and `mcc_rules` (0001) use plain `insert` — re-importing dupes rows.
   Add a unique key + `upsert` when you have a stable business key.
 - RLS is locked to signed-in users listed in `admin_users` (run `supabase/lock_down_rls.sql` on an existing DB after deploying the login screen; disable public sign-ups).
+
+
+## Column catalog v5 (PM field catalog)
+After the base schema, run `supabase/catalog_v5_migration.sql` (backs up to schema `backup_20261118`, renames/retypes columns,
+adds missing columns, creates `catalog_lists`), then re-run `supabase/benefit_numeric_stats.sql`. Values that do not fit a
+typed column are kept in a `<column>_raw` text column. `supabase/catalog_v5_report.txt` lists what was converted or left as text.
+The Excel template is built with `node scripts/make_catalog_template.js`.
+
+## Research sheets (Equitas format)
+`supabase/research_tables.sql` creates one `rs_*` table per research sheet (Card Fee, Clarifi Data, Card Details, categoryCondition, Rewards & Benefits, MCC, Sources, Read Me, Reward Calculations). Regenerate with `node scripts/gen_research_tables.js`. App page: Import Research Sheets. Template: `import_template_research.xlsx`.

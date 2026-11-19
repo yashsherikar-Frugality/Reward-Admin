@@ -6178,6 +6178,15 @@ const IMPORT_VALID_OPTIONS = {
     fee_waiver_period: ['Monthly','Quarterly','Half-Yearly','Yearly','Birthday','Anniversary','Festival'],
     welcome_benefit_type: ['Voucher','Rs','RP','Cashback'],
 };
+// Accept the PM's catalog (consolidated_fields_catalog-v5) dropdown values as well; existing
+// legacy values stay valid until the data is normalised to the catalog lists.
+(function mergeCatalogLists() {
+    const ui = { card_status: 'cardStatus', employment_type: 'empType', product_type: 'productType', instrument_type: 'instrument_type', fee_joining_type: 'fee_joining_type', fee_waiver_period: 'fee_waiver_period' };
+    ((window.SCHEMA_CATALOG || {}).lists || []).forEach(l => {
+        const key = l.t === 'cards' && ui[l.col];
+        if (key && IMPORT_VALID_OPTIONS[key]) l.items.forEach(v => { if (!IMPORT_VALID_OPTIONS[key].includes(v)) IMPORT_VALID_OPTIONS[key].push(v); });
+    });
+})();
 function validateImportedRow(row) {
     const invalid = new Set();
     const val = (k) => String(getColVal(row, k) ?? '').trim();
@@ -6471,6 +6480,7 @@ const PAGE_SHEET_LABELS = {
 const sheetImportState = {};   // pageId -> [{ def, sheetName, rows, compared }]
 
 function schemaDefsForPage(pageId) {
+    if (pageId === 'importResearch') return Object.entries(window.RESEARCH_SCHEMA || {}).map(([sheetName, def]) => ({ sheetName, def }));
     const want = PAGE_SHEET_LABELS[pageId] || [];
     return Object.entries(window.WORKBOOK_SCHEMA || {})
         .filter(([, d]) => want.includes(d.label))
@@ -6510,7 +6520,10 @@ function extractSheetRowsForDef(wb, sheetName, def) {
     const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
     const hdrIdx = {};
     (grid[0] || []).forEach((h, i) => { hdrIdx[norm(h)] = i; });
-    const srcIdx = def.cols.map((c, j) => (hdrIdx[norm(c)] === undefined ? j : hdrIdx[norm(c)]));
+    const srcIdx = def.cols.map((c, j) => {
+        const byHdr = def.headers ? hdrIdx[norm(def.headers[j])] : undefined;
+        return byHdr !== undefined ? byHdr : (hdrIdx[norm(c)] === undefined ? j : hdrIdx[norm(c)]);
+    });
     const rows = [];
     for (let r = 1; r < grid.length; r++) {
         const row = grid[r];
@@ -6543,6 +6556,17 @@ async function onSheetImportFile(pageId, event) {
             Object.keys(window.WORKBOOK_SCHEMA).slice(0, 6).map(s => s.trim()).join(', ') + ' …');
         return;
     }
+    if (pageId === 'importResearch') {
+        const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+        const notes = [];
+        defs.forEach(({ sheetName, def }) => {
+            if (!wb.Sheets[sheetName]) { notes.push('Missing sheet: ' + sheetName.trim()); return; }
+            const have = new Set((XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: '' })[0] || []).map(norm));
+            const miss = def.headers.filter((h, j) => def.cols[j] && !have.has(norm(h)) && !/^(notes|source)$/.test(def.cols[j]));
+            if (miss.length) notes.push(sheetName.trim() + ': missing column(s) ' + miss.join(', '));
+        });
+        if (notes.length) alert('Check the file layout:\n' + notes.join('\n'));
+    }
     sheetImportState[pageId] = state;
     document.getElementById('si_actions_' + pageId).hidden = false;
     renderSheetImportPreview(pageId);
@@ -6560,6 +6584,9 @@ function sheetRowInvalid(def, row) {
     const bad = new Set();
     const val = (c) => String(row[c] ?? '').trim();
     if (def.cardIdCol && !val(def.cardIdCol)) bad.add(def.cardIdCol);      // card id required
+    (def.required || []).forEach(c => { if (!val(c)) bad.add(c); });         // research sheets: name column required
+    (def.flags || []).forEach(c => { if (val(c) && !/^(y|n|na)$/i.test(val(c))) bad.add(c); });   // Y / N / NA only
+    (def.types || []).forEach((t, j) => { const v = val(def.cols[j]); if (v && /^numeric/.test(t) && isNaN(Number(v.replace(/,/g, '')))) bad.add(def.cols[j]); });
     def.cols.forEach(c => {
         const v = val(c);
         if (!v) return;
@@ -6898,6 +6925,7 @@ function showPage(pageId) {
         importOffers: 'Import Offers',
         importBenefits: 'Import Preferred Benefits',
         importMcc: 'MCC Imports',
+        importResearch: 'Import Research Sheets',
         extractBenefits: 'Extract Benefits',
         allData: 'All Data Check'
     };
@@ -6910,6 +6938,7 @@ function showPage(pageId) {
         importOffers: 'nav-importOffers',
         importBenefits: 'nav-importBenefits',
         importMcc: 'nav-importMcc',
+        importResearch: 'nav-importResearch',
         extractBenefits: 'nav-extractBenefits',
         allData: 'nav-allData'
     };
@@ -6943,6 +6972,15 @@ function showPage(pageId) {
         document.getElementById('importMccContainer').innerHTML = buildImportMccPanel();
         renderMccImportTable(importedMccData);
         document.getElementById('mccRecordCount').textContent = `${importedMccData.length} records`;
+    } else if (pageId === 'importResearch') {
+        document.getElementById('importResearchContainer').innerHTML = buildSheetImportPanel(
+            'importResearch', 'Import Research Sheets',
+            'Research workbook (Card Fee, Clarifi Data, Card Details, categoryCondition, Rewards &amp; Benefits, MCC, Sources, Read Me, Reward Calculations). Sheet names and column headers are checked; each sheet saves to its own table.'
+        ) + '<div class="text-end mt-2"><button class="btn btn-success btn-sm" onclick="saveSheetImport(&quot;importResearch&quot;)"><i class="fas fa-database me-1"></i> Save Research Sheets</button></div>';
+        if ((sheetImportState['importResearch'] || []).length) {
+            document.getElementById('si_actions_importResearch').hidden = false;
+            renderSheetImportPreview('importResearch');
+        }
     } else if (pageId === 'extractBenefits') {
         document.getElementById('extractBenefitsContainer').innerHTML = buildExtractBenefitsPanel();
     } else if (pageId === 'allData') {

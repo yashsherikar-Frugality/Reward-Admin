@@ -1,0 +1,99 @@
+cards.card_status_date -> card_status_date (date): 48 value(s) not convertible; originals kept in card_status_date_raw
+cards.card_spend_per_point -> spend_amount_per_reward_point (numeric(12,2)): 106 value(s) not convertible; originals kept in spend_amount_per_reward_point_raw
+cards.apr: type NOT changed to numeric(5,2) (207 of 894 values are free text); kept character varying, renamed to annual_percentage_rate_pct
+cards.age_min -> age_min (integer): 3 value(s) not convertible; originals kept in age_min_raw
+cards.age_max: type NOT changed to integer (767 of 832 values are free text); kept character varying
+cards.credit_score: type NOT changed to integer (166 of 828 values are free text); kept character varying
+cards.salary -> salary (numeric(12,2)): 14 value(s) not convertible; originals kept in salary_raw
+cards.fee_joining_type: type NOT changed to numeric(12,2) (categorical list); kept character varying
+cards.fee_annual -> fee_annual (numeric(12,2)): 2 value(s) not convertible; originals kept in fee_annual_raw
+cards.fee_waiver_spend -> fee_waiver_spend (numeric(12,2)): 8 value(s) not convertible; originals kept in fee_waiver_spend_raw
+cards.fee_waiver_period: type NOT changed to numeric(12,2) (categorical list); kept character varying
+mcc_rules.offer_id: longest value 143 > varchar(50); kept as text
+mcc_rules.mcc -> mcc (integer): 32 value(s) not convertible; originals kept in mcc_raw
+offers.offer_id: longest value 69 > varchar(50); kept as text
+offers.min_tx -> min_transaction_amount (numeric(12,2)): 108 value(s) not convertible; originals kept in min_transaction_amount_raw
+offers.max_tx -> max_transaction_amount (numeric(12,2)): 126 value(s) not convertible; originals kept in max_transaction_amount_raw
+offers.start_date -> start_date (date): 2 value(s) not convertible; originals kept in start_date_raw
+offers.end_date -> end_date (date): 66 value(s) not convertible; originals kept in end_date_raw
+offers.payment_scope_value: longest value 907 > varchar(255); kept as text
+wb_airline.discount_percent: type NOT changed to numeric(5,2) (75 of 81 values are free text); kept character varying
+wb_airport_transfer.minimum_spend -> minimum_spend (numeric(12,2)): 3 value(s) not convertible; originals kept in minimum_spend_raw
+wb_concierge.premium_services: longest value 256 > varchar(255); kept as text
+wb_concierge.service_fee: type NOT changed to numeric(12,2) (127 of 127 values are free text); kept character varying
+wb_contactless.per_txn_limit: type NOT changed to numeric(12,2) (339 of 689 values are free text); kept character varying
+wb_dining.dining_restaurant_mapping: longest value 296 > varchar(255); kept as text
+wb_dining.discount_percent: type NOT changed to numeric(5,2) (144 of 473 values are free text); kept character varying
+wb_dining.cashback_percent: type NOT changed to numeric(5,2) (144 of 427 values are free text); kept character varying
+wb_fee_waiver.fee_type: type NOT changed to numeric(12,2) (categorical list); kept character varying
+wb_fee_waiver.fee_amount -> fee_amount (numeric(12,2)): 4 value(s) not convertible; originals kept in fee_amount_raw
+wb_fee_waiver.waiver_amount -> waiver_amount (numeric(12,2)): 39 value(s) not convertible; originals kept in waiver_amount_raw
+wb_fee_waiver.waiver_threshold -> waiver_threshold (numeric(12,2)): 46 value(s) not convertible; originals kept in waiver_threshold_raw
+wb_fee_waiver.qualifying_spend_definition: type NOT changed to numeric(12,2) (516 of 516 values are free text); kept character varying
+wb_fee_waiver.automatic_waiver -> automatic_waiver (boolean): 1 value(s) not convertible; originals kept in automatic_waiver_raw
+wb_fees.fee_type: type NOT changed to numeric(12,2) (categorical list); kept character varying
+wb_fees.fee_amount -> fee_amount (numeric(12,2)): 408 value(s) not convertible; originals kept in fee_amount_raw
+wb_fees.fee_period: type NOT changed to numeric(12,2) (2323 of 2323 values are free text); kept character varying
+wb_fees.fee_waiver_eligible: type NOT changed to numeric(12,2) (1529 of 1529 values are free text); kept character varying
+wb_fees.fee_waiver_spend -> fee_waiver_spend (numeric(12,2)): 12 value(s) not convertible; originals kept in fee_waiver_spend_raw
+wb_fees.fee_waiver_period: type NOT changed to numeric(12,2) (categorical list); kept character varying
+wb_fees.start_date -> start_date (date): 31 value(s) not convertible; originals kept in start_date_raw
+wb_fees.card_status_date -> card_status_date (date): 183 value(s) not convertible; originals kept in card_status_date_raw
+wb_forex_international.conversion_charge: longest value 264 > varchar(255); kept as text
+wb_fuel.fuel_max_tx_count: type NOT changed to numeric(12,2) (367 of 399 values are free text); kept character varying
+wb_golf.free_rounds: type NOT changed to integer (38 of 78 values are free text); kept character varying
+wb_golf.caddie_included -> caddie_included (boolean): 1 value(s) not convertible; originals kept in caddie_included_raw
+wb_golf.additional_round_fee: type NOT changed to numeric(12,2) (58 of 64 values are free text); kept character varying
+wb_hotel.discount_percent: type NOT changed to numeric(5,2) (44 of 62 values are free text); kept character varying
+wb_hotel.breakfast_included -> breakfast_included (boolean): 5 value(s) not convertible; originals kept in breakfast_included_raw
+wb_insurance_protection.coverage_amount: type NOT changed to numeric(12,2) (101 of 295 values are free text); kept character varying
+wb_insurance_protection.minimum_spend: type NOT changed to numeric(12,2) (64 of 135 values are free text); kept character varying
+wb_insurance_protection.deductible: type NOT changed to numeric(12,2) (114 of 186 values are free text); kept character varying
+wb_insurance_protection.covered_items: type NOT changed to numeric(12,2) (263 of 263 values are free text); kept character varying
+wb_insurance_protection.claim_process: longest value 449 > varchar(255); kept as text
+wb_lounge.visits_per_period: type NOT changed to integer (367 of 398 values are free text); kept character varying
+wb_lounge.eligible_airports: longest value 465 > varchar(255); kept as text
+wb_lounge.boarding_pass_required -> boarding_pass_required (boolean): 5 value(s) not convertible; originals kept in boarding_pass_required_raw
+wb_lounge.guest_fee: type NOT changed to numeric(12,2) (196 of 196 values are free text); kept character varying
+wb_lounge.additional_visit_fee: type NOT changed to numeric(12,2) (224 of 224 values are free text); kept character varying
+wb_lounge.spend_threshold: type NOT changed to numeric(12,2) (124 of 272 values are free text); kept character varying
+wb_lounge.spend_lookback_period: type NOT changed to numeric(12,2) (categorical list); kept character varying
+wb_milestone.spend_from -> spend_from (numeric(12,2)): 13 value(s) not convertible; originals kept in spend_from_raw
+wb_milestone.spend_to -> spend_to (numeric(12,2)): 13 value(s) not convertible; originals kept in spend_to_raw
+wb_movie.discount_percent: type NOT changed to numeric(5,2) (44 of 118 values are free text); kept character varying
+wb_movie.monthly_ticket_limit: type NOT changed to numeric(12,2) (87 of 126 values are free text); kept character varying
+wb_movie.booking_fee: type NOT changed to numeric(12,2) (104 of 110 values are free text); kept character varying
+wb_movie.minimum_spend: type NOT changed to numeric(12,2) (75 of 113 values are free text); kept character varying
+wb_ott_subscription.minimum_spend: type NOT changed to numeric(12,2) (6 of 23 values are free text); kept character varying
+wb_partner_and_transfer.transfer_fee -> transfer_fee (numeric(12,2)): 10 value(s) not convertible; originals kept in transfer_fee_raw
+wb_personal_accident.accident_cover_amount -> accident_cover_amount (numeric(12,2)): 22 value(s) not convertible; originals kept in accident_cover_amount_raw
+wb_personal_accident.coverage_duration: type NOT changed to numeric(12,2) (136 of 136 values are free text); kept character varying
+wb_purchase_protection.purchase_protection_amount: type NOT changed to numeric(12,2) (32 of 101 values are free text); kept character varying
+wb_purchase_protection.coverage_period_days: type NOT changed to numeric(12,2) (37 of 98 values are free text); kept character varying
+wb_purchase_protection.deductible: type NOT changed to numeric(12,2) (62 of 72 values are free text); kept character varying
+wb_renewal_benefit.renewal_fee_linkage: type NOT changed to numeric(12,2) (253 of 256 values are free text); kept character varying
+wb_renewal_benefit.minimum_spend_for_renewal_benefit -> minimum_spend_for_renewal_benefit (numeric(12,2)): 9 value(s) not convertible; originals kept in minimum_spend_for_renewal_benefit_raw
+wb_renewal_benefit.expiry_date: type NOT changed to date (223 of 233 values are free text); kept character varying
+wb_reward_points.monthly_cap_spend: type NOT changed to numeric(12,2) (453 of 493 values are free text); kept character varying
+wb_reward_points.excluded_mccs: longest value 264 > varchar(255); kept as text
+wb_roadside_assistance.geographical_limit: type NOT changed to numeric(12,2) (58 of 58 values are free text); kept character varying
+wb_roadside_assistance.additional_service_fee: type NOT changed to numeric(12,2) (58 of 58 values are free text); kept character varying
+wb_shopping.discount_percent: type NOT changed to numeric(5,2) (96 of 115 values are free text); kept character varying
+wb_shopping.cashback_percent: type NOT changed to numeric(5,2) (90 of 120 values are free text); kept character varying
+wb_spa_wellness.discount_percent: type NOT changed to numeric(5,2) (21 of 33 values are free text); kept character varying
+wb_spa_wellness.minimum_spend: type NOT changed to numeric(12,2) (7 of 28 values are free text); kept character varying
+wb_travel_insurance.coverage_amount -> coverage_amount (numeric(12,2)): 10 value(s) not convertible; originals kept in coverage_amount_raw
+wb_travel_insurance.coverage_currency: type NOT changed to numeric(12,2) (93 of 93 values are free text); kept character varying
+wb_travel_insurance.minimum_ticket_spend: type NOT changed to numeric(12,2) (39 of 51 values are free text); kept character varying
+wb_travel_insurance.trip_duration_limit: type NOT changed to numeric(12,2) (64 of 76 values are free text); kept character varying
+wb_travel_insurance.geographical_coverage: type NOT changed to numeric(12,2) (88 of 88 values are free text); kept character varying
+wb_travel_insurance.deductible: type NOT changed to numeric(12,2) (36 of 53 values are free text); kept character varying
+wb_travel_insurance.medical_cover: type NOT changed to numeric(12,2) (67 of 79 values are free text); kept character varying
+wb_travel_insurance.baggage_cover: type NOT changed to numeric(12,2) (73 of 89 values are free text); kept character varying
+wb_travel_insurance.flight_delay_cover: type NOT changed to numeric(12,2) (73 of 86 values are free text); kept character varying
+wb_travel_insurance.cancellation_cover: type NOT changed to numeric(12,2) (69 of 81 values are free text); kept character varying
+wb_welcome.joining_fee_linkage: type NOT changed to numeric(12,2) (214 of 434 values are free text); kept character varying
+wb_welcome.minimum_spend -> minimum_spend (numeric(12,2)): 26 value(s) not convertible; originals kept in minimum_spend_raw
+wb_welcome.spend_period: type NOT changed to numeric(12,2) (403 of 440 values are free text); kept character varying
+wb_welcome.activation_required -> activation_required (boolean): 2 value(s) not convertible; originals kept in activation_required_raw
+wb_welcome.expiry_date: type NOT changed to date (291 of 325 values are free text); kept character varying

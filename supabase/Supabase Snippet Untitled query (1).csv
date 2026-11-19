@@ -1,0 +1,31 @@
+issuer,product,network,copies,card_id,sub_network,card_status,fee_joining,fee_annual,cobrand,card_web_link
+Bank of Baroda,BOBCARD PRAGATI BGGB,RuPay,2,BOB-RUP-CLA-BOB-002,Classic,Active,0,0,Yes,https://www.bobcard.co.in/credit-card-types/bobcard-pragati-bggb
+Bank of Baroda,BOBCARD PRAGATI BGGB,RuPay,2,BOB-RUP-PLA-BOB-005,Platinum,Active,0,0,Yes,https://www.bobcard.co.in/credit-card-types/bobcard-pragati-bggb
+Bank of Baroda,BOBCARD PRAGATI BRKGB,RuPay,2,BOB-RUP-CLA-BOB-003,Classic,Active,0,0,Yes,https://www.bobcard.co.in/credit-card-types/bobcard-pragati-brkgb
+Bank of Baroda,BOBCARD PRAGATI BRKGB,RuPay,2,BOB-RUP-PLA-BOB-006,Platinum,Active,0,0,Yes,https://www.bobcard.co.in/credit-card-types/bobcard-pragati-brkgb
+Bank of Baroda,BOBCARD PRAGATI BUPB,RuPay,2,BOB-RUP-CLA-BOB-001,Classic,Active,0,0,Yes,https://www.bobcard.co.in/credit-card-types/bobcard-pragati-bupb
+Bank of Baroda,BOBCARD PRAGATI BUPB,RuPay,2,BOB-RUP-PLA-BOB-004,Platinum,Active,0,0,Yes,https://www.bobcard.co.in/credit-card-types/bobcard-pragati-bupb
+HDFC Bank,Diners Black,Diners Club,2,HDF-DIN-BLA-DIN-001,Black,Functional,10000,10000,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/diners-black
+HDFC Bank,Diners Black,Diners Club,2,HDF-DIN-PRE-DIN-001,Premium,Functional,10000,10000,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/diners-black
+HDFC Bank,Diners Black Metal Edition,Diners Club,2,HDF-DIN-BLA-DIN-002,Black,Active,10000,10000,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/diners-black-metal-edition
+HDFC Bank,Diners Black Metal Edition,Diners Club,2,HDF-DIN-PRE-DIN-002,Premium,Active,10000,10000,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/diners-black-metal-edition
+HDFC Bank,Diners Club Miles,Diners Club,2,HDF-DIN-PRE-DIN-003,Premium,Active,500,500,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/diners-club-miles
+HDFC Bank,Diners Club Miles,Diners Club,2,HDF-DIN-PRI-DIN-001,Privilege,Active,500,500,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/diners-club-miles
+HDFC Bank,Diners Club Premium,Diners Club,2,HDF-DIN-PRE-DIN-004,Premium,Active,500,500,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/diners-club-premium
+HDFC Bank,Diners Club Premium,Diners Club,2,HDF-DIN-PRI-DIN-002,Privilege,Active,500,500,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/diners-club-premium
+HDFC Bank,Diners Club Rewardz,Diners Club,2,HDF-DIN-PRE-DIN-005,Premium,Active,500,500,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/diners-club-rewardz
+HDFC Bank,Diners Club Rewardz,Diners Club,2,HDF-DIN-PRI-DIN-003,Privilege,Active,500,500,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/diners-club-rewardz
+HDFC Bank,HDFC Bank UPI RuPay,RuPay,2,HDF-RUP-CRE-HDF-001,Credit on UPI,Active,500,500,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/hdfc-bank-upi-rupay
+HDFC Bank,HDFC Bank UPI RuPay,RuPay,2,HDF-RUP-SEL-HDF-001,Select,Active,500,500,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/hdfc-bank-upi-rupay
+HDFC Bank,HDFC Bank UPI RuPay Biz,RuPay,2,HDF-RUP-COM-HDF-001,Commercial,Active,99,99,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/hdfc-bank-upi-rupay-biz
+HDFC Bank,HDFC Bank UPI RuPay Biz,RuPay,2,HDF-RUP-SEL-HDF-002,Select,Active,99,99,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/hdfc-bank-upi-rupay-biz
+HDFC Bank,HDFC Bank UPI RuPay Mega Saver,RuPay,2,HDF-RUP-CRE-HDF-002,Credit on UPI,Active,500,500,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/hdfc-bank-upi-rupay-mega-saver
+HDFC Bank,HDFC Bank UPI RuPay Mega Saver,RuPay,2,HDF-RUP-SEL-HDF-003,Select,Active,500,500,No,https://www.hdfcbank.com/personal/pay/cards/credit-cards/hdfc-bank-upi-rupay-mega-saver
+Kotak Mahindra Bank,Kotak 811 Credit Card,Visa,2,KOT-VIS-CLA-KOT-001,Classic,Active,500,500,No,https://www.kotak.bank.in/en/personal-banking/cards/credit-cards/811-credit-card.html
+Kotak Mahindra Bank,Kotak 811 Credit Card,Visa,2,KOT-VIS-PLA-KOT-002,Platinum,Active,500,500,No,https://www.kotak.bank.in/en/personal-banking/cards/credit-cards/811-credit-card.html
+Kotak Mahindra Bank,Kotak Purchase Credit Card,Visa,2,KOT-VIS-BUS-KOT-001,Business,Active,0,0,No,https://www.kotak.bank.in/en/personal-banking/cards/credit-cards/corporate-purchasing-card.html
+Kotak Mahindra Bank,Kotak Purchase Credit Card,Visa,2,KOT-VIS-COR-KOT-001,Corporate,Active,0,0,No,https://www.kotak.bank.in/en/personal-banking/cards/credit-cards/corporate-purchasing-card.html
+Kotak Mahindra Bank,PVR Kotak Credit Card,Visa,2,KOT-VIS-GOL-PVR-002,Gold,Functional,0,499,Yes,https://www.kotak.bank.in/en/personal-banking/cards/credit-cards/pvr-inox-credit-card.html
+Kotak Mahindra Bank,PVR Kotak Credit Card,Visa,2,KOT-VIS-PLA-PVR-003,Platinum,Functional,0,499,Yes,https://www.kotak.bank.in/en/personal-banking/cards/credit-cards/pvr-inox-credit-card.html
+Kotak Mahindra Bank,Solitaire Business Credit Card,Visa,2,KOT-VIS-BUS-SOL-001,Business,Active,0,0,No,https://www.kotak.bank.in/en/personal-banking/cards/credit-cards/solitaire-business-credit-card.html
+Kotak Mahindra Bank,Solitaire Business Credit Card,Visa,2,KOT-VIS-INF-SOL-001,Infinite,Active,0,0,No,https://www.kotak.bank.in/en/personal-banking/cards/credit-cards/solitaire-business-credit-card.html
